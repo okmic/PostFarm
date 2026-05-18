@@ -14,8 +14,9 @@ class SignController {
       if (!user) throw new ErrorNotAuth("Пользователь не найден")
       //проверка на совподения пароля
 
-      const access = appInstance.getInstance().jwt.sign({ secret: String(user._id) }, { expiresIn: "30d" })
-      const refresh = appInstance.getInstance().jwt.sign({ secret: String(user._id) }, { expiresIn: "69d" })
+     const access = appInstance.getInstance().jwt.sign({ id: String(user._id), role: user.role, rate: "0" }, { expiresIn: "15d" })
+      const refresh = appInstance.getInstance().jwt.sign({ id: String(user._id), role: user.role, rate: "0" }, { expiresIn: "30d" })
+
       return reply
         .setCookie(
           'refreshToken',
@@ -44,8 +45,9 @@ class SignController {
     try {
       const { name, email, psw } = req.body
       const user = await signService.signup({ name, email, psw })
-      const access = appInstance.getInstance().jwt.sign({ secret: String(user._id) }, { expiresIn: "15d" })
-      const refresh = appInstance.getInstance().jwt.sign({ secret: String(user._id) }, { expiresIn: "30d" })
+      const access = appInstance.getInstance().jwt.sign({ id: String(user._id), role: user.role, rate: "0" }, { expiresIn: "15d" })
+      const refresh = appInstance.getInstance().jwt.sign({ id: String(user._id), role: user.role, rate: "0" }, { expiresIn: "30d" })
+      
       return reply
         .setCookie(
           'refreshToken',
@@ -65,7 +67,6 @@ class SignController {
           auth: true, accessToken: access, refreshToken: refresh, user: { ...user, psw: undefined }
         })
     } catch (e) {
-      console.log(e)
       return errorResponse(e, reply, "Пользователь уже существует")
     }
   }

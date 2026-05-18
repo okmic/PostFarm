@@ -9,7 +9,6 @@ import { Toaster } from "react-hot-toast"
 import LoadingSpinner from "./components/UI/LoadingSpinner"
 import { SignInPage } from "./pages/Signin"
 import { SignUpPage } from "./pages/Signup"
-import AdminPage from "./pages/Admin"
 import UserPage from "./pages/User"
 
 function MainApp() {
@@ -47,13 +46,13 @@ function MainApp() {
           {auth.authStatus === "auth" && auth.user ? (
             <Route element={<DashboardLayout />}>
               
-              {auth.user.role === "Admin" && (
+              {auth.user.role === "admin" && (
                 <>
-                <Route path="/" element={<AdminPage />} />
+
                 </>
               )}
 
-              {auth.user.role === "User" && (
+              {auth.user.role === "user" && (
                 <>
                 <Route path="/" element={<UserPage />} />
                 </>

@@ -1,8 +1,8 @@
 export interface IUser {
     _id: string
-    role: "Admin" | "User"
+    role: "admin" | "user"
     name: string
     email: string
     psw?: string | null
-    isActive: boolean
+    rate: "0" | "1" | "2" | "3" | "4"
 }

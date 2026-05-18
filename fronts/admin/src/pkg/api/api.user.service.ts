@@ -43,28 +43,10 @@ class ApiTaxonomyService {
       `/api/users/me`,
       { headers: getAuthHeader() },
     )
-      .then(r => r.data.data.user)
+      .then(r => r.data.user)
       .catch(e => handlerError(e))
   }
 
-  public async updateStatus(id: string, status: boolean) {
-    return await this.axiosInstance.put<any>(
-      `/api/users/status/${id}`,
-      { status },
-      { headers: getAuthHeader() },
-    )
-      .then(r => r.data.data.result)
-      .catch(e => handlerError(e))
-  }
-  async signupAdmin(payload: { name: string, email: string, psw: string, role: "Admin" | "User" }) {
-    return await this.axiosInstance.post<any>(
-      `/api/signup/admin`,
-      { ...payload },
-      { headers: getAuthHeader() },
-    )
-      .then(r => r.data.data.result)
-      .catch(e => handlerError(e))
-  }
 }
 
 export default new ApiTaxonomyService()

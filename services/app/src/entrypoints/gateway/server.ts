@@ -11,6 +11,7 @@ import { cheackOrCreateInitFoldersAndFiles, getPath } from "../../utils/paths.ut
 import { setupGlobalErrorHandlers } from "../../pkg/errors/error-handler"
 import { initializeDatabase } from "../../pkg/db/db.init"
 import appInstance from "../../pkg/appInstance/appInstance"
+import UserModule from "../../modules/user/user.module"
 
 (async () => {
   const server = fastify({ logger: true })
@@ -35,7 +36,7 @@ import appInstance from "../../pkg/appInstance/appInstance"
   appInstance.setApp(server)
   server.get('/api', async (_, reply) => reply.send({ msg: "pong" }))
   new SignModule(server)
-  
+  new UserModule(server)
   try {
     await cheackOrCreateInitFoldersAndFiles()
     setupGlobalErrorHandlers()
