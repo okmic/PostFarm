@@ -1,6 +1,7 @@
 import React from 'react'
 import { Outlet } from 'react-router-dom'
 import { useTheme } from '../providers/ThemeProvider'
+import Nav from '../Nav/Nav'
 
 export const DashboardLayout: React.FC = () => {
   const { colors } = useTheme()
@@ -24,6 +25,8 @@ export const DashboardLayout: React.FC = () => {
             }}
           >
             <Outlet />
+            <Nav />
+            <div className='mb-[300px]' />
           </div>
         </main>
       </div>
