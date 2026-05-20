@@ -23,6 +23,7 @@ class UserController {
 
     async updateUser(req: FastifyRequest<{ Body: { name: string, psw: string } }>, reply: FastifyReply): Promise<void> {
         const reqUserId = (req?.user as any)?.id
+        console.log(req.body, "--------------------------------------", reqUserId)
         const { name, psw } = req.body
         if (!reqUserId) {
             throw new ErrorNotAuth()

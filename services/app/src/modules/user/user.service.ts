@@ -13,7 +13,8 @@ class UserService {
         if (psw) {
             hashedPsw = await bcrypt.hash(psw, 6)
         }
-        return await User.updateOne({ _id: id, "$set": { name, psw: hashedPsw } })
+    
+        return await User.updateOne({ _id: id }, { "$set": { name, psw: hashedPsw } })
     }
 }
 

@@ -9,7 +9,7 @@ import { Toaster } from "react-hot-toast"
 import LoadingSpinner from "./components/UI/LoadingSpinner"
 import { SignInPage } from "./pages/Signin"
 import { SignUpPage } from "./pages/Signup"
-import UserPage from "./pages/User"
+import UserSettingsPage from "./pages/Settings"
 
 function MainApp() {
   const auth = useSelector((s: RootState) => s.auth)
@@ -54,10 +54,10 @@ function MainApp() {
 
               {auth.user.role === "user" && (
                 <>
-                <Route path="/" element={<UserPage />} />
                 </>
               )}
 
+              <Route path="/settings" element={<UserSettingsPage />} />
               <Route path="*" element={<h1>NOT FOUND</h1>} />
 
             </Route>

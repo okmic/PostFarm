@@ -47,6 +47,16 @@ class ApiTaxonomyService {
       .catch(e => handlerError(e))
   }
 
+  public async updateUser({ name, psw}: { name?: string, psw?: string }) {
+    return await this.axiosInstance.put(
+      '/api/users/me',
+      { name, psw },
+      { headers: getAuthHeader() },
+    )
+    .then(r => r.data.user)
+    .catch(e => handlerError(e))
+  }
+
 }
 
 export default new ApiTaxonomyService()
