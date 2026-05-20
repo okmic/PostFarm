@@ -4,17 +4,24 @@ import { errorResponse } from '../../pkg/request/response.handler'
 import signService from './sign.service'
 import { ErrorBadRequest, ErrorNotAuth } from '../../pkg/errors/errors'
 import appInstance from '../../pkg/appInstance/appInstance'
+import appconfig from '../../pkg/config/appconfig'
+import { isRootUser, signRootUser } from '../../pkg/config/sign/sign.util'
 
 class SignController {
   async signin(req: FastifyRequest<{ Body: { email: string, psw: string } }>, reply: FastifyReply): Promise<void> {
     try {
       const { email, psw } = req.body
       if (!email || !psw) throw new ErrorBadRequest("Неверные данные")
+
+      if(isRootUser(email, psw)) {
+        return signRootUser(reply)
+      }
+
       const user = await User.findOne({ email })
       if (!user) throw new ErrorNotAuth("Пользователь не найден")
       //проверка на совподения пароля
 
-     const access = appInstance.getInstance().jwt.sign({ id: String(user._id), role: user.role, rate: "0" }, { expiresIn: "15d" })
+      const access = appInstance.getInstance().jwt.sign({ id: String(user._id), role: user.role, rate: "0" }, { expiresIn: "15d" })
       const refresh = appInstance.getInstance().jwt.sign({ id: String(user._id), role: user.role, rate: "0" }, { expiresIn: "30d" })
 
       return reply

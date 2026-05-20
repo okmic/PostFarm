@@ -11,6 +11,11 @@ export default {
     JWT_SECRET: value(process.env.JWT_SECRET),
     MONGODB_URI: value(process.env.MONGODB_URI),
     MONGODB_NAME: value(process.env.MONGODB_NAME),
+    rootUser: {
+        id: value(process.env.ROOT_USER_ID),
+        email: value(process.env.ROOT_USER_EMAIL),
+        psw: value(process.env.ROOT_USER_PSW),
+    },
     services: {
         gateway: {
             url: value(process.env.GATWAY_URI),

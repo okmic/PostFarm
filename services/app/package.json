@@ -5,7 +5,9 @@
   "author": "okmic <okmic.g@gmail.com>",
   "license": "MIT",
   "scripts": {
+    "front-admin:dev": "cd fronts/admin && yarn dev",
     "gateway-server:dev": "nodemon --watch src --ext ts --ignore src/**/*.json --exec \"ts-node src/entrypoints/gateway/server.ts\"",
+    "vk-core:dev": "nodemon --watch src --ext ts --ignore src/**/*.json --exec \"ts-node src/entrypoints/vk/core.ts\"",
     "build": "tsc -p ."
   },
   "dependencies": {
@@ -28,6 +30,7 @@
     "mammoth": "^1.11.0",
     "mongoose": "^8.14.2",
     "node-schedule": "^2.1.1",
+    "node-vk-bot-api": "^3.5.0",
     "pdf-parse": "^2.4.5",
     "systeminformation": "^5.27.8",
     "terser": "^5.44.1",

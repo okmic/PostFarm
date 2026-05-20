@@ -13,5 +13,10 @@ export default class UserModule {
             preHandler: cheackJwtInHeader,
             handler: userController.getMe,
         })
+
+        server.put('/api/users/me', {
+            preHandler: cheackJwtInHeader,
+            handler: userController.updateUser,
+        })
     }
 };
