@@ -4,7 +4,7 @@ import { logout, updateStateUser } from "../../store/slices/auth.slice"
 import type { RootState } from "../../store/store"
 import { 
   FaUser, FaSave, FaTimes, FaEye, FaEyeSlash, 
-  FaStar, FaStarHalf, FaCrown, FaRocket, 
+  FaStar, FaCrown, FaRocket, 
   FaUserAstronaut, FaGem, FaEdit, FaSignOutAlt,
   FaCheckCircle, FaBell, FaShieldAlt, FaClock,
   FaArrowLeft
@@ -116,7 +116,7 @@ export default function SettingsPage() {
       if (i <= rateInfo.stars) {
         stars.push(<FaStar key={i} className={`${rateInfo.color} text-xs lg:text-sm`} />)
       } else {
-        stars.push(<FaStarHalf key={i} className={`${rateInfo.color} text-xs lg:text-sm opacity-30`} />)
+        stars.push(<FaStar key={i} className={`text-white/20 text-xs lg:text-sm`} />)
       }
     }
     return stars
@@ -179,7 +179,6 @@ export default function SettingsPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-          {/* Sidebar - User Info Card */}
           <div className="lg:col-span-1">
             <div className="sticky top-8">
               <div className="relative bg-gradient-to-br from-white/5 to-white/3 backdrop-blur-sm rounded-2xl border border-white/10 p-6 overflow-hidden group">
@@ -221,7 +220,7 @@ export default function SettingsPage() {
                           ID
                         </span>
                         <span className="text-white/60 font-mono text-[10px] lg:text-xs">
-                          {user?._id?.slice(-12) || "—"}
+                          {user?._id || "—"}
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-xs">
@@ -302,7 +301,6 @@ export default function SettingsPage() {
                       )}
                     </div>
 
-                    {/* Email - только для чтения */}
                     <div>
                       <label className="block text-sm font-medium text-white/60 mb-2">
                         Email адрес
