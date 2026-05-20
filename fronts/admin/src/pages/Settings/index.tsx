@@ -126,7 +126,7 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen">
-      <div className="relative max-w-6xl px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={() => navigate(-1)}
@@ -316,7 +316,6 @@ export default function SettingsPage() {
                       </div>
                     </div>
 
-                    {/* Password */}
                     <div>
                       <label className="block text-sm font-medium text-white/60 mb-2">
                         Пароль
@@ -427,7 +426,7 @@ export default function SettingsPage() {
             <div className="mt-6">
               <button
                 onClick={() => dispatch(logout())}
-                className="group w-full py-4 px-6 rounded-xl bg-red-500/5 border border-red-500/20 text-red-400 font-medium text-sm transition-all hover:bg-red-500/15 hover:border-red-500/40 hover:translate-y-[-2px] active:scale-[0.98] flex items-center justify-center gap-2"
+                className="group cursor-pointer w-full py-4 px-6 rounded-xl bg-red-500/5 border border-red-500/20 text-red-400 font-medium text-sm transition-all hover:bg-red-500/15 hover:border-red-500/40 flex items-center justify-center gap-2"
               >
                 <FaSignOutAlt className="transition-transform group-hover:translate-x-0.5" />
                 Выйти из аккаунта

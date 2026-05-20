@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useNotifications } from '../../hooks/useNotifications'
 import apiAuthService from '../../pkg/api/api.auth.service'
 import { SignUpForm } from './SignupForm'
-import { MasterBotLogo } from '../../components/Logo/Logo'
+import { Logo } from '../../components/Logo/Logo'
 
 export const SignUpPage: React.FC = () => {
   const navigate = useNavigate()
@@ -56,7 +56,7 @@ export const SignUpPage: React.FC = () => {
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="flex w-full justify-center items-center">
-            <MasterBotLogo />
+            <Logo />
           </div>
 
           <SignUpForm onSubmit={handleSubmit} isLoading={isLoading} error={error} />

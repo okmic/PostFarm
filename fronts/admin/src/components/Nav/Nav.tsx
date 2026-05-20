@@ -4,6 +4,7 @@ import { FaUserCircle, FaChartLine } from "react-icons/fa"
 import { ImStatsBars2 } from "react-icons/im"
 import { MdOutlineSocialDistance, MdSettings } from "react-icons/md"
 import { FiMenu, FiX } from "react-icons/fi"
+import { Logo } from "../Logo/Logo"
 
 const desktopLinkItems = [
   { to: "/settings", title: "Настройки", Icon: FaUserCircle },
@@ -92,9 +93,7 @@ const DesktopNav = ({ onCloseNav, isClosing }: { onCloseNav: () => void; isClosi
         ${isClosing ? 'animate-out fade-out slide-out-to-bottom duration-300' : 'animate-in fade-in slide-in-from-bottom-5 duration-500'}
       `}>
         <div className="pr-5 border-r border-white/10 mr-1">
-          <span className="text-xl font-bold bg-gradient-to-r from-white to-[#2D9CDB] bg-clip-text text-transparent tracking-tight">
-            MBot
-          </span>
+          <Logo size="sm" />
         </div>
         
         <div className="flex gap-2">

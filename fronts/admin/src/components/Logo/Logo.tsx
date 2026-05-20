@@ -76,7 +76,7 @@ const PureIcon: React.FC<{ size: number; className?: string }> = ({ size, classN
 }
 
 export const MasterBotIcon: React.FC<{ size?: 'sm' | 'md' | 'lg' | 'xl'; className?: string }> = ({ 
-  size = 'lg', 
+  size = 'xl', 
   className = '' 
 }) => {
   const { icon } = sizeMap[size]
@@ -87,7 +87,7 @@ export const MasterBotIcon: React.FC<{ size?: 'sm' | 'md' | 'lg' | 'xl'; classNa
   )
 }
 
-export const MasterBotLogo: React.FC<MasterBotLogoProps> = ({
+export const Logo: React.FC<MasterBotLogoProps> = ({
   variant = 'full',
   size = 'lg',
   className = '',

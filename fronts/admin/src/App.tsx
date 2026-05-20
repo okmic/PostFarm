@@ -10,6 +10,9 @@ import LoadingSpinner from "./components/UI/LoadingSpinner"
 import { SignInPage } from "./pages/Signin"
 import { SignUpPage } from "./pages/Signup"
 import UserSettingsPage from "./pages/Settings"
+import NotFound from "./pages/NotFound"
+import ServicePage from "./pages/Services"
+import MainPage from "./pages/Main/Main"
 
 function MainApp() {
   const auth = useSelector((s: RootState) => s.auth)
@@ -56,10 +59,12 @@ function MainApp() {
                 <>
                 </>
               )}
-
+              
+              <Route path="/" element={<MainPage />} />
+              <Route path="/services" element={<ServicePage />} />
+              <Route path="/services/vk" element={<ServicePage />} />
               <Route path="/settings" element={<UserSettingsPage />} />
-              <Route path="*" element={<h1>NOT FOUND</h1>} />
-
+              <Route path="*" element={<NotFound />} />
             </Route>
           ) : (
             <>
