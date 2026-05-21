@@ -2,48 +2,42 @@ import React, { createContext, useContext, type ReactNode } from 'react'
 
 interface ThemeContextType {
   colors: {
-    // Брендовые
-    micoNight: '#1E2A5E'
-    microSpark: '#2D9CDB'
-    microMint: '#20B2AA'
-    // Нейтральные
+    farmNight: '#1E3A1E'
+    farmSpark: '#4CAF50'
+    farmGold: '#FFA726'
     white: '#FFFFFF'
-    grayLight: '#F5F7FC'
-    grayDark: '#2C3E50'
-    grayCool: '#7F8C8D'
-    // Статусные
-    success: '#10B981'
-    error: '#FB6B5B'
-    warning: '#F59E0B'
-    // Прозрачности
+    grayLight: '#F5F7F5'
+    grayDark: '#2C3E2C'
+    grayCool: '#7F8D7F'
+    success: '#4CAF50'
+    error: '#E57373'
+    warning: '#FFA726'
     white04: 'rgba(255, 255, 255, 0.4)'
     white06: 'rgba(255, 255, 255, 0.6)'
     white05: 'rgba(255, 255, 255, 0.05)'
     white08: 'rgba(255, 255, 255, 0.08)'
     white10: 'rgba(255, 255, 255, 0.1)'
     white15: 'rgba(255, 255, 255, 0.15)'
-    // Производные
-    background: '#1E2A5E'
-    surface: 'rgba(30, 42, 94, 0.05)'
+    background: '#1E3A1E'
+    surface: 'rgba(30, 58, 30, 0.05)'
     text: '#FFFFFF'
     textSecondary: 'rgba(255, 255, 255, 0.4)'
     border: 'rgba(255, 255, 255, 0.1)'
-    glow: 'rgba(45, 156, 219, 0.4)'
-    surfaceDark: '#1E293B'
-    borderDark: '#334155'
-    textDark: '#E2E8F0'
-    textSecondaryDark: '#94A3B8'
-    // Светлая тема
-    lightBackground: '#F5F7FC'
+    glow: 'rgba(76, 175, 80, 0.4)'
+    surfaceDark: '#1E2E1E'
+    borderDark: '#334033'
+    textDark: '#E2E8E2'
+    textSecondaryDark: '#94A398'
+    lightBackground: '#F5F7F5'
     lightSurface: '#FFFFFF'
-    lightText: '#1E2A5E'
-    lightTextSecondary: '#7F8C8D'
-    lightBorder: '#E2E8F0'
+    lightText: '#1E3A1E'
+    lightTextSecondary: '#7F8D7F'
+    lightBorder: '#E2E8E2'
   }
   gradients: {
-    primary: 'linear-gradient(135deg, #1E2A5E 0%, #2D9CDB 100%)'
-    secondary: 'linear-gradient(135deg, #2D9CDB 0%, #20B2AA 100%)'
-    sunrise: 'linear-gradient(135deg, #1E2A5E 0%, #20B2AA 100%)'
+    primary: 'linear-gradient(135deg, #1E3A1E 0%, #4CAF50 100%)'
+    secondary: 'linear-gradient(135deg, #4CAF50 0%, #FFA726 100%)'
+    sunrise: 'linear-gradient(135deg, #1E3A1E 0%, #FFA726 100%)'
   }
   radius: {
     small: '4px'
@@ -109,9 +103,9 @@ interface ThemeContextType {
   shadows: {
     card: '0px 4px 12px rgba(0, 0, 0, 0.3)'
     cardLight: '0px 2px 8px rgba(0, 0, 0, 0.04)'
-    button: '0px 0px 12px rgba(45, 156, 219, 0.4)'
-    success: '0px 0px 16px rgba(16, 185, 129, 0.3)'
-    gold: '0px 0px 20px rgba(255, 215, 0, 0.2)'
+    button: '0px 0px 12px rgba(76, 175, 80, 0.4)'
+    success: '0px 0px 16px rgba(76, 175, 80, 0.3)'
+    gold: '0px 0px 20px rgba(255, 167, 38, 0.2)'
   }
   breakpoints: {
     sm: '640px'
@@ -130,42 +124,42 @@ interface ThemeContextType {
 
 const theme: ThemeContextType = {
   colors: {
-    micoNight: '#1E2A5E',
-    microSpark: '#2D9CDB',
-    microMint: '#20B2AA',
+    farmNight: '#1E3A1E',
+    farmSpark: '#4CAF50',
+    farmGold: '#FFA726',
     white: '#FFFFFF',
-    grayLight: '#F5F7FC',
-    grayDark: '#2C3E50',
-    grayCool: '#7F8C8D',
-    success: '#10B981',
-    error: '#FB6B5B',
-    warning: '#F59E0B',
+    grayLight: '#F5F7F5',
+    grayDark: '#2C3E2C',
+    grayCool: '#7F8D7F',
+    success: '#4CAF50',
+    error: '#E57373',
+    warning: '#FFA726',
     white04: 'rgba(255, 255, 255, 0.4)',
     white06: 'rgba(255, 255, 255, 0.6)',
     white05: 'rgba(255, 255, 255, 0.05)',
     white08: 'rgba(255, 255, 255, 0.08)',
     white10: 'rgba(255, 255, 255, 0.1)',
     white15: 'rgba(255, 255, 255, 0.15)',
-    background: '#1E2A5E',
-    surface: 'rgba(30, 42, 94, 0.05)',
+    background: '#1E3A1E',
+    surface: 'rgba(30, 58, 30, 0.05)',
     text: '#FFFFFF',
     textSecondary: 'rgba(255, 255, 255, 0.4)',
     border: 'rgba(255, 255, 255, 0.1)',
-    glow: 'rgba(45, 156, 219, 0.4)',
-    surfaceDark: '#1E293B',
-    borderDark: '#334155',
-    textDark: '#E2E8F0',
-    textSecondaryDark: '#94A3B8',
-    lightBackground: '#F5F7FC',
+    glow: 'rgba(76, 175, 80, 0.4)',
+    surfaceDark: '#1E2E1E',
+    borderDark: '#334033',
+    textDark: '#E2E8E2',
+    textSecondaryDark: '#94A398',
+    lightBackground: '#F5F7F5',
     lightSurface: '#FFFFFF',
-    lightText: '#1E2A5E',
-    lightTextSecondary: '#7F8C8D',
-    lightBorder: '#E2E8F0'
+    lightText: '#1E3A1E',
+    lightTextSecondary: '#7F8D7F',
+    lightBorder: '#E2E8E2'
   },
   gradients: {
-    primary: 'linear-gradient(135deg, #1E2A5E 0%, #2D9CDB 100%)',
-    secondary: 'linear-gradient(135deg, #2D9CDB 0%, #20B2AA 100%)',
-    sunrise: 'linear-gradient(135deg, #1E2A5E 0%, #20B2AA 100%)'
+    primary: 'linear-gradient(135deg, #1E3A1E 0%, #4CAF50 100%)',
+    secondary: 'linear-gradient(135deg, #4CAF50 0%, #FFA726 100%)',
+    sunrise: 'linear-gradient(135deg, #1E3A1E 0%, #FFA726 100%)'
   },
   radius: {
     small: '4px',
@@ -231,9 +225,9 @@ const theme: ThemeContextType = {
   shadows: {
     card: '0px 4px 12px rgba(0, 0, 0, 0.3)',
     cardLight: '0px 2px 8px rgba(0, 0, 0, 0.04)',
-    button: '0px 0px 12px rgba(45, 156, 219, 0.4)',
-    success: '0px 0px 16px rgba(16, 185, 129, 0.3)',
-    gold: '0px 0px 20px rgba(255, 215, 0, 0.2)'
+    button: '0px 0px 12px rgba(76, 175, 80, 0.4)',
+    success: '0px 0px 16px rgba(76, 175, 80, 0.3)',
+    gold: '0px 0px 20px rgba(255, 167, 38, 0.2)'
   },
   breakpoints: {
     sm: '640px',

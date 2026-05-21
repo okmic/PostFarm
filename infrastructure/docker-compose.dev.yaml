@@ -1,11 +1,11 @@
 services:
   mongodb:
     image: mongo:6
-    container_name: mbot_mongodb
+    container_name: postfarm_mongodb
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password
-      MONGO_INITDB_DATABASE: mbot
+      MONGO_INITDB_DATABASE: postfarm
     volumes:
       - mongodb_data:/data/db
     ports:

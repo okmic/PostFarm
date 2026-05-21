@@ -34,11 +34,11 @@ export default function SettingsPage() {
 
   const getRateInfo = (rate: string) => {
     const rates = {
-      "0": { name: "Базовый", color: "text-gray-400", bg: "bg-gray-500/10", border: "border-gray-500/20", stars: 1, icon: FaUser, gradient: "from-gray-500/20 to-gray-600/20" },
-      "1": { name: "Продвинутый", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20", stars: 2, icon: FaRocket, gradient: "from-emerald-500/20 to-teal-500/20" },
-      "2": { name: "Профессиональный", color: "text-blue-400", bg: "bg-blue-500/10", border: "border-blue-500/20", stars: 3, icon: FaGem, gradient: "from-blue-500/20 to-cyan-500/20" },
-      "3": { name: "Эксперт", color: "text-purple-400", bg: "bg-purple-500/10", border: "border-purple-500/20", stars: 4, icon: FaUserAstronaut, gradient: "from-purple-500/20 to-pink-500/20" },
-      "4": { name: "Root", color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20", stars: 5, icon: FaCrown, gradient: "from-amber-500/20 to-orange-500/20" }
+      "0": { name: "Семя", color: "text-gray-400", bg: "bg-gray-500/10", border: "border-gray-500/20", stars: 1, icon: FaUser, gradient: "from-gray-500/20 to-gray-600/20" },
+      "1": { name: "Росток", color: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20", stars: 2, icon: FaRocket, gradient: "from-emerald-500/20 to-teal-500/20" },
+      "2": { name: "Колос", color: "text-[#4CAF50]", bg: "bg-[#4CAF50]/10", border: "border-[#4CAF50]/20", stars: 3, icon: FaGem, gradient: "from-[#4CAF50]/20 to-[#FFA726]/20" },
+      "3": { name: "Урожай", color: "text-[#FFA726]", bg: "bg-[#FFA726]/10", border: "border-[#FFA726]/20", stars: 4, icon: FaUserAstronaut, gradient: "from-[#FFA726]/20 to-orange-500/20" },
+      "4": { name: "Агроном", color: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20", stars: 5, icon: FaCrown, gradient: "from-amber-500/20 to-[#FFA726]/20" }
     }
     return rates[rate as keyof typeof rates] || rates["0"]
   }
@@ -136,11 +136,11 @@ export default function SettingsPage() {
           </button>
           <div>
             <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-white to-[#2D9CDB] bg-clip-text text-transparent">
+              <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-white to-[#4CAF50] bg-clip-text text-transparent">
                 Настройки профиля
               </h1>
               <div className="max-sm:hidden px-2 py-0.5 lg:px-3 lg:py-1 rounded-full bg-white/5 border border-white/10">
-                <span className="text-[10px] lg:text-xs text-white/40 font-mono">MBot v1.0</span>
+                <span className="text-[10px] lg:text-xs text-white/40 font-mono">ПостФерма v1.0</span>
               </div>
             </div>
             <p className="text-white/40 text-xs lg:text-sm">
@@ -155,7 +155,7 @@ export default function SettingsPage() {
             className={`
               flex items-center gap-2 px-4 lg:px-6 py-2.5 lg:py-3 rounded-t-xl text-sm font-medium transition-all
               ${activeTab === "profile" 
-                ? "text-white border-b-2 border-[#2D9CDB] bg-white/5" 
+                ? "text-white border-b-2 border-[#4CAF50] bg-white/5" 
                 : "text-white/40 hover:text-white/60 hover:bg-white/5"
               }
             `}
@@ -168,7 +168,7 @@ export default function SettingsPage() {
             className={`
               flex items-center gap-2 px-4 lg:px-6 py-2.5 lg:py-3 rounded-t-xl text-sm font-medium transition-all
               ${activeTab === "notifications" 
-                ? "text-white border-b-2 border-[#2D9CDB] bg-white/5" 
+                ? "text-white border-b-2 border-[#4CAF50] bg-white/5" 
                 : "text-white/40 hover:text-white/60 hover:bg-white/5"
               }
             `}
@@ -187,11 +187,11 @@ export default function SettingsPage() {
                 <div className="relative">
                   <div className="flex flex-col items-center text-center">
                     <div className="relative mb-5">
-                      <div className="w-24 h-24 lg:w-28 lg:h-28 rounded-2xl bg-gradient-to-br from-[#2D9CDB] to-[#20B2AA] flex items-center justify-center text-white text-3xl lg:text-4xl font-bold shadow-2xl shadow-[#2D9CDB]/20 ring-4 ring-white/10">
+                      <div className="w-24 h-24 lg:w-28 lg:h-28 rounded-2xl bg-gradient-to-br from-[#4CAF50] to-[#FFA726] flex items-center justify-center text-white text-3xl lg:text-4xl font-bold shadow-2xl shadow-[#4CAF50]/20 ring-4 ring-white/10">
                         {avatarLetter}
                       </div>
-                      <div className="absolute -bottom-2 -right-2 w-7 h-7 lg:w-8 lg:h-8 rounded-full bg-[#1E2A5E] border-2 border-white/10 flex items-center justify-center">
-                        <MdOutlineVerified className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-[#2D9CDB]" />
+                      <div className="absolute -bottom-2 -right-2 w-7 h-7 lg:w-8 lg:h-8 rounded-full bg-[#1E3A1E] border-2 border-white/10 flex items-center justify-center">
+                        <MdOutlineVerified className="w-3.5 h-3.5 lg:w-4 lg:h-4 text-[#4CAF50]" />
                       </div>
                     </div>
                     
@@ -228,8 +228,8 @@ export default function SettingsPage() {
                           <FaClock className="text-[10px]" />
                           Статус
                         </span>
-                        <span className="inline-flex items-center gap-1.5 text-emerald-400">
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        <span className="inline-flex items-center gap-1.5 text-[#4CAF50]">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#4CAF50] animate-pulse" />
                           Активен
                         </span>
                       </div>
@@ -245,8 +245,8 @@ export default function SettingsPage() {
               <div className="bg-gradient-to-br from-white/5 to-white/3 backdrop-blur-sm rounded-2xl border border-white/10 p-6 lg:p-8">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-xl bg-[#2D9CDB]/20 flex items-center justify-center">
-                      <FaUser className="text-[#2D9CDB] text-sm" />
+                    <div className="w-8 h-8 rounded-xl bg-[#4CAF50]/20 flex items-center justify-center">
+                      <FaUser className="text-[#4CAF50] text-sm" />
                     </div>
                     Информация профиля
                   </h3>
@@ -254,7 +254,7 @@ export default function SettingsPage() {
                   {!isEditing && (
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#2D9CDB]/20 border border-[#2D9CDB]/30 text-[#2D9CDB] text-sm font-medium transition-all hover:bg-[#2D9CDB]/30 hover:border-[#2D9CDB]/50 hover:translate-y-[-2px] active:scale-95"
+                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#4CAF50]/20 border border-[#4CAF50]/30 text-[#4CAF50] text-sm font-medium transition-all hover:bg-[#4CAF50]/30 hover:border-[#4CAF50]/50 hover:translate-y-[-2px] active:scale-95"
                     >
                       <FaEdit className="text-sm" />
                       Редактировать
@@ -265,10 +265,10 @@ export default function SettingsPage() {
                 {message && (
                   <div className={`mb-6 p-4 rounded-xl border animate-in fade-in slide-in-from-top-2 duration-300 ${
                     message.type === "success" 
-                      ? "bg-emerald-500/10 border-emerald-500/20" 
-                      : "bg-red-500/10 border-red-500/20"
+                      ? "bg-[#4CAF50]/10 border-[#4CAF50]/20" 
+                      : "bg-[#E57373]/10 border-[#E57373]/20"
                   }`}>
-                    <div className={`flex items-center gap-2 text-sm ${message.type === "success" ? "text-emerald-400" : "text-red-400"}`}>
+                    <div className={`flex items-center gap-2 text-sm ${message.type === "success" ? "text-[#4CAF50]" : "text-[#E57373]"}`}>
                       {message.type === "success" && <FaCheckCircle />}
                       {message.text}
                     </div>
@@ -283,18 +283,18 @@ export default function SettingsPage() {
                       </label>
                       {isEditing ? (
                         <div className="relative group">
-                          <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 text-sm group-focus-within:text-[#2D9CDB] transition-colors" />
+                          <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 text-sm group-focus-within:text-[#4CAF50] transition-colors" />
                           <input
                             type="text"
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            className="w-full pl-11 pr-4 py-3 rounded-xl bg-[#1E2A5E] border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-[#2D9CDB] focus:ring-2 focus:ring-[#2D9CDB]/20 transition-all"
+                            className="w-full pl-11 pr-4 py-3 rounded-xl bg-[#1E3A1E] border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-[#4CAF50] focus:ring-2 focus:ring-[#4CAF50]/20 transition-all"
                             placeholder="Введите имя"
                           />
                         </div>
                       ) : (
-                        <div className="px-4 py-3 rounded-xl bg-[#1E2A5E] border border-white/10 text-white flex items-center gap-2">
+                        <div className="px-4 py-3 rounded-xl bg-[#1E3A1E] border border-white/10 text-white flex items-center gap-2">
                           <FaUser className="text-white/40 text-sm" />
                           <span>{user?.name || "—"}</span>
                         </div>
@@ -305,7 +305,7 @@ export default function SettingsPage() {
                       <label className="block text-sm font-medium text-white/60 mb-2">
                         Email адрес
                       </label>
-                      <div className="px-4 py-3 rounded-xl bg-[#1E2A5E]/50 border border-white/10 text-white/60 flex items-center gap-2">
+                      <div className="px-4 py-3 rounded-xl bg-[#1E3A1E]/50 border border-white/10 text-white/60 flex items-center gap-2">
                         <div className="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center">
                           <svg className="w-3.5 h-3.5 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -329,13 +329,13 @@ export default function SettingsPage() {
                               name="psw"
                               value={formData.psw}
                               onChange={handleChange}
-                              className="w-full pl-11 pr-12 py-3 rounded-xl bg-[#1E2A5E] border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-[#2D9CDB] focus:ring-2 focus:ring-[#2D9CDB]/20 transition-all"
+                              className="w-full pl-11 pr-12 py-3 rounded-xl bg-[#1E3A1E] border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-[#4CAF50] focus:ring-2 focus:ring-[#4CAF50]/20 transition-all"
                               placeholder="Новый пароль"
                             />
                             <button
                               type="button"
                               onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-[#2D9CDB] transition-colors p-1"
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-[#4CAF50] transition-colors p-1"
                             >
                               {showPassword ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
                             </button>
@@ -347,20 +347,20 @@ export default function SettingsPage() {
                               name="confirmPsw"
                               value={formData.confirmPsw}
                               onChange={handleChange}
-                              className="w-full pl-11 pr-12 py-3 rounded-xl bg-[#1E2A5E] border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-[#2D9CDB] focus:ring-2 focus:ring-[#2D9CDB]/20 transition-all"
+                              className="w-full pl-11 pr-12 py-3 rounded-xl bg-[#1E3A1E] border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-[#4CAF50] focus:ring-2 focus:ring-[#4CAF50]/20 transition-all"
                               placeholder="Подтвердите пароль"
                             />
                             <button
                               type="button"
                               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-[#2D9CDB] transition-colors p-1"
+                              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-[#4CAF50] transition-colors p-1"
                             >
                               {showConfirmPassword ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
                             </button>
                           </div>
                         </div>
                       ) : (
-                        <div className="px-4 py-3 rounded-xl bg-[#1E2A5E] border border-white/10 text-white/60 flex items-center gap-2">
+                        <div className="px-4 py-3 rounded-xl bg-[#1E3A1E] border border-white/10 text-white/60 flex items-center gap-2">
                           <div className="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center">
                             <FaEye className="w-3.5 h-3.5 text-white/40" />
                           </div>
@@ -368,7 +368,7 @@ export default function SettingsPage() {
                           <button
                             type="button"
                             onClick={() => setIsEditing(true)}
-                            className="ml-auto text-xs text-[#2D9CDB]/60 hover:text-[#2D9CDB] transition-colors"
+                            className="ml-auto text-xs text-[#4CAF50]/60 hover:text-[#4CAF50] transition-colors"
                           >
                             Изменить
                           </button>
@@ -381,7 +381,7 @@ export default function SettingsPage() {
                         <button
                           type="submit"
                           disabled={loading}
-                          className="flex-1 py-3 px-6 rounded-xl bg-gradient-to-r from-[#2D9CDB] to-[#20B2AA] text-white font-medium text-sm transition-all hover:translate-y-[-2px] hover:shadow-lg hover:shadow-[#2D9CDB]/25 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                          className="flex-1 py-3 px-6 rounded-xl bg-gradient-to-r from-[#4CAF50] to-[#FFA726] text-white font-medium text-sm transition-all hover:translate-y-[-2px] hover:shadow-lg hover:shadow-[#4CAF50]/25 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         >
                           {loading ? (
                             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -426,7 +426,7 @@ export default function SettingsPage() {
             <div className="mt-6">
               <button
                 onClick={() => dispatch(logout())}
-                className="group cursor-pointer w-full py-4 px-6 rounded-xl bg-red-500/5 border border-red-500/20 text-red-400 font-medium text-sm transition-all hover:bg-red-500/15 hover:border-red-500/40 flex items-center justify-center gap-2"
+                className="group cursor-pointer w-full py-4 px-6 rounded-xl bg-[#E57373]/5 border border-[#E57373]/20 text-[#E57373] font-medium text-sm transition-all hover:bg-[#E57373]/15 hover:border-[#E57373]/40 flex items-center justify-center gap-2"
               >
                 <FaSignOutAlt className="transition-transform group-hover:translate-x-0.5" />
                 Выйти из аккаунта

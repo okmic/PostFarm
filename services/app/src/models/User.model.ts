@@ -11,7 +11,7 @@ export interface IUser {
 }
 
 const userSchema = new Schema<IUser>({
-  name: { type: String, default: "MBot" },
+  name: { type: String, default: "Пользователь ПостФермы" },
   date: { type: Date, default: Date.now },
   email: { type: String, required: true, unique: true },
   psw: { type: String, required: true },

@@ -28,23 +28,23 @@ export const SignInPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen w-full relative overflow-hidden bg-[#1E2A5E] transition-colors duration-500">
-      <div className="absolute inset-0 opacity-5">
+    <div className="min-h-screen w-full relative overflow-hidden bg-[#1E3A1E] transition-colors duration-500">
+      <div className="absolute inset-0 opacity-[0.04]">
         <div
           className="w-full h-full"
           style={{
-            backgroundImage: `radial-gradient(circle at 24px 24px, #2D9CDB 2px, transparent 0)`,
+            backgroundImage: `radial-gradient(circle at 24px 24px, #4CAF50 2px, transparent 0)`,
             backgroundSize: '48px 48px'
           }}
         />
       </div>
 
-      <div className="absolute top-20 left-10 w-32 h-32 opacity-10">
-        <div className="w-full h-full rounded-full bg-[#2D9CDB] blur-3xl" />
+      <div className="absolute top-20 left-10 w-32 h-32 opacity-[0.08]">
+        <div className="w-full h-full rounded-full bg-[#4CAF50] blur-3xl" />
       </div>
 
-      <div className="absolute bottom-20 right-10 w-64 h-64 opacity-10">
-        <div className="w-full h-full rounded-full bg-[#20B2AA] blur-3xl" />
+      <div className="absolute bottom-20 right-10 w-64 h-64 opacity-[0.08]">
+        <div className="w-full h-full rounded-full bg-[#FFA726] blur-3xl" />
       </div>
 
       <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
@@ -58,7 +58,7 @@ export const SignInPage: React.FC = () => {
           <div className="mt-8 text-center">
             <Link
               to="/signup"
-              className="text-sm text-white/40 hover:text-[#2D9CDB] transition-colors duration-300 underline decoration-dotted underline-offset-4"
+              className="text-sm text-white/40 hover:text-[#4CAF50] transition-colors duration-300 underline decoration-dotted underline-offset-4"
             >
               Нет аккаунта? Создать
             </Link>

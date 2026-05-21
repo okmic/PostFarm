@@ -113,8 +113,8 @@ export const SignInForm: React.FC<SignInFormProps> = ({
           className={`
             block text-sm font-bold uppercase tracking-wide
             transition-colors duration-300
-            ${focusedField === 'email' ? 'text-[#2D9CDB]' : 'text-white'}
-            ${errors.email ? 'text-[#FB6B5B]' : ''}
+            ${focusedField === 'email' ? 'text-[#4CAF50]' : 'text-white'}
+            ${errors.email ? 'text-[#E57373]' : ''}
             ${!focusedField && !errors.email ? 'opacity-80' : ''}
           `}
         >
@@ -137,9 +137,9 @@ export const SignInForm: React.FC<SignInFormProps> = ({
               transition-all duration-300
               outline-none border-2
               ${errors.email 
-                ? 'border-[#FB6B5B] bg-[#FB6B5B]/10' 
+                ? 'border-[#E57373] bg-[#E57373]/10' 
                 : focusedField === 'email'
-                  ? 'border-[#2D9CDB] bg-white/10'
+                  ? 'border-[#4CAF50] bg-white/10'
                   : 'border-white/10 bg-white/5'
               }
               ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}
@@ -151,16 +151,16 @@ export const SignInForm: React.FC<SignInFormProps> = ({
               w-2 h-2 rounded-full
               transition-all duration-300
               ${formData.email && !errors.email 
-                ? 'bg-[#2D9CDB] animate-pulse' 
+                ? 'bg-[#4CAF50] animate-pulse' 
                 : errors.email 
-                  ? 'bg-[#FB6B5B]' 
+                  ? 'bg-[#E57373]' 
                   : 'bg-white/30'
               }
             `} />
           </div>
         </div>
         {errors.email && (
-          <p className="text-sm text-[#FB6B5B] mt-2 px-6 animate-fadeIn">
+          <p className="text-sm text-[#E57373] mt-2 px-6 animate-fadeIn">
             {errors.email}
           </p>
         )}
@@ -172,8 +172,8 @@ export const SignInForm: React.FC<SignInFormProps> = ({
           className={`
             block text-sm font-bold uppercase tracking-wide
             transition-colors duration-300
-            ${focusedField === 'psw' ? 'text-[#2D9CDB]' : 'text-white'}
-            ${errors.psw ? 'text-[#FB6B5B]' : ''}
+            ${focusedField === 'psw' ? 'text-[#4CAF50]' : 'text-white'}
+            ${errors.psw ? 'text-[#E57373]' : ''}
             ${!focusedField && !errors.psw ? 'opacity-80' : ''}
           `}
         >
@@ -196,9 +196,9 @@ export const SignInForm: React.FC<SignInFormProps> = ({
               transition-all duration-300
               outline-none border-2
               ${errors.psw 
-                ? 'border-[#FB6B5B] bg-[#FB6B5B]/10' 
+                ? 'border-[#E57373] bg-[#E57373]/10' 
                 : focusedField === 'psw'
-                  ? 'border-[#2D9CDB] bg-white/10'
+                  ? 'border-[#4CAF50] bg-white/10'
                   : 'border-white/10 bg-white/5'
               }
               ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}
@@ -214,8 +214,8 @@ export const SignInForm: React.FC<SignInFormProps> = ({
                   transition-all duration-300
                   ${formData.psw.length >= i * 2 
                     ? formData.psw.length > 8 
-                      ? 'bg-[#10B981]' 
-                      : 'bg-[#F59E0B]'
+                      ? 'bg-[#4CAF50]' 
+                      : 'bg-[#FFA726]'
                     : 'bg-white/20'
                   }
                 `}
@@ -224,7 +224,7 @@ export const SignInForm: React.FC<SignInFormProps> = ({
           </div>
         </div>
         {errors.psw && (
-          <p className="text-sm text-[#FB6B5B] mt-2 px-6 animate-fadeIn">
+          <p className="text-sm text-[#E57373] mt-2 px-6 animate-fadeIn">
             {errors.psw}
           </p>
         )}
@@ -233,8 +233,8 @@ export const SignInForm: React.FC<SignInFormProps> = ({
       {error && (
         <div className="
           p-4 rounded-xl
-          bg-[#FB6B5B]/10 border-2 border-[#FB6B5B]/30
-          text-[#FB6B5B] text-sm text-center
+          bg-[#E57373]/10 border-2 border-[#E57373]/30
+          text-[#E57373] text-sm text-center
           animate-fadeIn
         ">
           {error}
@@ -247,10 +247,10 @@ export const SignInForm: React.FC<SignInFormProps> = ({
         className={`
           cursor-pointer w-full py-5 px-8 rounded-xl
           font-bold text-lg uppercase tracking-wider
-          bg-gradient-to-r from-[#1E2A5E] to-[#2D9CDB] text-white
+          bg-gradient-to-r from-[#1E3A1E] to-[#4CAF50] text-white
           transition-all duration-300
           transform hover:scale-105 active:scale-95
-          ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-[0_0_30px_rgba(45,156,219,0.4)]'}
+          ${isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:shadow-[0_0_30px_rgba(76,175,80,0.4)]'}
           relative overflow-hidden group
         `}
       >

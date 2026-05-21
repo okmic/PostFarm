@@ -21,13 +21,13 @@ export default function NotFound() {
   return (
     <div className="min-h-screen flex flex-col items-center px-4">
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-20 w-64 h-64 bg-[#2D9CDB]/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-20 w-64 h-64 bg-[#20B2AA]/5 rounded-full blur-3xl" />
+        <div className="absolute top-20 right-20 w-64 h-64 bg-[#4CAF50]/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 left-20 w-64 h-64 bg-[#FFA726]/5 rounded-full blur-3xl" />
       </div>
 
       <div className="relative max-w-2xl w-full">
         <div className="text-center mb-8">
-          <h1 className={`text-6xl lg:text-8xl font-black mb-4 tracking-tighter bg-gradient-to-r from-white via-[#2D9CDB] to-[#20B2AA] bg-clip-text text-transparent ${isGlitching ? 'animate-glitch-text' : ''}`}>
+          <h1 className={`text-6xl lg:text-8xl font-black mb-4 tracking-tighter bg-gradient-to-r from-white via-[#4CAF50] to-[#FFA726] bg-clip-text text-transparent ${isGlitching ? 'animate-glitch-text' : ''}`}>
             404
           </h1>
           
@@ -49,12 +49,11 @@ export default function NotFound() {
           <div className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/5">
             <code className="text-xs text-white/30 font-mono flex items-center gap-1">
               <FiBox className="text-[10px]" />
-              MBot Constructor
+              PostFarm Constructor
             </code>
           </div>
         </div>
 
-        {/* Кнопки */}
         <div className="flex flex-col sm:flex-row gap-3 justify-center mb-8">
           <button
             onClick={() => navigate(-1)}
@@ -66,7 +65,7 @@ export default function NotFound() {
           
           <button
             onClick={() => navigate("/")}
-            className="group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#2D9CDB] to-[#20B2AA] text-white font-medium text-sm transition-all hover:shadow-lg hover:shadow-[#2D9CDB]/25 cursor-pointer"
+            className="group inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-gradient-to-r from-[#4CAF50] to-[#FFA726] text-white font-medium text-sm transition-all hover:shadow-lg hover:shadow-[#4CAF50]/25 cursor-pointer"
           >
             <FaHome className="text-sm transition-transform group-hover:-translate-y-0.5" />
             На главную
