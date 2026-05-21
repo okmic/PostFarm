@@ -1,11 +1,8 @@
+import "./styles.css"
+
 export default function MainPage() {
   return (
-    <div className="flex flex-col items-center justify-start px-4 overflow-hidden">
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[#4CAF50]/5 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '5s' }} />
-        <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-[#FFA726]/5 rounded-full blur-3xl animate-pulse" style={{ animationDuration: '7s', animationDelay: '1s' }} />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#4CAF50]/3 rounded-full blur-3xl" />
-      </div>
+    <div className="flex flex-col items-center justify-start overflow-hidden">
 
       <div className="absolute inset-0 opacity-[0.03] pointer-events-none">
         <div
@@ -50,17 +47,6 @@ export default function MainPage() {
           <div className="w-12 h-[1px] bg-gradient-to-l from-transparent to-[#FFA726]/30" />
         </div>
       </div>
-
-      <style>{`
-        @keyframes grow {
-          0% { transform: scaleY(0.3); opacity: 0.3; }
-          50% { transform: scaleY(1.1); opacity: 1; }
-          100% { transform: scaleY(0.3); opacity: 0.3; }
-        }
-        .animate-grow {
-          animation: grow 2.5s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   )
 }
