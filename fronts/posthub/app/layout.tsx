@@ -1,6 +1,8 @@
+// app/layout.tsx (серверный компонент)
 import type { Metadata } from 'next';
 import { Inter, Manrope, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
+import ClientLayout from './ClientLayout';
 
 const inter = Inter({
   subsets: ['latin', 'cyrillic'],
@@ -53,9 +55,7 @@ export default function RootLayout({
   return (
     <html lang="ru" className={`${inter.variable} ${manrope.variable} ${jetbrainsMono.variable}`}>
       <body>
-        <div className="page-wrapper">
-          {children}
-        </div>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );
