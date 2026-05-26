@@ -13,6 +13,11 @@ import UserSettingsPage from "./pages/Settings"
 import NotFound from "./pages/NotFound"
 import ServicePage from "./pages/Services"
 import MainPage from "./pages/Main/Main"
+import TelegramContentService from "./pages/Services/TelegramContentService"
+import ViralHeadlinesService from "./pages/Services/ViralHeadlinesService"
+import AiDigestService from "./pages/Services/AiDigestService"
+import EducationPostsService from "./pages/Services/EducationPostsService"
+import PostChronicleService from "./pages/Services/PostChronicleService"
 
 function MainApp() {
   const auth = useSelector((s: RootState) => s.auth)
@@ -62,7 +67,11 @@ function MainApp() {
               
               <Route path="/" element={<MainPage />} />
               <Route path="/services" element={<ServicePage />} />
-              <Route path="/services/vk" element={<ServicePage />} />
+              <Route path="/services/telegram-content" element={<TelegramContentService />} />
+              <Route path="/services/viral-headlines" element={<ViralHeadlinesService />} />
+              <Route path="/services/ai-digest" element={<AiDigestService />} />
+              <Route path="/services/education-posts" element={<EducationPostsService />} />
+              <Route path="/services/post-chronicle" element={<PostChronicleService />} />
               <Route path="/settings" element={<UserSettingsPage />} />
               <Route path="*" element={<NotFound />} />
             </Route>

@@ -1,148 +1,320 @@
-import { useNavigate } from "react-router-dom"
-import { FaVk, FaTelegramPlane, FaClock, FaCheckCircle } from "react-icons/fa"
-import { MdOutlineIntegrationInstructions, MdSync } from "react-icons/md"
-import { FiBox } from "react-icons/fi"
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+import {
+  FaTelegramPlane,
+  FaFire,
+  FaGraduationCap,
+  FaRobot,
+  FaCheckCircle,
+  FaChevronDown,
+  FaHistory,
+} from 'react-icons/fa'
+
+import { FiArrowRight, FiInfo } from 'react-icons/fi'
 
 export default function ServicePage() {
   const navigate = useNavigate()
+  const [expandedId, setExpandedId] = useState<string | null>(null)
 
   const services = [
     {
-      id: "telegram",
-      name: "Telegram",
+      id: 'telegram-content',
+      name: 'Telegram контент',
       icon: FaTelegramPlane,
-      color: "from-[#26A5E4] to-[#1E88E5]",
-      bgColor: "bg-[#26A5E4]/10",
-      borderColor: "border-[#26A5E4]/30",
-      status: "active",
-      description: "Интеграция с Telegram Bot API для создания ботов",
-      features: [
-        "Мгновенные уведомления",
-        "Клавиатуры и кнопки",
-        "Постинг",
-        "Медиа контент",
-        "Групповые чаты"
-      ],
-      version: "v1.0.0 (beta)",
-      docs: "/docs/telegram"
+      color: '#26A5E4',
+      badge: 'Популярно',
+      badgeColor: 'text-[#26A5E4]',
+      badgeBg: 'bg-[#26A5E4]/10 border border-[#26A5E4]/20',
+      description: 'Создавайте готовые посты, идеи и контент для Telegram-каналов',
+      stats: '14.1k генераций',
+      about: {
+        title: 'Что делает этот инструмент',
+        text: 'AI пишет посты, придумывает идеи, создаёт опросы и серии публикаций специально для Telegram. Экономит 3 часа в день на создании контента.',
+        details: [
+          'Генерация готовых постов с эмодзи и структурой',
+          'Создание идей для публикаций на неделю вперёд',
+          'Вовлекающие опросы с вариантами ответов',
+          'Серии связанных постов для удержания аудитории'
+        ]
+      },
+      outputs: ['Посты', 'Идеи', 'Опросы', 'Серии'],
+      useCase: 'Для владельцев Telegram-каналов, SMM-менеджеров, блогеров'
     },
     {
-      id: "vk",
-      name: "VK",
-      icon: FaVk,
-      color: "from-[#4C75A3] to-[#2C5A8C]",
-      bgColor: "bg-[#4C75A3]/10",
-      borderColor: "border-[#4C75A3]/30",
-      status: "coming-soon",
-      description: "Интеграция с VK API для создания бота и управление постингом",
-      features: [
-        "Автоматическая синхронизация",
-        "Управление сообщениями",
-        "Постинг",
-        "Рассылки и уведомления"
-      ],
-      version: "v2.1.0",
-      docs: "/docs/vk"
+      id: 'viral-headlines',
+      name: 'Цепляющие заголовки',
+      icon: FaFire,
+      color: '#FF7043',
+      badge: 'Вовлечение',
+      badgeColor: 'text-[#FF7043]',
+      badgeBg: 'bg-[#FF7043]/10 border border-[#FF7043]/20',
+      description: 'Генерация заголовков, hooks и сильных начал для постов',
+      stats: '12.4k генераций',
+      about: {
+        title: 'Что делает этот инструмент',
+        text: 'AI создаёт заголовки с высоким CTR, цепляющие первые строки и вирусные механики. Увеличивает просмотры публикаций на 40%.',
+        details: [
+          'Заголовки с цифрами, интригой и обещанием пользы',
+          'Цепляющие хуки для первых строк поста',
+          'Призывы к действию с высокой конверсией',
+          'Вирусные идеи для максимальных охватов'
+        ]
+      },
+      outputs: ['Заголовки', 'Hooks', 'CTA', 'Вирусные'],
+      useCase: 'Для копирайтеров, маркетологов, авторов каналов'
+    },
+    {
+      id: 'ai-digest',
+      name: 'AI-дайджесты',
+      icon: FaRobot,
+      color: '#4CAF50',
+      badge: 'AI новости',
+      badgeColor: 'text-[#4CAF50]',
+      badgeBg: 'bg-[#4CAF50]/10 border border-[#4CAF50]/20',
+      description: 'Превращайте новости и темы в готовые Telegram-посты',
+      stats: '8.7k генераций',
+      about: {
+        title: 'Что делает этот инструмент',
+        text: 'Вставьте ссылку или текст — AI сделает краткий пересказ, обзор или выделит главные выводы. Экономит 2 часа на анализе информации.',
+        details: [
+          'Превращение ссылок в адаптированные новости',
+          'Краткий пересказ длинных статей за 30 секунд',
+          'Глубокие обзоры с анализом и контекстом',
+          'Извлечение практических выводов и инсайтов'
+        ]
+      },
+      outputs: ['Новости', 'Summary', 'Обзоры', 'Выводы'],
+      useCase: 'Для новостных каналов, аналитиков, tech-блогеров'
+    },
+    {
+      id: 'education-posts',
+      name: 'Обучающие посты',
+      icon: FaGraduationCap,
+      color: '#8B5CF6',
+      badge: 'Обучение',
+      badgeColor: 'text-[#8B5CF6]',
+      badgeBg: 'bg-[#8B5CF6]/10 border border-[#8B5CF6]/20',
+      description: 'Объясняйте сложные темы простым и понятным языком',
+      stats: '4.3k генераций',
+      about: {
+        title: 'Что делает этот инструмент',
+        text: 'AI создаёт гайды, объяснения и серии уроков. Адаптирует сложные темы под любой уровень подготовки читателя.',
+        details: [
+          'Пошаговые мини-гайды с чёткими инструкциями',
+          'Объяснение сложных тем на простых аналогиях',
+          'Познавательные факты с цифрами и контекстом',
+          'Серии обучающих постов с прогрессией сложности'
+        ]
+      },
+      outputs: ['Мини-гайды', 'Объяснения', 'Факты', 'Уроки'],
+      useCase: 'Для образовательных каналов, экспертов, коучей'
+    },
+    {
+      id: 'post-chronicle',
+      name: 'Хроника постов',
+      icon: FaHistory,
+      color: '#FFA726',
+      badge: 'Новое',
+      badgeColor: 'text-[#FFA726]',
+      badgeBg: 'bg-[#FFA726]/10 border border-[#FFA726]/20',
+      description: 'Копируйте свои посты — AI проанализирует стиль и напишет продолжение',
+      stats: '3.2k генераций',
+      about: {
+        title: 'Как это работает',
+        text: 'Вы вставляете 2-5 своих предыдущих постов. AI изучает ваш стиль, тон, темы и создаёт новый пост, который звучит как естественное продолжение. Идеально для серийного контента и storytelling.',
+        details: [
+          'Анализ стиля: AI копирует вашу манеру письма',
+          'Сюжетная связность: продолжает логику повествования',
+          'Tone of voice: сохраняет ваш уникальный голос',
+          'Форматы: продолжение, новая глава, спин-офф'
+        ]
+      },
+      outputs: ['Продолжение', 'Новая глава', 'Спин-офф', 'Рефлексия'],
+      useCase: 'Для авторов серий, блогов с историей, storytelling-каналов'
     }
   ]
 
-  const handleCardClick = (service: typeof services[0]) => {
-    if (service.status === "active") {
-      navigate(`/services/${service.id}`)
-    }
+  const handleCardClick = (id: string) => {
+    navigate(`/services/${id}`)
+  }
+
+  const toggleExpand = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation()
+    setExpandedId(expandedId === id ? null : id)
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="relative max-w-7xl px-4 mx-auto sm:px-6 lg:px-8 py-8 lg:py-12">
-        <div className="mb-8 lg:mb-10">
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-2xl lg:text-3xl font-bold bg-gradient-to-r from-white to-[#4CAF50] bg-clip-text text-transparent">
-              Сервисы интеграции
-            </h1>
+    <div className='min-h-screen overflow-hidden'>
+      <div className='absolute inset-0 opacity-[0.03] bg-[radial-gradient(circle,white_1px,transparent_1px)] [background-size:24px_24px]' />
+
+      <div className='relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-14'>
+
+        <div className='relative overflow-hidden rounded-[32px] border border-white/10 bg-gradient-to-br from-white/[0.07] to-white/[0.02] backdrop-blur-xl p-8 lg:p-12 mb-10'>
+          <div className='absolute inset-0 bg-gradient-to-r from-[#4CAF50]/10 via-transparent to-[#FFA726]/5' />
+
+          <div className='relative flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8'>
+            <div className='max-w-2xl'>
+              <h1 className='text-4xl lg:text-5xl font-black tracking-[-0.04em] text-white leading-none mb-4'>
+                Что будем
+                <span className='bg-gradient-to-r from-[#4CAF50] to-[#FFA726] bg-clip-text text-transparent'>
+                  {' '}публиковать?
+                </span>
+              </h1>
+
+              <p className='text-base text-white/40 max-w-xl'>
+                AI-инструменты для создания постов, заголовков, идей и контента
+              </p>
+            </div>
+
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+        <div className='flex items-center justify-between mb-6'>
+          <div>
+            <h2 className='text-2xl font-bold text-white tracking-[-0.03em] mb-1'>
+              Инструменты контента
+            </h2>
+            <p className='text-sm text-white/40'>
+              Выберите инструмент и начните создавать контент
+            </p>
+          </div>
+        </div>
+
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start'>
           {services.map((service) => {
             const Icon = service.icon
-            const isActive = service.status === "active"
+            const isExpanded = expandedId === service.id
 
             return (
               <div
                 key={service.id}
-                onClick={() => handleCardClick(service)}
                 className={`
-                  relative group cursor-pointer transition-all duration-300
-                  ${isActive ? "hover:translate-y-[-4px]" : "cursor-not-allowed"}
+                  relative rounded-2xl
+                  border border-white/10
+                  bg-white/[0.04]
+                  backdrop-blur-xl
+                  transition-all duration-300
+                  hover:border-white/20
+                  hover:bg-white/[0.06]
+                  hover:shadow-[0_8px_32px_rgba(0,0,0,0.3)]
+                  ${isExpanded ? 'ring-1 ring-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.4)]' : ''}
                 `}
               >
-                <div className={`
-                  relative overflow-hidden rounded-2xl border 
-                  ${isActive ? service.borderColor : "border-white/10"} 
-                  ${isActive ? "bg-white/5" : "bg-white/3"} 
-                  backdrop-blur-sm
-                  transition-all duration-300
-                  ${isActive ? "hover:shadow-2xl hover:shadow-[#4CAF50]/10" : "opacity-60"}
-                `}>
-                  {isActive && (
-                    <div className="absolute inset-0 bg-gradient-to-br from-[#4CAF50]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  )}
-
-                  <div className="relative p-6 lg:p-8">
-                    <div className="absolute top-4 right-4">
-                      {isActive ? (
-                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[#4CAF50]/10 border border-[#4CAF50]/20">
-                          <FaCheckCircle className="text-[#4CAF50] text-[10px]" />
-                          <span className="text-[10px] font-medium text-[#4CAF50]">Активен</span>
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-amber-500/10 border border-amber-500/20">
-                          <FaClock className="text-amber-400 text-[10px]" />
-                          <span className="text-[10px] font-medium text-amber-400">В разработке</span>
-                        </div>
-                      )}
+                <button
+                  onClick={() => handleCardClick(service.id)}
+                  className='w-full cursor-pointer text-left p-5'
+                >
+                  <div className='flex items-center justify-between mb-4'>
+                    <div
+                      className='w-11 h-11 rounded-xl flex items-center justify-center border border-white/5 flex-shrink-0'
+                      style={{ backgroundColor: `${service.color}15` }}
+                    >
+                      <Icon
+                        className='text-lg'
+                        style={{ color: service.color }}
+                      />
                     </div>
+                    <span className={`px-2 py-1 rounded-lg text-[10px] uppercase tracking-[0.1em] font-medium whitespace-nowrap ${service.badgeBg} ${service.badgeColor}`}>
+                      {service.badge}
+                    </span>
+                  </div>
 
-                    <div className="flex items-start gap-4 mb-6">
-                      <div className={`
-                        w-14 h-14 lg:w-16 lg:h-16 rounded-xl 
-                        ${isActive ? service.bgColor : "bg-white/5"} 
-                        flex items-center justify-center
-                        ${isActive ? "shadow-lg" : ""}
-                        transition-all duration-300
-                        ${isActive ? "group-hover:scale-105" : ""}
-                      `}>
-                        <Icon className={`
-                          text-2xl lg:text-3xl 
-                          ${isActive ? `text-[#4CAF50]` : "text-white/30"}
-                        `} />
+                  <h3 className='text-base font-bold tracking-[-0.02em] text-white mb-1.5'>
+                    {service.name}
+                  </h3>
+                  <p className='text-xs leading-relaxed text-white/40 mb-4 line-clamp-2 min-h-[2.5rem]'>
+                    {service.description}
+                  </p>
+
+                  <div className='grid grid-cols-2 gap-1.5 mb-4'>
+                    {service.outputs.map((output) => (
+                      <div
+                        key={output}
+                        className='rounded-lg border border-white/5 bg-white/[0.03] px-2.5 py-2'
+                      >
+                        <span className='text-xs text-white/60 truncate block'>{output}</span>
                       </div>
-                      <div>
-                        <h2 className="text-xl lg:text-2xl font-bold text-white mb-1">
-                          {service.name}
-                        </h2>
-                        <p className="text-white/40 text-xs lg:text-sm">
-                          {service.description}
-                        </p>
+                    ))}
+                  </div>
+
+                  <div className='flex items-center justify-between pt-4 border-t border-white/5'>
+                    <div>
+                      <div className='text-[10px] uppercase tracking-[0.12em] text-white/25 mb-0.5'>
+                        Активность
                       </div>
+                      <div className='text-xs text-white/60'>{service.stats}</div>
                     </div>
+                    <div
+                      className='flex items-center gap-1.5 text-xs font-medium transition-all duration-200'
+                      style={{ color: service.color }}
+                    >
+                      Открыть
+                      <FiArrowRight className='text-xs' />
+                    </div>
+                  </div>
+                </button>
 
-                    <div className="mb-6">
-                      <h3 className="text-xs font-semibold text-white/60 mb-3 flex items-center gap-2">
-                        <MdOutlineIntegrationInstructions className="text-[#4CAF50]" />
-                        Основные возможности
-                      </h3>
-                      <div className="grid grid-cols-2 gap-2">
-                        {service.features.map((feature, idx) => (
-                          <div key={idx} className="flex items-center gap-2 text-xs text-white/40">
-                            <MdSync className="text-[#4CAF50] text-[10px]" />
-                            <span>{feature}</span>
-                          </div>
+                <button
+                  onClick={(e) => toggleExpand(e, service.id)}
+                  className={`
+                    w-full flex items-center justify-center gap-2 px-5 py-2.5 cursor-pointer
+                    border-t border-white/5
+                    text-xs text-white/30 hover:text-white/50
+                    transition-all duration-200
+                    ${isExpanded ? 'bg-white/[0.02]' : 'hover:bg-white/[0.02]'}
+                  `}
+                >
+                  <FiInfo className='text-xs' />
+                  <span>{isExpanded ? 'Скрыть справку' : 'Что это за инструмент?'}</span>
+                  <FaChevronDown
+                    className={`text-[10px] transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                <div
+                  className={`
+                    overflow-hidden transition-all duration-300 ease-in-out
+                    ${isExpanded ? 'max-h-[400px] opacity-100' : 'max-h-0 opacity-0'}
+                  `}
+                >
+                  <div className='px-5 pb-5 pt-5 space-y-4'>
+                    <div
+                      className='rounded-xl p-4 border'
+                      style={{
+                        backgroundColor: `${service.color}08`,
+                        borderColor: `${service.color}20`
+                      }}
+                    >
+                      <h4
+                        className='text-xs font-semibold mb-2'
+                        style={{ color: service.color }}
+                      >
+                        {service.about.title}
+                      </h4>
+                      <p className='text-xs text-white/50 leading-relaxed mb-3'>
+                        {service.about.text}
+                      </p>
+                      <ul className='space-y-2'>
+                        {service.about.details.map((detail, i) => (
+                          <li key={i} className='flex items-start gap-2 text-xs text-white/40'>
+                            <span
+                              className='w-1 h-1 rounded-full mt-1.5 flex-shrink-0'
+                              style={{ backgroundColor: service.color }}
+                            />
+                            {detail}
+                          </li>
                         ))}
-                      </div>
+                      </ul>
                     </div>
 
+                    <div className='flex items-start gap-2 text-xs text-white/30'>
+                      <FaCheckCircle
+                        className='text-xs mt-0.5 flex-shrink-0'
+                        style={{ color: service.color }}
+                      />
+                      <span>{service.useCase}</span>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -150,25 +322,10 @@ export default function ServicePage() {
           })}
         </div>
 
-        <div className="mt-12 p-6 rounded-2xl bg-white/5 border border-white/10">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-[#4CAF50]/20 flex items-center justify-center">
-                <FiBox className="text-[#4CAF50] text-lg" />
-              </div>
-              <div>
-                <h3 className="text-sm font-semibold text-white">Нужна помощь с интеграцией?</h3>
-                <p className="text-xs text-white/40">Cвяжитесь с поддержкой</p>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <button className="px-4 py-2 rounded-xl bg-[#4CAF50]/20 border border-[#4CAF50]/30 text-[#4CAF50] text-xs font-medium hover:bg-[#4CAF50]/30 transition-all">
-                Связаться с поддержкой
-              </button>
-            </div>
-          </div>
+        <div className='mt-8 flex items-center justify-center gap-2 text-xs text-white/15'>
+          <FiInfo className='text-sm' />
+          <span>Нажмите «Что это за инструмент?» чтобы узнать подробнее о каждом сервисе</span>
         </div>
-
       </div>
     </div>
   )
