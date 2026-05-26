@@ -132,7 +132,7 @@ export const Logo: React.FC<PostFarmLogoProps> = ({
     return (
       <div className={`flex flex-col items-center ${className}`}>
         <div className={`font-black tracking-[-0.03em] text-white ${text} leading-none`}>
-          ПостФерма
+          Пост<span className="text-[#FFA726]">Ф</span>ерма
         </div>
         <div className="font-mono tracking-[0.4em] text-[#4CAF50]/40 mt-1" style={{ fontSize: subtitle.replace('text-[', '').replace(']', '') }}>
           POSTFARM
@@ -215,6 +215,49 @@ export const HeroBrand: React.FC<{ className?: string }> = ({ className = '' }) 
         <p className={`mt-4 text-white/40 text-sm font-medium transition-all duration-700 delay-500 ${mounted ? 'opacity-100' : 'opacity-0'}`}>
           Выращиваем контент. Автоматически.
         </p>
+      </div>
+    </div>
+  )
+}
+
+export const PostHubLogo: React.FC<PostFarmLogoProps> = ({
+  variant = 'full',
+  size = 'lg',
+  className = '',
+}) => {
+  const { text, subtitle } = sizeMap[size]
+
+  if (variant === 'icon') {
+    return <WheatMark sizeKey={size} className={className} />
+  }
+
+  if (variant === 'wordmark') {
+    return (
+      <div className={`flex flex-col items-center ${className}`}>
+        <div className={`font-black tracking-[-0.03em] text-white ${text} leading-none`}>
+          Пост<span className="text-[#FFA726]">H</span>ub
+        </div>
+        <div className="font-mono tracking-[0.4em] text-[#4CAF50]/40 mt-1" style={{ fontSize: subtitle.replace('text-[', '').replace(']', '') }}>
+          POSTHUB
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className={`flex flex-col items-center select-none ${className}`}>
+      <WheatMark sizeKey={size} />
+      <div className="mt-4 flex flex-col items-center">
+        <div className={`font-black tracking-[-0.03em] text-white ${text} leading-none`}>
+          Пост<span className="text-[#FFA726]">H</span>ub
+        </div>
+        <div className="flex items-center gap-2 mt-1">
+          <span className="w-1 h-1 rounded-full bg-[#4CAF50]/60" />
+          <span className="font-mono tracking-[0.4em] text-[#4CAF50]/40" style={{ fontSize: subtitle.replace('text-[', '').replace(']', '') }}>
+            POSTHUB
+          </span>
+          <span className="w-1 h-1 rounded-full bg-[#FFA726]/60" />
+        </div>
       </div>
     </div>
   )

@@ -4,6 +4,7 @@ import cors from '@fastify/cors'
 import config from "../../pkg/config/appconfig"
 import fastifyJwt from '@fastify/jwt'
 import fastifyStatic from "@fastify/static"
+import httpProxy from "@fastify/http-proxy"
 import cookie from "@fastify/cookie"
 import SignModule from "../../modules/sign/sign.module"
 import appconfig from "../../pkg/config/appconfig"
@@ -35,8 +36,25 @@ import UserModule from "../../modules/user/user.module"
   if (!server.jwt) throw new Error('JWT plugin not initialized')
   appInstance.setApp(server)
   server.get('/api', async (_, reply) => reply.send({ msg: "pong" }))
+
   new SignModule(server)
   new UserModule(server)
+
+  await server.register(httpProxy, {
+    upstream: appconfig.services.ai.text.uri + "/api/ai/text/yandex-gpt",
+    prefix: '/api/ai/text',
+    rewritePrefix: '/products',
+    replyOptions: {
+      rewriteRequestHeaders: (_originalReq, headers) => {
+        return {
+          ...headers,
+          authorization: server.jwt.sign({ id: "root", role: "root", rate: "4" }),
+        }
+      }
+    }
+  })
+
+
   try {
     await cheackOrCreateInitFoldersAndFiles()
     setupGlobalErrorHandlers()

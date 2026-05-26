@@ -1,4 +1,5 @@
 import dotenv from "dotenv"
+import { text } from "stream/consumers"
 dotenv.config()
 
 const value = (value: any): string  => {
@@ -21,10 +22,16 @@ export default {
             url: value(process.env.GATWAY_URI),
             PORT: Number(value(process.env.GATWAY_PORT)),
         },
-        vk: {
-            uri: value(process.env.VK_URI),
-            PORT: Number(value(process.env.VK_PORT)),
-            JWT_SECRET: Number(value(process.env.VK_JWT_SECRET)),
+        ai: {
+            text: {
+                uri: value(process.env.AI_TEXT_GPT_URI),
+                PORT: Number(value(process.env.AI_TEXT_GPT_PORT)),
+                JWT_SECRET: value(process.env.AI_TEXT_GPT_JWT_SECRET),
+                yandex: {
+                    OAuthToken: value(process.env.AI_TEXT_GPT_YANDEX_OAUTH_TOKEN),
+                    XFolderId: value(process.env.AI_TEXT_GPT_YANDEX_XFOLDER_ID)
+                }
+            }
         },
     }
 }
