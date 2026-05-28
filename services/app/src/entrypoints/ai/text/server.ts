@@ -7,7 +7,7 @@ import cookie from "@fastify/cookie"
 import appconfig from "../../../pkg/config/appconfig"
 import { setupGlobalErrorHandlers } from "../../../pkg/errors/error-handler"
 import appJwtPlugin from "../../../pkg/plugins/app.auth.plugin"
-import YandexGptTextModule from "../../../modules/ai/text/yandex-gpt/yandex.gpt.text.module"
+import AITextModule from "../../../modules/ai/text/ai.text.module"
 
 (async () => {
   const server = fastify({ logger: true })
@@ -26,7 +26,7 @@ import YandexGptTextModule from "../../../modules/ai/text/yandex-gpt/yandex.gpt.
   if (!server.jwt) throw new Error('JWT plugin not initialized')
   server.register(appJwtPlugin)
   server.get('/api', async (_, reply) => reply.send({ msg: "pong" }))
-  new YandexGptTextModule(server)
+  new AITextModule(server)
 
   try {
     setupGlobalErrorHandlers()

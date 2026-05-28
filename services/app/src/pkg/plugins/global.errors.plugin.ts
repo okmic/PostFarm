@@ -9,6 +9,8 @@ import {
 
 const errorHandlerPlugin: FastifyPluginAsync = async (fastify) => {
   fastify.setErrorHandler(async (error, request, reply) => {
+
+    console.error('Global error handler:', error)
     const alertMsg = (request.body as any)?.alertMsg || (request.query as any)?.alertMsg
     
     if (error instanceof ErrorNotAuth) {

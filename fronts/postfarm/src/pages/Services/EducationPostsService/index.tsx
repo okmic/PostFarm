@@ -105,7 +105,6 @@ const EducationPostsService = () => {
     <div className="min-h-screen bg-[#1E3A1E] text-white font-['Inter']">
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8 sm:py-12">
         
-        {/* Header */}
         <div className="mb-6 sm:mb-8">
           <span className="inline-block px-3 py-1 bg-[#8B5CF6]/20 text-[#8B5CF6] text-xs font-medium rounded-full uppercase tracking-[0.05em] mb-3">
             Обучение
@@ -328,7 +327,6 @@ const EducationPostsService = () => {
 
             {generatedContent ? (
               <div className="space-y-4">
-                {/* Main post card */}
                 <div className="bg-white/5 border border-white/10 rounded-xl p-5 sm:p-6 backdrop-blur-sm">
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-xl bg-[#8B5CF6]/20 flex items-center justify-center flex-shrink-0">
@@ -345,9 +343,7 @@ const EducationPostsService = () => {
                   </div>
                 </div>
 
-                {/* Analysis cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {/* Audience note */}
                   <div className="bg-[#8B5CF6]/5 border border-[#8B5CF6]/20 rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <FiUsers className="text-[#8B5CF6] text-sm" />

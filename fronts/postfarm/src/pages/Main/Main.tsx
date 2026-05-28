@@ -5,18 +5,7 @@ export default function MainPage() {
         <div className="flex flex-col items-center justify-start overflow-hidden">
 
             <div className="relative z-10 text-center max-w-3xl flex-1 flex flex-col justify-center">
-                <div className="flex items-center justify-center gap-3 mb-12">
-                    {[0, 1, 2].map((i) => (
-                        <div
-                            key={i}
-                            className="w-2 rounded-full bg-gradient-to-t from-[#4CAF50]/50 to-[#FFA726]/50 origin-bottom animate-grow"
-                            style={{
-                                animationDelay: `${i * 0.2}s`,
-                                height: `${56 + i * 20}px`
-                            }}
-                        />
-                    ))}
-                </div>
+
 
                 <h1 className="text-4xl lg:text-6xl xl:text-7xl font-black tracking-[-0.03em] leading-tight">
                     <span className="text-white">Выращиваем </span>

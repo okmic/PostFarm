@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { ErrorForbidden } from '../../../../pkg/errors/errors'
+import { ErrorForbidden } from '../../../pkg/errors/errors'
 
 class YandexGptTextService {
   public async YGpt(
@@ -7,7 +7,7 @@ class YandexGptTextService {
       'temperature': number,
       'YandexFolderID': string
       'YandexOAuthToken': string
-      'prompt': string
+      'prompt': string | null
       'msg': string
     }
   ): Promise<{ text: string, usageTokens: number }> {
@@ -43,7 +43,7 @@ class YandexGptTextService {
     }
   }
 
-  private async toGpt(temperature: number, prompt: string, msg: string, YPOAuth: string, YXFolderId: string): Promise<{ text: string, usageTokens: number }> {
+  private async toGpt(temperature: number, prompt: string | null, msg: string, YPOAuth: string, YXFolderId: string): Promise<{ text: string, usageTokens: number }> {
     const aimtoken = await this.getYToken(YPOAuth, YXFolderId);
     const promt = {
       'completionOptions': {
@@ -53,16 +53,18 @@ class YandexGptTextService {
       },
       'messages': [
         {
-          'role': 'system',
-          'text': prompt
-        },
-        {
           'role': 'user',
           'text': msg
         }
       ],
       modelUri: `gpt://${YXFolderId}/yandexgpt-lite`
     };
+    if(prompt) {
+      promt.messages.unshift({
+        'role': 'system',
+        'text': prompt
+      })
+    }
     let response = await axios.post(
       'https://llm.api.cloud.yandex.net/foundationModels/v1/completion',
       JSON.stringify(promt),

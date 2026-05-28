@@ -2,7 +2,6 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 import {
-  FaTelegramPlane,
   FaFire,
   FaGraduationCap,
   FaRobot,
@@ -12,6 +11,7 @@ import {
 } from 'react-icons/fa'
 
 import { FiArrowRight, FiInfo } from 'react-icons/fi'
+import { MdContentPasteSearch } from 'react-icons/md'
 
 export default function ServicePage() {
   const navigate = useNavigate()
@@ -19,18 +19,18 @@ export default function ServicePage() {
 
   const services = [
     {
-      id: 'telegram-content',
-      name: 'Telegram контент',
-      icon: FaTelegramPlane,
+      id: 'channel-content',
+      name: 'Контент Блога или Канала',
+      icon: MdContentPasteSearch,
       color: '#26A5E4',
       badge: 'Популярно',
       badgeColor: 'text-[#26A5E4]',
       badgeBg: 'bg-[#26A5E4]/10 border border-[#26A5E4]/20',
-      description: 'Создавайте готовые посты, идеи и контент для Telegram-каналов',
+      description: 'Создавайте готовые посты, идеи и контент для блогов и каналов',
       stats: '14.1k генераций',
       about: {
         title: 'Что делает этот инструмент',
-        text: 'AI пишет посты, придумывает идеи, создаёт опросы и серии публикаций специально для Telegram. Экономит 3 часа в день на создании контента.',
+        text: 'AI пишет посты, придумывает идеи, создаёт опросы и серии публикаций специально для блогов и каналов. Экономит 3 часа в день на создании контента.',
         details: [
           'Генерация готовых постов с эмодзи и структурой',
           'Создание идей для публикаций на неделю вперёд',
@@ -39,7 +39,7 @@ export default function ServicePage() {
         ]
       },
       outputs: ['Посты', 'Идеи', 'Опросы', 'Серии'],
-      useCase: 'Для владельцев Telegram-каналов, SMM-менеджеров, блогеров'
+      useCase: 'Для владельцев блогов и каналов, SMM-менеджеров, блогеров'
     },
     {
       id: 'viral-headlines',

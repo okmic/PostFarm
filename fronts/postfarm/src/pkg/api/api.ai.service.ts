@@ -3,7 +3,7 @@ import appconfig from '../../appconfig'
 import store from '../../store/store'
 import { logout } from '../../store/slices/auth.slice'
 import { getAuthHeader, handlerError } from './api.util'
-import type { PostChronicleTypeEnum } from "../../../../../pkg/types/ai.text.types"
+import type { PostChannelContentToneEnum, PostChannelContentTypeEnum, PostChronicleTypeEnum } from "../../../../../pkg/types/ai.text.types"
 
 class ApiAiService {
   private axiosInstance: AxiosInstance
@@ -30,16 +30,25 @@ class ApiAiService {
       }
     )
   }
-  public async postChronicle(payload: { type: PostChronicleTypeEnum, text: string }) {
+  public async postChronicle(payload: { type: PostChronicleTypeEnum, text: string }): Promise<string> {
     return await this.axiosInstance.post(
       `/api/ai/text/post-chronicle`,
       { type: payload.type, text: payload.text },
       { headers: getAuthHeader() },
     )
-      .then(r => r.data.data.users)
+      .then(r => r.data.text)
       .catch(e => handlerError(e))
   }
 
+  public async chanelContent(payload: { text: string, type: PostChannelContentTypeEnum, tone: PostChannelContentToneEnum }): Promise<string> {
+    return await this.axiosInstance.post(
+      `/api/ai/text/channel-content`,
+      { text: payload.text, type: payload.type, tone: payload.tone },
+      { headers: getAuthHeader() },
+    )
+      .then(r => r.data.text)
+      .catch(e => handlerError(e))
+  }
 
 }
 

@@ -38,36 +38,43 @@ import UserModule from "../../modules/user/user.module"
     decorateReply: false
   })
   
-  // 2. ГЛОБАЛЬНЫЙ ОБРАБОТЧИК ОШИБОК - ДОЛЖЕН БЫТЬ РАНЬШЕ ВСЕГО
   server.register(errorHandlerPlugin)
   
   if (!server.jwt) throw new Error('JWT plugin not initialized')
   appInstance.setApp(server)
   
-  // 3. Публичные маршруты (не требуют авторизации)
   server.get('/api', async (_, reply) => reply.send({ msg: "pong" }))
-  new SignModule(server) // Регистрирует /api/signin, /api/signup и т.д.
+  new SignModule(server) 
   
-  // 4. АВТОРИЗАЦИЯ - после публичных маршрутов
   server.register(usersAuthPlugin)
+  new UserModule(server)
   
-  // 5. Защищенные маршруты (требуют авторизации)
-  new UserModule(server) // Регистрирует /api/users/* и т.д.
-  
-  // 6. Proxy (тоже может требовать авторизации)
-  await server.register(httpProxy, {
-    upstream: appconfig.services.ai.text.uri + "/api/ai/text/yandex-gpt",
-    prefix: '/api/ai/text',
-    rewritePrefix: '/products',
-    replyOptions: {
-      rewriteRequestHeaders: (_originalReq, headers) => {
-        return {
-          ...headers,
-          authorization: server.jwt.sign({ id: "root", role: "root", rate: "4" }),
-        }
+await server.register(httpProxy, {
+  upstream: appconfig.services.ai.text.uri, 
+  prefix: '/api/ai/text/post-chronicle',
+  rewritePrefix: '/api/ai/text/post-chronicle', 
+  replyOptions: {
+    rewriteRequestHeaders: (_originalReq, headers) => {
+      return {
+        ...headers,
+        authorization: server.jwt.sign({ id: "root", role: "root", rate: "4" }),
       }
     }
-  })
+  }
+})
+await server.register(httpProxy, {
+  upstream: appconfig.services.ai.text.uri,
+  prefix: '/api/ai/text/channel-content',
+  rewritePrefix: '/api/ai/text/channel-content', 
+  replyOptions: {
+    rewriteRequestHeaders: (_originalReq, headers) => {
+      return {
+        ...headers,
+        authorization: server.jwt.sign({ id: "root", role: "root", rate: "4" }),
+      }
+    }
+  }
+})
 
   try {
     await cheackOrCreateInitFoldersAndFiles()
