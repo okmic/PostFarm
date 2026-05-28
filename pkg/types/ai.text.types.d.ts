@@ -1,0 +1,1 @@
+export type PostChronicleTypeEnum = "CONTINUATION" | "NEW_CHAPTER" | "SPIN_OFF"

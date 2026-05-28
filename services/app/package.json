@@ -5,9 +5,8 @@
   "author": "okmic <okmic.g@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "front-admin:dev": "cd fronts/admin && yarn dev",
-    "gateway-server:dev": "nodemon --watch src --ext ts --ignore src/**/*.json --exec \"ts-node src/entrypoints/gateway/server.ts\"",
-    "vk-core:dev": "nodemon --watch src --ext ts --ignore src/**/*.json --exec \"ts-node src/entrypoints/vk/core.ts\"",
+    "gateway:server:dev": "nodemon --watch src --ext ts --ignore src/**/*.json --exec \"ts-node src/entrypoints/gateway/server.ts\"",
+    "gpt:text:server:dev": "nodemon --watch src --ext ts --ignore src/**/*.json --exec \"ts-node src/entrypoints/ai/text/server.ts\"",
     "build": "tsc -p ."
   },
   "dependencies": {

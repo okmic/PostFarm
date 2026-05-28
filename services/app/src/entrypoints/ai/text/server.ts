@@ -1,13 +1,13 @@
 import fastify from "fastify"
 import formBody from "@fastify/formbody"
 import cors from '@fastify/cors'
-import config from "../../pkg/config/appconfig"
+import config from "../../../pkg/config/appconfig"
 import fastifyJwt from '@fastify/jwt'
 import cookie from "@fastify/cookie"
-import appconfig from "../../pkg/config/appconfig"
-import { setupGlobalErrorHandlers } from "../../pkg/errors/error-handler"
-import appJwtPlugin from "../../pkg/plugins/app.auth.plugin"
-import YandexGptTextModule from "../../modules/ai/text/yandex-gpt/yandex.gpt.text.module"
+import appconfig from "../../../pkg/config/appconfig"
+import { setupGlobalErrorHandlers } from "../../../pkg/errors/error-handler"
+import appJwtPlugin from "../../../pkg/plugins/app.auth.plugin"
+import YandexGptTextModule from "../../../modules/ai/text/yandex-gpt/yandex.gpt.text.module"
 
 (async () => {
   const server = fastify({ logger: true })

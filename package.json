@@ -5,7 +5,10 @@
   "author": "okmic <okmic.g@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "gateway-server:dev": "cd services/app && yarn gateway-server:dev"
+    "gateway:server:dev": "cd services/app && yarn gateway:server:dev",
+    "gpt:text:server:dev": "cd services/app && yarn gpt:text:server:dev",
+    "front:postfarm:dev": "cd fronts/postfarm && yarn dev",
+    "front:posthub:dev": "cd fronts/posthuv && yarn dev"
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.8.2",
