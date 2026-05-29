@@ -3,7 +3,7 @@ import { FiZap, FiCopy, FiRefreshCw, FiThumbsUp, FiInfo, FiArrowRight, FiClock, 
 import { FaHistory } from 'react-icons/fa'
 import apiAiService from '../../../pkg/api/api.ai.service'
 import type { PostChronicleTypeEnum } from '../../../../../../pkg/types/ai.text.types'
-import { LogoLoading } from '../../../components/Logo/LogoLoading'
+import { SimpleLogoLoading } from '../../../components/Logo/LogoLoading'
 
 type Tab = {
   id: string
@@ -408,11 +408,7 @@ const ResultSection = ({
 const LoadingState = () => {
   return (
     <div className="bg-white/5 border border-white/10 rounded-xl p-8 sm:p-12 backdrop-blur-sm flex flex-col items-center justify-center text-center min-h-[500px]">
-      <LogoLoading
-        size="lg" 
-        message="Анализирую стиль и создаю контент" 
-      />
-      
+      <SimpleLogoLoading />
       <div className="mt-8 flex items-center gap-4 text-white/15 text-xs">
         <div className="flex items-center gap-1.5">
           <FiPenTool className="text-sm" />

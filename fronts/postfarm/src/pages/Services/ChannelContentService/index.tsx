@@ -519,7 +519,7 @@ const ResultSection = ({
 const LoadingState = () => {
   return (
     <div className="bg-white/5 border border-white/10 rounded-xl p-8 sm:p-12 backdrop-blur-sm flex flex-col items-center justify-center text-center min-h-[500px]">
-      <SimpleLogoLoading size="lg" />
+      <SimpleLogoLoading />
       
       <h3 className="text-white/80 font-semibold mb-2 mt-6">
         Генерируем контент...
