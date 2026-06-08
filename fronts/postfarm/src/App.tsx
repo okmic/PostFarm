@@ -14,7 +14,6 @@ import NotFound from "./pages/NotFound"
 import ServicePage from "./pages/Services"
 import MainPage from "./pages/Main/Main"
 import ViralHeadlinesService from "./pages/Services/ViralHeadlinesService"
-import AiDigestService from "./pages/Services/AiDigestService"
 import EducationPostsService from "./pages/Services/EducationPostsService"
 import PostChronicleService from "./pages/Services/PostChronicleService"
 import ChannelContentService from "./pages/Services/ChannelContentService"
@@ -69,7 +68,6 @@ function MainApp() {
               <Route path="/services" element={<ServicePage />} />
               <Route path="/services/channel-content" element={<ChannelContentService />} />
               <Route path="/services/viral-headlines" element={<ViralHeadlinesService />} />
-              <Route path="/services/ai-digest" element={<AiDigestService />} />
               <Route path="/services/education-posts" element={<EducationPostsService />} />
               <Route path="/services/post-chronicle" element={<PostChronicleService />} />
               <Route path="/settings" element={<UserSettingsPage />} />

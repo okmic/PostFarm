@@ -18,7 +18,7 @@ import UserModule from "../../modules/user/user.module"
 
 (async () => {
   const server = fastify({ logger: true })
-  
+
   // 1. Базовые плагины
   await server.register(formBody)
   await server.register(cookie)
@@ -37,44 +37,58 @@ import UserModule from "../../modules/user/user.module"
     prefix: "/api/public",
     decorateReply: false
   })
-  
+
   server.register(errorHandlerPlugin)
-  
+
   if (!server.jwt) throw new Error('JWT plugin not initialized')
   appInstance.setApp(server)
-  
+
   server.get('/api', async (_, reply) => reply.send({ msg: "pong" }))
-  new SignModule(server) 
-  
+  new SignModule(server)
+
   server.register(usersAuthPlugin)
   new UserModule(server)
-  
-await server.register(httpProxy, {
-  upstream: appconfig.services.ai.text.uri, 
-  prefix: '/api/ai/text/post-chronicle',
-  rewritePrefix: '/api/ai/text/post-chronicle', 
-  replyOptions: {
-    rewriteRequestHeaders: (_originalReq, headers) => {
-      return {
-        ...headers,
-        authorization: server.jwt.sign({ id: "root", role: "root", rate: "4" }),
+
+  await server.register(httpProxy, {
+    upstream: appconfig.services.ai.text.uri,
+    prefix: '/api/ai/text/post-chronicle',
+    rewritePrefix: '/api/ai/text/post-chronicle',
+    replyOptions: {
+      rewriteRequestHeaders: (_originalReq, headers) => {
+        return {
+          ...headers,
+          authorization: server.jwt.sign({ id: "root", role: "root", rate: "4" }),
+        }
       }
     }
-  }
-})
-await server.register(httpProxy, {
-  upstream: appconfig.services.ai.text.uri,
-  prefix: '/api/ai/text/channel-content',
-  rewritePrefix: '/api/ai/text/channel-content', 
-  replyOptions: {
-    rewriteRequestHeaders: (_originalReq, headers) => {
-      return {
-        ...headers,
-        authorization: server.jwt.sign({ id: "root", role: "root", rate: "4" }),
+  })
+  await server.register(httpProxy, {
+    upstream: appconfig.services.ai.text.uri,
+    prefix: '/api/ai/text/channel-content',
+    rewritePrefix: '/api/ai/text/channel-content',
+    replyOptions: {
+      rewriteRequestHeaders: (_originalReq, headers) => {
+        return {
+          ...headers,
+          authorization: server.jwt.sign({ id: "root", role: "root", rate: "4" }),
+        }
       }
     }
-  }
-})
+  })
+
+  await server.register(httpProxy, {
+    upstream: appconfig.services.ai.text.uri,
+    prefix: '/api/ai/text/viral-headlines',
+    rewritePrefix: '/api/ai/text/viral-headlines',
+    replyOptions: {
+      rewriteRequestHeaders: (_originalReq, headers) => {
+        return {
+          ...headers,
+          authorization: server.jwt.sign({ id: "root", role: "root", rate: "4" }),
+        }
+      }
+    }
+  })
 
   try {
     await cheackOrCreateInitFoldersAndFiles()

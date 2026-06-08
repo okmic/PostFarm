@@ -158,9 +158,6 @@ const Header = () => {
       <h1 className="text-3xl sm:text-4xl font-bold tracking-[-0.02em] mb-2">
         Хроника постов
       </h1>
-      <p className="text-white/40 text-sm sm:text-base max-w-2xl">
-        3.2k генераций — Загрузите свои прошлые посты, и AI напишет продолжение в вашем стиле
-      </p>
     </div>
   )
 }

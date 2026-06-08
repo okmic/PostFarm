@@ -13,5 +13,8 @@ export default class AITextModule {
         server.post('/api/ai/text/channel-content', {
             handler: aiTextController.channelContent,
         })
+        server.post('/api/ai/text/viral-headlines', {
+            handler: aiTextController.viralHeadlines,
+        })
     }
 };

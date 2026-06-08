@@ -3,7 +3,7 @@ import appconfig from '../../appconfig'
 import store from '../../store/store'
 import { logout } from '../../store/slices/auth.slice'
 import { getAuthHeader, handlerError } from './api.util'
-import type { PostChannelContentToneEnum, PostChannelContentTypeEnum, PostChronicleTypeEnum } from "../../../../../pkg/types/ai.text.types"
+import type { HeadlineContentEnum, HeadlineStyleEnum, PostChannelContentToneEnum, PostChannelContentTypeEnum, PostChronicleTypeEnum } from "../../../../../pkg/types/ai.text.types"
 
 class ApiAiService {
   private axiosInstance: AxiosInstance
@@ -50,6 +50,15 @@ class ApiAiService {
       .catch(e => handlerError(e))
   }
 
+  public async viralHeadlines(payload: { topic: string, type: HeadlineContentEnum, style: HeadlineStyleEnum }): Promise<string> {
+    return await this.axiosInstance.post(
+      `/api/ai/text/viral-headlines`,
+      { topic: payload.topic, type: payload.type, style: payload.style },
+      { headers: getAuthHeader() },
+    )
+      .then(r => r.data.text)
+      .catch(e => handlerError(e))
+  }
 }
 
 export default new ApiAiService()

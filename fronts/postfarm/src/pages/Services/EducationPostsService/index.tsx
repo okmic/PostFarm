@@ -112,9 +112,6 @@ const EducationPostsService = () => {
           <h1 className="text-3xl sm:text-4xl font-bold tracking-[-0.02em] mb-2">
             Обучающие посты
           </h1>
-          <p className="text-white/40 text-sm sm:text-base max-w-2xl">
-            4.3k генераций — Объясняйте сложные темы простым языком. Создавайте гайды, уроки и познавательный контент
-          </p>
         </div>
 
         {/* Steps indicator */}
