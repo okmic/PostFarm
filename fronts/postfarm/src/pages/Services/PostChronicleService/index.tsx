@@ -152,9 +152,6 @@ const PostChronicleService = () => {
 const Header = () => {
   return (
     <div className="mb-6 sm:mb-8">
-      <span className="inline-block px-3 py-1 bg-[#FFA726]/20 text-[#FFA726] text-xs font-medium rounded-full uppercase tracking-[0.05em] mb-3">
-        Новое
-      </span>
       <h1 className="text-3xl sm:text-4xl font-bold tracking-[-0.02em] mb-2">
         Хроника постов
       </h1>

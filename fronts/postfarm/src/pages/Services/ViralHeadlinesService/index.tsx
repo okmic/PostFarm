@@ -1,5 +1,5 @@
 import { useState, type JSX } from 'react'
-import { FiZap, FiCopy, FiRefreshCw, FiThumbsUp, FiTarget, FiTrendingUp, FiVolume2, FiInfo, FiStar, FiArrowRight, FiArrowLeft, FiClock, FiSend, FiPenTool } from 'react-icons/fi'
+import { FiZap, FiCopy, FiRefreshCw, FiThumbsUp, FiTarget, FiTrendingUp, FiVolume2, FiInfo, FiStar, FiArrowRight, FiClock, FiSend, FiPenTool } from 'react-icons/fi'
 import type { HeadlineStyleEnum, HeadlineContentEnum } from '../../../../../../pkg/types/ai.text.types'
 import apiAiService from '../../../pkg/api/api.ai.service'
 import { SimpleLogoLoading } from '../../../components/Logo/LogoLoading'
@@ -101,7 +101,6 @@ const ViralHeadlinesService = () => {
         throw new Error('Не удалось получить результат')
       }
     } catch (err) {
-      console.error('API Error:', err)
       setError(err instanceof Error ? err.message : 'Ошибка при генерации. Попробуйте позже.')
       setCurrentStep(1)
     } finally {
@@ -133,15 +132,6 @@ const ViralHeadlinesService = () => {
   return (
     <div className="min-h-screen bg-[#1E3A1E] text-white font-['Inter']">
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        
-        {/* Кнопка Назад */}
-        <button 
-          onClick={() => window.history.back()}
-          className="flex items-center gap-2 px-4 py-2 mb-6 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-all duration-150 text-sm"
-        >
-          <FiArrowLeft className="text-sm" />
-          <span>Назад</span>
-        </button>
 
         <Header />
         <StepsIndicator steps={steps} currentStep={currentStep} />

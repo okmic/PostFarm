@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import { 
   FaFire, 
   FaGraduationCap, 
@@ -24,9 +25,12 @@ import {
 import { FiArrowRight, FiHexagon, FiInfo } from 'react-icons/fi'
 import { MdContentPasteSearch } from 'react-icons/md'
 import type { IconType } from 'react-icons'
+import type { ServicesIdsType } from '../../pkg/types/user'
+import type { RootState } from '../../store/store'
+import apiUserService from '../../pkg/api/api.user.service'
 
 type Service = {
-  id: string
+  id: ServicesIdsType
   name: string
   description: string
   about: {
@@ -143,16 +147,38 @@ const serviceIcons: Record<string, IconType> = {
 
 export default function ServicePage() {
   const navigate = useNavigate()
+  const user = useSelector((state: RootState) => state.auth.user)
+  
   const [expandedId, setExpandedId] = useState<string | null>(null)
-  const [favorites, setFavorites] = useState<Set<string>>(new Set(['channel-content', 'viral-headlines']))
+  const [favorites, setFavorites] = useState<ServicesIdsType[]>(user?.featuredServices || [])
+  const [isUpdating, setIsUpdating] = useState(false)
 
-  const toggleFavorite = (e: React.MouseEvent, id: string) => {
+  useEffect(() => {
+    if (user?.featuredServices) {
+      setFavorites(user.featuredServices)
+    }
+  }, [user?.featuredServices])
+
+  const toggleFavorite = async (e: React.MouseEvent, id: ServicesIdsType) => {
     e.stopPropagation()
-    setFavorites(prev => {
-      const next = new Set(prev)
-      next.has(id) ? next.delete(id) : next.add(id)
-      return next
-    })
+    if (isUpdating) return
+
+    const isCurrentlyFavorite = favorites.includes(id)
+    const updatedFavorites = isCurrentlyFavorite
+      ? favorites.filter(fav => fav !== id)
+      : [...favorites, id]
+
+    setFavorites(updatedFavorites)
+    setIsUpdating(true)
+
+    try {
+      await apiUserService.updateUser({ featuredServices: updatedFavorites })
+    } catch (error) {
+      setFavorites(favorites)
+      console.error('Failed to update favorites:', error)
+    } finally {
+      setIsUpdating(false)
+    }
   }
 
   const toggleExpand = (e: React.MouseEvent, id: string) => {
@@ -169,10 +195,10 @@ export default function ServicePage() {
           <p className='text-[11px] text-white/25 uppercase tracking-[0.2em] mb-2'>сервисы</p>
           <h2 className='text-2xl font-light text-white tracking-[-0.02em]'>Инструменты</h2>
         </div>
-        {favorites.size > 0 && (
+        {favorites.length > 0 && (
           <div className='flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.06]'>
             <FaStar className='text-[#FFA726] text-[10px]' />
-            <span className='text-xs text-white/30 font-light'>{favorites.size} в избранном</span>
+            <span className='text-xs text-white/30 font-light'>{favorites.length} в избранном</span>
           </div>
         )}
       </div>
@@ -183,7 +209,7 @@ export default function ServicePage() {
             key={service.id}
             service={service}
             Icon={serviceIcons[service.id]}
-            isFavorite={favorites.has(service.id)}
+            isFavorite={favorites.includes(service.id)}
             isExpanded={expandedId === service.id}
             onNavigate={() => navigate(`/services/${service.id}`)}
             onToggleFavorite={(e) => toggleFavorite(e, service.id)}

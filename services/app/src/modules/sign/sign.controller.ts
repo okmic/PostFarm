@@ -19,7 +19,6 @@ class SignController {
 
       const user = await User.findOne({ email })
       if (!user) throw new ErrorNotAuth("Пользователь не найден")
-      //проверка на совподения пароля
 
       const access = appInstance.getInstance().jwt.sign({ id: String(user._id), role: user.role, rate: "0" }, { expiresIn: "15d" })
       const refresh = appInstance.getInstance().jwt.sign({ id: String(user._id), role: user.role, rate: "0" }, { expiresIn: "30d" })

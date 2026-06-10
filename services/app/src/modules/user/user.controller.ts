@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from "fastify";
 import { successResponse } from "../../pkg/request/response.handler";
 import { ErrorNotAuth } from "../../pkg/errors/errors";
-import { User } from "../../models/User.model";
+import { IUser, User } from "../../models/User.model";
 import { getFullRootUser, isRootUser } from "../../pkg/config/sign/sign.util";
 import appconfig from "../../pkg/config/appconfig";
 import userService from "./user.service";
@@ -21,15 +21,14 @@ class UserController {
         return successResponse("success", { user }, reply)
     }
 
-    async updateUser(req: FastifyRequest<{ Body: { name: string, psw: string } }>, reply: FastifyReply): Promise<void> {
+    async updateUser(req: FastifyRequest<{ Body: { name: string, psw: string, featuredServices?: IUser["featuredServices"] } }>, reply: FastifyReply): Promise<void> {
         const reqUserId = (req?.user as any)?.id
-        console.log(req.body, "--------------------------------------", reqUserId)
-        const { name, psw } = req.body
+        const { name, psw, featuredServices } = req.body
         if (!reqUserId) {
             throw new ErrorNotAuth()
         }
 
-        const result = await userService.updateUser({ id: reqUserId, name, psw })
+        const result = await userService.updateUser({ id: reqUserId, name, psw, featuredServices })
 
         return successResponse("success", { result }, reply)
     }

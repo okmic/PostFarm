@@ -1,38 +1,42 @@
 import { useState } from 'react'
 import { FiZap, FiCopy, FiRefreshCw, FiThumbsUp, FiBookOpen, FiLayers, FiCloudLightning, FiCheckCircle, FiInfo, FiStar, FiArrowRight, FiClock, FiSend, FiUsers, FiTarget, FiPenTool } from 'react-icons/fi'
+import type { EducationContentEnum, EducationLevelEnum } from '../../../../../../pkg/types/ai.text.types'
+import apiAiService from '../../../pkg/api/api.ai.service'
+import { SimpleLogoLoading } from '../../../components/Logo/LogoLoading'
 
 const EducationPostsService = () => {
   const [topic, setTopic] = useState('')
-  const [audience, setAudience] = useState('beginners')
-  const [generatedContent, setGeneratedContent] = useState<{title: string, content: string, audienceNote: string, formatNote: string} | null>(null)
+  const [audience, setAudience] = useState<EducationLevelEnum>('BEGINNER')
+  const [generatedContent, setGeneratedContent] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
-  const [activeTab, setActiveTab] = useState('guide')
+  const [activeTab, setActiveTab] = useState<EducationContentEnum>('GUIDE')
   const [currentStep, setCurrentStep] = useState(1)
+  const [error, setError] = useState<string | null>(null)
 
   const tabs = [
     { 
-      id: 'guide', 
+      id: 'GUIDE' as EducationContentEnum, 
       label: 'Мини-гайд', 
       icon: <FiBookOpen className="text-sm" />,
       description: 'Пошаговая инструкция',
       example: 'Как настроить AI-бота → 5 шагов'
     },
     { 
-      id: 'explain', 
+      id: 'EXPLAIN' as EducationContentEnum, 
       label: 'Объяснение', 
       icon: <FiCloudLightning className="text-sm" />,
       description: 'Сложное простыми словами',
       example: 'Что такое нейросети → на примере пиццы'
     },
     { 
-      id: 'facts', 
+      id: 'FACTS' as EducationContentEnum, 
       label: 'Факты', 
       icon: <FiStar className="text-sm" />,
       description: 'Познавательные заметки',
       example: '5 фактов об AI, которые удивят'
     },
     { 
-      id: 'lessons', 
+      id: 'COURSE' as EducationContentEnum, 
       label: 'Серия уроков', 
       icon: <FiLayers className="text-sm" />,
       description: 'Курс из связанных постов',
@@ -41,9 +45,9 @@ const EducationPostsService = () => {
   ]
 
   const audiences = [
-    { id: 'beginners', label: 'Новичкам', icon: <FiUsers className="text-sm" />, description: 'Объясняю с нуля, без терминов' },
-    { id: 'intermediate', label: 'Продвинутым', icon: <FiTarget className="text-sm" />, description: 'Детали, нюансы, лучшие практики' },
-    { id: 'experts', label: 'Экспертам', icon: <FiZap className="text-sm" />, description: 'Глубокий анализ, инсайты' },
+    { id: 'BEGINNER' as EducationLevelEnum, label: 'Новичкам', icon: <FiUsers className="text-sm" />, description: 'Объясняю с нуля, без терминов' },
+    { id: 'ADVANCED' as EducationLevelEnum, label: 'Продвинутым', icon: <FiTarget className="text-sm" />, description: 'Детали, нюансы, лучшие практики' },
+    { id: 'EXPERT' as EducationLevelEnum, label: 'Экспертам', icon: <FiZap className="text-sm" />, description: 'Глубокий анализ, инсайты' },
   ]
 
   const steps = [
@@ -53,46 +57,41 @@ const EducationPostsService = () => {
   ]
 
   const handleGenerate = async () => {
-    if (!topic.trim()) return
-    setIsGenerating(true)
-    setCurrentStep(2)
-    await new Promise(resolve => setTimeout(resolve, 2500))
-
-    const contentByTab = {
-      guide: {
-        title: '🚀 Как создать первый AI-пост за 5 минут',
-        content: 'Шаг 1: Откройте генератор и введите тему\nШаг 2: Выберите тон — дружелюбный для Telegram\nШаг 3: Нажмите «Сгенерировать» и получите 3 варианта\nШаг 4: Выберите лучший и добавьте личный опыт\nШаг 5: Опубликуйте и смотрите на реакции\n\nБонус: сохраните удачные промты — они сэкономят время в будущем.\n\nРезультат: вы тратите 10 минут в день вместо часа.',
-        audienceNote: 'Уровень: для новичков. Каждый шаг объяснён без терминов, добавлены временные ориентиры.',
-        formatNote: 'Формат: пошаговая инструкция 5+1. Структура: шаги → бонус → результат.'
-      },
-      explain: {
-        title: '🧠 Что такое нейросеть? Объясняю на пицце',
-        content: 'Представьте пиццерию. Вы заказываете пиццу, и с каждым разом повар запоминает ваши предпочтения: больше сыра, меньше оливок, тонкое тесто.\n\nНейросеть работает так же: она «пробует» миллионы примеров и запоминает, что работает лучше. Только вместо пиццы — текст, картинки или музыка.\n\nКлючевой ингредиент — данные. Чем больше примеров «съест» нейросеть, тем точнее результат.\n\nЗапомните: нейросеть — это не магия, а статистика на стероидах. Она не думает, она считает вероятности.',
-        audienceNote: 'Уровень: для новичков. Использована бытовая аналогия, избегаются технические термины.',
-        formatNote: 'Формат: объяснение через метафору. Структура: аналогия → принцип работы → простой вывод.'
-      },
-      facts: {
-        title: '🔥 5 фактов об AI, которые изменят ваш взгляд',
-        content: '1. ChatGPT набрал 1 млн пользователей за 5 дней. Instagram — за 2.5 месяца.\n\n2. 60% пользователей не могут отличить текст AI от человеческого.\n\n3. AI экономит создателям контента в среднем 6 часов в неделю.\n\n4. К 2027 году 90% онлайн-контента будет создано с помощью AI.\n\n5. Telegram-каналы, использующие AI, растут на 40% быстрее.\n\nВывод: AI — не будущее, а настоящее. Те, кто начнёт использовать его сегодня, получат преимущество завтра.',
-        audienceNote: 'Уровень: универсальный. Факты подобраны так, чтобы удивить и новичков, и экспертов.',
-        formatNote: 'Формат: список фактов с выводом. Структура: шокирующие цифры → обобщение → призыв к действию.'
-      },
-      lessons: {
-        title: '📖 Урок 1/5: Что такое AI и зачем он вам',
-        content: 'AI — это не робот из фильма, а инструмент. Как калькулятор, который считает не цифры, а слова.\n\nЗачем вам AI:\n• Экономия времени: AI пишет черновик за 30 секунд\n• Генерация идей: 10 тем для постов за минуту\n• Улучшение текста: AI проверяет ошибки и стиль\n• Анализ аудитории: AI подскажет, что интересно читателям\n\nДомашнее задание: попробуйте сгенерировать один пост через AI. Сравните со своим обычным текстом. Результат вас удивит.\n\nВ следующем уроке: как правильно общаться с AI, чтобы получать идеальные результаты.',
-        audienceNote: 'Уровень: для новичков. Урок мотивационный, с акцентом на практическую пользу.',
-        formatNote: 'Формат: урок с домашним заданием. Структура: теория → примеры → задание → анонс следующего урока.'
-      }
+    if (!topic.trim()) {
+      setError('Пожалуйста, введите тему')
+      return
     }
 
-    setGeneratedContent(contentByTab[activeTab as keyof typeof contentByTab] || contentByTab.guide)
-    setIsGenerating(false)
-    setCurrentStep(3)
+    setIsGenerating(true)
+    setError(null)
+    setCurrentStep(2)
+    setGeneratedContent(null)
+
+    try {
+      const response = await apiAiService.educationPost({ 
+        topic: topic.trim(), 
+        type: activeTab, 
+        level: audience 
+      })
+
+      if (response?.trim()) {
+        setGeneratedContent(response)
+        setCurrentStep(3)
+      } else {
+        throw new Error('Не удалось получить результат')
+      }
+    } catch (err) {
+      console.error('API Error:', err)
+      setError(err instanceof Error ? err.message : 'Ошибка при генерации. Попробуйте позже.')
+      setCurrentStep(1)
+    } finally {
+      setIsGenerating(false)
+    }
   }
 
   const handleCopy = () => {
     if (!generatedContent) return
-    navigator.clipboard.writeText(`${generatedContent.title}\n\n${generatedContent.content}`)
+    navigator.clipboard.writeText(generatedContent)
   }
 
   const handleRegenerate = () => {
@@ -114,7 +113,6 @@ const EducationPostsService = () => {
           </h1>
         </div>
 
-        {/* Steps indicator */}
         <div className="flex items-center gap-2 sm:gap-4 mb-6 sm:mb-8">
           {steps.map((step, index) => (
             <div key={step.number} className="flex items-center gap-2 sm:gap-4">
@@ -150,7 +148,13 @@ const EducationPostsService = () => {
           ))}
         </div>
 
-        {/* Tabs with descriptions */}
+        {error && (
+          <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-xl text-red-200 text-sm flex items-center gap-2">
+            <FiInfo className="text-red-400" />
+            <span>{error}</span>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6 sm:mb-8">
           {tabs.map((tab) => (
             <button
@@ -159,6 +163,7 @@ const EducationPostsService = () => {
                 setActiveTab(tab.id)
                 setGeneratedContent(null)
                 setCurrentStep(1)
+                setError(null)
               }}
               className={`text-left p-4 rounded-xl transition-all duration-150 cursor-pointer ${
                 activeTab === tab.id
@@ -186,13 +191,8 @@ const EducationPostsService = () => {
           ))}
         </div>
 
-        {/* Main content */}
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
-          
-          {/* Left column - Input */}
           <div className="lg:col-span-2 space-y-5">
-            
-            {/* How it works info */}
             <div className="bg-white/5 border border-white/10 rounded-xl p-4 sm:p-5 backdrop-blur-sm">
               <div className="flex items-start gap-3">
                 <div className="w-8 h-8 rounded-lg bg-[#8B5CF6]/20 flex items-center justify-center flex-shrink-0">
@@ -203,16 +203,15 @@ const EducationPostsService = () => {
                     Как это работает
                   </h3>
                   <p className="text-white/50 text-xs leading-relaxed">
-                    {activeTab === 'guide' && 'Введите тему, и AI создаст пошаговую инструкцию с чёткими этапами. Каждый шаг объяснён простым языком. Идеально для обучения подписчиков новым навыкам.'}
-                    {activeTab === 'explain' && 'Назовите сложную тему, и AI объяснит её на простых аналогиях. Без терминов, с примерами из жизни. Ваши читатели скажут «А, вот оно что!»'}
-                    {activeTab === 'facts' && 'Укажите тему, и AI соберёт удивительные факты с цифрами и статистикой. Познавательный контент, которым хочется поделиться.'}
-                    {activeTab === 'lessons' && 'Задайте тему курса, и AI создаст урок с домашним заданием. С прогрессией сложности и удержанием внимания.'}
+                    {activeTab === 'GUIDE' && 'Введите тему, и AI создаст пошаговую инструкцию с чёткими этапами. Каждый шаг объяснён простым языком. Идеально для обучения подписчиков новым навыкам.'}
+                    {activeTab === 'EXPLAIN' && 'Назовите сложную тему, и AI объяснит её на простых аналогиях. Без терминов, с примерами из жизни. Ваши читатели скажут «А, вот оно что!»'}
+                    {activeTab === 'FACTS' && 'Укажите тему, и AI соберёт удивительные факты с цифрами и статистикой. Познавательный контент, которым хочется поделиться.'}
+                    {activeTab === 'COURSE' && 'Задайте тему курса, и AI создаст урок с домашним заданием. С прогрессией сложности и удержанием внимания.'}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Audience selector */}
             <div>
               <label className="block text-sm font-medium text-white/60 mb-3 tracking-[0.05em] uppercase">
                 Для кого объясняем
@@ -251,7 +250,6 @@ const EducationPostsService = () => {
               </div>
             </div>
 
-            {/* Topic input */}
             <div>
               <label className="block text-sm font-medium text-white/60 mb-2 tracking-[0.05em] uppercase">
                 О чём рассказать
@@ -260,16 +258,16 @@ const EducationPostsService = () => {
                 value={topic}
                 onChange={(e) => setTopic(e.target.value)}
                 placeholder={
-                  activeTab === 'guide' ? 'Например: Как настроить автопостинг в Telegram за 5 шагов' :
-                  activeTab === 'explain' ? 'Например: Что такое блокчейн и как он работает' :
-                  activeTab === 'facts' ? 'Например: Интересные факты об истории Telegram' :
+                  activeTab === 'GUIDE' ? 'Например: Как настроить автопостинг в Telegram за 5 шагов' :
+                  activeTab === 'EXPLAIN' ? 'Например: Что такое блокчейн и как он работает' :
+                  activeTab === 'FACTS' ? 'Например: Интересные факты об истории Telegram' :
                   'Например: Основы контент-маркетинга для новичков'
                 }
                 className="w-full h-36 bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 resize-none focus:outline-none focus:border-[#8B5CF6] focus:shadow-[0_0_12px_rgba(139,92,246,0.15)] transition-all duration-150"
+                disabled={isGenerating}
               />
             </div>
 
-            {/* Generate button */}
             <button
               onClick={handleGenerate}
               disabled={!topic.trim() || isGenerating}
@@ -294,7 +292,6 @@ const EducationPostsService = () => {
             </button>
           </div>
 
-          {/* Right column - Result */}
           <div className="lg:col-span-3">
             <div className="flex items-center justify-between mb-3">
               <label className="text-sm font-medium text-white/60 tracking-[0.05em] uppercase flex items-center gap-2">
@@ -322,52 +319,39 @@ const EducationPostsService = () => {
               )}
             </div>
 
-            {generatedContent ? (
+            {isGenerating ? (
+              <div className="bg-white/5 border border-white/10 rounded-xl p-8 sm:p-12 backdrop-blur-sm flex flex-col items-center justify-center text-center min-h-[500px]">
+                <SimpleLogoLoading />
+                <div className="mt-8 flex items-center gap-4 text-white/15 text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <FiPenTool className="text-sm" />
+                    <span>Анализ темы</span>
+                  </div>
+                  <div className="w-1 h-1 bg-white/20 rounded-full" />
+                  <div className="flex items-center gap-1.5">
+                    <FiBookOpen className="text-sm" />
+                    <span>Подбор структуры</span>
+                  </div>
+                  <div className="w-1 h-1 bg-white/20 rounded-full" />
+                  <div className="flex items-center gap-1.5">
+                    <FiSend className="text-sm" />
+                    <span>Генерация поста</span>
+                  </div>
+                </div>
+              </div>
+            ) : generatedContent ? (
               <div className="space-y-4">
-                <div className="bg-white/5 border border-white/10 rounded-xl p-5 sm:p-6 backdrop-blur-sm">
+                <div className="bg-white/5 border border-white/10 rounded-xl p-6 sm:p-8 backdrop-blur-sm">
                   <div className="flex items-start gap-4">
                     <div className="w-10 h-10 rounded-xl bg-[#8B5CF6]/20 flex items-center justify-center flex-shrink-0">
                       <FiSend className="text-[#8B5CF6] text-lg" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-bold text-white mb-3 leading-relaxed">
-                        {generatedContent.title}
-                      </h3>
-                      <div className="text-white/70 text-sm leading-relaxed whitespace-pre-wrap">
-                        {generatedContent.content}
-                      </div>
+                    <div className="text-white/80 text-sm leading-relaxed whitespace-pre-wrap">
+                      {generatedContent}
                     </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="bg-[#8B5CF6]/5 border border-[#8B5CF6]/20 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <FiUsers className="text-[#8B5CF6] text-sm" />
-                      <h4 className="text-xs font-semibold text-[#8B5CF6] uppercase tracking-[0.05em]">
-                        Аудитория
-                      </h4>
-                    </div>
-                    <p className="text-white/50 text-xs leading-relaxed">
-                      {generatedContent.audienceNote}
-                    </p>
-                  </div>
-
-                  {/* Format note */}
-                  <div className="bg-[#4CAF50]/5 border border-[#4CAF50]/20 rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                      <FiPenTool className="text-[#4CAF50] text-sm" />
-                      <h4 className="text-xs font-semibold text-[#4CAF50] uppercase tracking-[0.05em]">
-                        Формат
-                      </h4>
-                    </div>
-                    <p className="text-white/50 text-xs leading-relaxed">
-                      {generatedContent.formatNote}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Bottom insight */}
                 <div className="bg-gradient-to-r from-[#8B5CF6]/10 to-[#4CAF50]/10 border border-[#8B5CF6]/20 rounded-xl p-4 sm:p-5 backdrop-blur-sm">
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#8B5CF6] to-[#4CAF50] flex items-center justify-center flex-shrink-0">
@@ -378,16 +362,12 @@ const EducationPostsService = () => {
                         Совет по использованию
                       </h3>
                       <p className="text-white/70 text-xs leading-relaxed">
-                        {activeTab === 'guide' && 'Хороший гайд — это путь от проблемы к решению. Добавьте личный пример или скриншот к каждому шагу. Визуализация повышает понятность на 60%.'}
-                        {activeTab === 'explain' && 'Лучшее объяснение — мост между неизвестным и знакомым. Если ваша бабушка поймёт — вы написали идеальный пост. Проверьте на друге не из индустрии.'}
-                        {activeTab === 'facts' && 'Факты работают, когда они удивляют. Но одних фактов мало — добавьте вывод. Что читатель должен сделать с этой информацией? Ответьте в последнем абзаце.'}
-                        {activeTab === 'lessons' && 'Серия уроков держит внимание неделями. Анонсируйте следующий урок в конце текущего. И обязательно напоминайте о прошлом — это создаёт связность.'}
+                        Добавьте личный пример из практики — это повысит доверие. Один реальный кейс стоит десяти общих советов.
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Feedback */}
                 <div className="flex items-center justify-between pt-2">
                   <div className="flex items-center gap-3">
                     <span className="text-xs text-white/40">Оценить:</span>
@@ -403,22 +383,18 @@ const EducationPostsService = () => {
                 </div>
               </div>
             ) : (
-              /* Empty state */
               <div className="bg-white/5 border border-white/10 rounded-xl p-8 sm:p-12 backdrop-blur-sm flex flex-col items-center justify-center text-center min-h-[500px]">
                 <div className="w-16 h-16 rounded-2xl bg-[#8B5CF6]/10 flex items-center justify-center mb-5">
-                  {activeTab === 'guide' && <FiBookOpen className="text-[#8B5CF6] text-2xl" />}
-                  {activeTab === 'explain' && <FiCloudLightning className="text-[#8B5CF6] text-2xl" />}
-                  {activeTab === 'facts' && <FiStar className="text-[#8B5CF6] text-2xl" />}
-                  {activeTab === 'lessons' && <FiLayers className="text-[#8B5CF6] text-2xl" />}
+                  {activeTab === 'GUIDE' && <FiBookOpen className="text-[#8B5CF6] text-2xl" />}
+                  {activeTab === 'EXPLAIN' && <FiCloudLightning className="text-[#8B5CF6] text-2xl" />}
+                  {activeTab === 'FACTS' && <FiStar className="text-[#8B5CF6] text-2xl" />}
+                  {activeTab === 'COURSE' && <FiLayers className="text-[#8B5CF6] text-2xl" />}
                 </div>
                 <h3 className="text-white/80 font-semibold mb-2">
                   Готово к созданию
                 </h3>
                 <p className="text-white/30 text-sm max-w-sm mb-6">
-                  {activeTab === 'guide' && 'Введите тему, и AI создаст пошаговую инструкцию. С чёткими этапами и понятными объяснениями.'}
-                  {activeTab === 'explain' && 'Назовите сложную тему, и AI объяснит её на простых аналогиях. Без терминов, с примерами из жизни.'}
-                  {activeTab === 'facts' && 'Укажите тему, и AI соберёт удивительные факты. Контент, которым хочется поделиться.'}
-                  {activeTab === 'lessons' && 'Задайте тему курса, и AI создаст урок с домашним заданием. С прогрессией и удержанием внимания.'}
+                  Введите тему, и AI создаст пост с учётом выбранного формата и уровня аудитории.
                 </p>
                 <div className="flex items-center gap-4 text-white/15 text-xs">
                   <div className="flex items-center gap-1.5">

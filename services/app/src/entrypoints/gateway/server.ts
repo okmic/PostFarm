@@ -4,7 +4,6 @@ import cors from '@fastify/cors'
 import config from "../../pkg/config/appconfig"
 import fastifyJwt from '@fastify/jwt'
 import fastifyStatic from "@fastify/static"
-import httpProxy from "@fastify/http-proxy"
 import cookie from "@fastify/cookie"
 import errorHandlerPlugin from "../../pkg/plugins/global.errors.plugin"
 import SignModule from "../../modules/sign/sign.module"
@@ -15,11 +14,11 @@ import { setupGlobalErrorHandlers } from "../../pkg/errors/error-handler"
 import { initializeDatabase } from "../../pkg/db/db.init"
 import appInstance from "../../pkg/appInstance/appInstance"
 import UserModule from "../../modules/user/user.module"
+import GatewayModule from "../../modules/gateway/gateway.module"
 
 (async () => {
   const server = fastify({ logger: true })
 
-  // 1. Базовые плагины
   await server.register(formBody)
   await server.register(cookie)
   await server.register(fastifyJwt, {
@@ -45,50 +44,8 @@ import UserModule from "../../modules/user/user.module"
 
   server.get('/api', async (_, reply) => reply.send({ msg: "pong" }))
   new SignModule(server)
-
   server.register(usersAuthPlugin)
-  new UserModule(server)
-
-  await server.register(httpProxy, {
-    upstream: appconfig.services.ai.text.uri,
-    prefix: '/api/ai/text/post-chronicle',
-    rewritePrefix: '/api/ai/text/post-chronicle',
-    replyOptions: {
-      rewriteRequestHeaders: (_originalReq, headers) => {
-        return {
-          ...headers,
-          authorization: server.jwt.sign({ id: "root", role: "root", rate: "4" }),
-        }
-      }
-    }
-  })
-  await server.register(httpProxy, {
-    upstream: appconfig.services.ai.text.uri,
-    prefix: '/api/ai/text/channel-content',
-    rewritePrefix: '/api/ai/text/channel-content',
-    replyOptions: {
-      rewriteRequestHeaders: (_originalReq, headers) => {
-        return {
-          ...headers,
-          authorization: server.jwt.sign({ id: "root", role: "root", rate: "4" }),
-        }
-      }
-    }
-  })
-
-  await server.register(httpProxy, {
-    upstream: appconfig.services.ai.text.uri,
-    prefix: '/api/ai/text/viral-headlines',
-    rewritePrefix: '/api/ai/text/viral-headlines',
-    replyOptions: {
-      rewriteRequestHeaders: (_originalReq, headers) => {
-        return {
-          ...headers,
-          authorization: server.jwt.sign({ id: "root", role: "root", rate: "4" }),
-        }
-      }
-    }
-  })
+  new GatewayModule(server)
 
   try {
     await cheackOrCreateInitFoldersAndFiles()
