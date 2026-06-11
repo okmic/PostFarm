@@ -1,5 +1,4 @@
-export type PostChronicleTypeEnum = "CONTINUATION" | "NEW_CHAPTER" | "SPIN_OFF"
-
+export type PostChronicleTypeEnum = "CONTINUATION" | "NEW_CHAPTER" | "SPIN_OFF" | "THE_END"
 export type PostChannelContentTypeEnum = "POST" | "IDEA" | "POLL" | "SERIES"
 export type PostChannelContentToneEnum = "FRIENDLY" | "EXPERT" | "СASUAL" | "HUMOROUS"
 export type HeadlineContentEnum = 'HEADLINES' | 'HOOKS' | 'CTA' | 'VIRAL'

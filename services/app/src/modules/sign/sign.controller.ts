@@ -4,7 +4,6 @@ import { errorResponse } from '../../pkg/request/response.handler'
 import signService from './sign.service'
 import { ErrorBadRequest, ErrorNotAuth } from '../../pkg/errors/errors'
 import appInstance from '../../pkg/appInstance/appInstance'
-import appconfig from '../../pkg/config/appconfig'
 import { isRootUser, signRootUser } from '../../pkg/config/sign/sign.util'
 
 class SignController {

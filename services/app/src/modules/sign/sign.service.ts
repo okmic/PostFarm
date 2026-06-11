@@ -2,7 +2,6 @@ import { IUser, User } from "../../models/User.model"
 import bcrypt from "bcrypt"
 import { ErrorForbidden } from "../../pkg/errors/errors"
 
-
 class SignService {
 
   public async signup({ name, email, psw }: { name: string, email: string, psw: string }): Promise<IUser> {

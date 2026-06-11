@@ -4,6 +4,7 @@ import { FaHistory } from 'react-icons/fa'
 import apiAiService from '../../../pkg/api/api.ai.service'
 import type { PostChronicleTypeEnum } from '../../../../../../pkg/types/ai.text.types'
 import { SimpleLogoLoading } from '../../../components/Logo/LogoLoading'
+import { MdStopScreenShare } from 'react-icons/md'
 
 type Tab = {
   id: string
@@ -29,30 +30,38 @@ const PostChronicleService = () => {
   const [error, setError] = useState<string | null>(null)
 
   const tabs: Tab[] = [
-    { 
-      id: 'continue', 
-      label: 'Продолжение', 
+    {
+      id: 'continue',
+      label: 'Продолжение',
       icon: <FiArrowRight className="text-sm" />,
       description: 'Логичное продолжение истории',
       example: 'Часть 3 → Часть 4 в том же стиле',
       apiType: 'CONTINUATION'
     },
-    { 
-      id: 'new-chapter', 
-      label: 'Новая глава', 
+    {
+      id: 'new-chapter',
+      label: 'Новая глава',
       icon: <FiPlus className="text-sm" />,
       description: 'Новый поворот сюжета',
       example: 'Текущая линия → неожиданный поворот',
       apiType: 'NEW_CHAPTER'
     },
-    { 
-      id: 'spin-off', 
-      label: 'Спин-офф', 
+    {
+      id: 'spin-off',
+      label: 'Спин-офф',
       icon: <FiFileText className="text-sm" />,
       description: 'Ответвление от темы',
       example: 'Основная тема → смежная история',
       apiType: 'SPINOFF'
     },
+    {
+      id: 'the-end',
+      label: 'Финал',
+      icon: <MdStopScreenShare className="text-sm" />,
+      description: 'Конец истории',
+      example: 'Закончить серию постов. Придумать концовку',
+      apiType: 'THE_END'
+    }
   ]
 
   const steps: Step[] = [
@@ -76,9 +85,9 @@ const PostChronicleService = () => {
       const currentTab = tabs.find(tab => tab.id === activeTab)
       const apiType = currentTab?.apiType || 'CONTINUATION'
 
-      const response = await apiAiService.postChronicle({ 
-        type: apiType as PostChronicleTypeEnum, 
-        text: historyPosts.trim() 
+      const response = await apiAiService.postChronicle({
+        type: apiType as PostChronicleTypeEnum,
+        text: historyPosts.trim()
       })
 
       if (response && typeof response === 'string' && response.trim()) {
@@ -116,26 +125,26 @@ const PostChronicleService = () => {
           setCurrentStep(1)
           setError(null)
         }} />
-        
+
         {error && <ErrorMessage error={error} />}
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
           <div className="lg:col-span-2 space-y-5">
             <HowItWorks activeTab={activeTab} />
-            <HistoryInput 
-              value={historyPosts} 
-              onChange={setHistoryPosts} 
-              isGenerating={isGenerating} 
+            <HistoryInput
+              value={historyPosts}
+              onChange={setHistoryPosts}
+              isGenerating={isGenerating}
             />
-            <GenerateButton 
-              isGenerating={isGenerating} 
-              disabled={!historyPosts.trim()} 
-              onClick={handleGenerate} 
+            <GenerateButton
+              isGenerating={isGenerating}
+              disabled={!historyPosts.trim()}
+              onClick={handleGenerate}
             />
           </div>
-          
+
           <div className="lg:col-span-3">
-            <ResultSection 
+            <ResultSection
               isGenerating={isGenerating}
               generatedContent={generatedContent}
               activeTab={activeTab}
@@ -164,33 +173,28 @@ const StepsIndicator = ({ steps, currentStep }: { steps: Step[], currentStep: nu
     <div className="flex items-center gap-2 sm:gap-4 mb-6 sm:mb-8">
       {steps.map((step, index) => (
         <div key={step.number} className="flex items-center gap-2 sm:gap-4">
-          <div className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl transition-all duration-300 ${
-            currentStep >= step.number 
-              ? 'bg-[#FFA726]/20 border border-[#FFA726]/30' 
+          <div className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl transition-all duration-300 ${currentStep >= step.number
+              ? 'bg-[#FFA726]/20 border border-[#FFA726]/30'
               : 'bg-white/5 border border-white/10'
-          }`}>
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-              currentStep >= step.number 
-                ? 'bg-[#FFA726] text-[#1E3A1E]' 
-                : 'bg-white/10 text-white/40'
             }`}>
+            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${currentStep >= step.number
+                ? 'bg-[#FFA726] text-[#1E3A1E]'
+                : 'bg-white/10 text-white/40'
+              }`}>
               {step.number}
             </span>
-            <span className={`text-sm font-medium hidden sm:block ${
-              currentStep >= step.number ? 'text-white' : 'text-white/40'
-            }`}>
+            <span className={`text-sm font-medium hidden sm:block ${currentStep >= step.number ? 'text-white' : 'text-white/40'
+              }`}>
               {step.label}
             </span>
-            <span className={`sm:hidden ${
-              currentStep >= step.number ? 'text-[#FFA726]' : 'text-white/40'
-            }`}>
+            <span className={`sm:hidden ${currentStep >= step.number ? 'text-[#FFA726]' : 'text-white/40'
+              }`}>
               {step.icon}
             </span>
           </div>
           {index < steps.length - 1 && (
-            <FiArrowRight className={`text-sm flex-shrink-0 ${
-              currentStep > step.number ? 'text-[#FFA726]' : 'text-white/20'
-            }`} />
+            <FiArrowRight className={`text-sm flex-shrink-0 ${currentStep > step.number ? 'text-[#FFA726]' : 'text-white/20'
+              }`} />
           )}
         </div>
       ))}
@@ -198,30 +202,28 @@ const StepsIndicator = ({ steps, currentStep }: { steps: Step[], currentStep: nu
   )
 }
 
-const Tabs = ({ tabs, activeTab, onTabChange }: { 
-  tabs: Tab[], 
-  activeTab: string, 
-  onTabChange: (id: string) => void 
+const Tabs = ({ tabs, activeTab, onTabChange }: {
+  tabs: Tab[],
+  activeTab: string,
+  onTabChange: (id: string) => void
 }) => {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 sm:mb-8">
+    <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-6 sm:mb-8">
       {tabs.map((tab) => (
         <button
           key={tab.id}
           onClick={() => onTabChange(tab.id)}
-          className={`text-left p-4 rounded-xl transition-all duration-150 group ${
-            activeTab === tab.id
+          className={`text-left p-4 rounded-xl transition-all duration-150 group ${activeTab === tab.id
               ? 'bg-[#FFA726]/20 border border-[#FFA726]/30 shadow-[0_0_12px_rgba(255,167,38,0.15)]'
               : 'bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/8'
-          }`}
+            }`}
         >
           <div className="flex items-center gap-2 mb-2">
             <span className={activeTab === tab.id ? 'text-[#FFA726]' : 'text-white/60'}>
               {tab.icon}
             </span>
-            <span className={`text-sm font-semibold ${
-              activeTab === tab.id ? 'text-white' : 'text-white/80'
-            }`}>
+            <span className={`text-sm font-semibold ${activeTab === tab.id ? 'text-white' : 'text-white/80'
+              }`}>
               {tab.label}
             </span>
           </div>
@@ -250,13 +252,15 @@ const ErrorMessage = ({ error }: { error: string }) => {
 
 const HowItWorks = ({ activeTab }: { activeTab: string }) => {
   const getDescription = () => {
-    switch(activeTab) {
+    switch (activeTab) {
       case 'continue':
         return 'Скопируйте 2-5 своих предыдущих постов. AI проанализирует стиль, тон и логику повествования, затем создаст естественное продолжение.'
       case 'new-chapter':
         return 'Загрузите историю постов, и AI придумает неожиданный поворот. Сохранит ваш стиль, но добавит новый конфликт или развитие темы.'
       case 'spin-off':
         return 'AI возьмёт тему из ваших постов и создаст ответвление — смежную историю, которая расширит контент и привлечёт новую аудиторию.'
+      case 'the-end':
+        return 'Придумать конец серии постов, завершить этап, придумать концовку.'
       default:
         return 'Скопируйте 2-5 своих предыдущих постов для анализа стиля и генерации продолжения.'
     }
@@ -281,14 +285,14 @@ const HowItWorks = ({ activeTab }: { activeTab: string }) => {
   )
 }
 
-const HistoryInput = ({ 
-  value, 
-  onChange, 
-  isGenerating 
-}: { 
-  value: string, 
-  onChange: (value: string) => void, 
-  isGenerating: boolean 
+const HistoryInput = ({
+  value,
+  onChange,
+  isGenerating
+}: {
+  value: string,
+  onChange: (value: string) => void,
+  isGenerating: boolean
 }) => {
   return (
     <div>
@@ -310,14 +314,14 @@ const HistoryInput = ({
   )
 }
 
-const GenerateButton = ({ 
-  isGenerating, 
-  disabled, 
-  onClick 
-}: { 
-  isGenerating: boolean, 
-  disabled: boolean, 
-  onClick: () => void 
+const GenerateButton = ({
+  isGenerating,
+  disabled,
+  onClick
+}: {
+  isGenerating: boolean,
+  disabled: boolean,
+  onClick: () => void
 }) => {
   return (
     <button
@@ -345,18 +349,18 @@ const GenerateButton = ({
   )
 }
 
-const ResultSection = ({ 
-  isGenerating, 
-  generatedContent, 
-  activeTab, 
-  onCopy, 
-  onRegenerate 
-}: { 
-  isGenerating: boolean, 
-  generatedContent: string | null, 
-  activeTab: string, 
-  onCopy: () => void, 
-  onRegenerate: () => void 
+const ResultSection = ({
+  isGenerating,
+  generatedContent,
+  activeTab,
+  onCopy,
+  onRegenerate
+}: {
+  isGenerating: boolean,
+  generatedContent: string | null,
+  activeTab: string,
+  onCopy: () => void,
+  onRegenerate: () => void
 }) => {
   return (
     <>
@@ -425,7 +429,7 @@ const LoadingState = () => {
 
 const GeneratedResult = ({ content, activeTab }: { content: string, activeTab: string }) => {
   const getAdvice = () => {
-    switch(activeTab) {
+    switch (activeTab) {
       case 'continue':
         return 'Не публикуйте AI-продолжение как есть. Добавьте актуальные детали из вашей ниши и личный комментарий. AI сохраняет стиль, но только вы знаете, что происходит прямо сейчас.'
       case 'new-chapter':
@@ -487,7 +491,7 @@ const GeneratedResult = ({ content, activeTab }: { content: string, activeTab: s
 
 const EmptyState = ({ activeTab }: { activeTab: string }) => {
   const getMessage = () => {
-    switch(activeTab) {
+    switch (activeTab) {
       case 'continue':
         return 'Вставьте 2-5 своих прошлых постов, и AI напишет логичное продолжение. Сохранит ваш стиль и тон.'
       case 'new-chapter':
