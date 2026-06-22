@@ -1,8 +1,8 @@
 import { Document, Schema, model, Types, Model } from 'mongoose'
 import type { ServicesTypeEnum } from '../../../../pkg/types/ai.text.types'
 
-export interface IAITokens extends Document {
-  _id: Types.ObjectId
+export interface IAITokens {
+  _id: Types.ObjectId | string
   createdAt: Date
   usageTokens: number
   beforeText: string
@@ -14,7 +14,9 @@ export interface IAITokens extends Document {
   service: ServicesTypeEnum
 }
 
-const aiTokensSchema = new Schema<IAITokens>({
+export type AITokensDocumentType = IAITokens & Document
+
+const aiTokensSchema = new Schema<AITokensDocumentType>({
   usageTokens: { type: Number, required: true },
   beforeText: { type: String, required: true },
   afterText: { type: String, required: true },
@@ -26,6 +28,6 @@ const aiTokensSchema = new Schema<IAITokens>({
   createdAt: { type: Date, default: Date.now },
 })
 
-interface IAITokensModel extends Model<IAITokens> {}
+interface IAITokensModel extends Model<AITokensDocumentType> {}
 
-export const AITokens = model<IAITokens, IAITokensModel>('AITokens', aiTokensSchema)
+export const AITokens = model<AITokensDocumentType, IAITokensModel>('AITokens', aiTokensSchema)

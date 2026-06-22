@@ -12,8 +12,8 @@ export const isRootUser = (email: string, psw: string): boolean => {
 }
 
 export const signRootUser = (reply: FastifyReply) => {
-    const access = appInstance.getInstance().jwt.sign({ id: "admin", role: "admin", rate: "4" }, { expiresIn: "15d" })
-    const refresh = appInstance.getInstance().jwt.sign({ id: "admin", role: "admin", rate: "4" }, { expiresIn: "30d" })
+    const access = appInstance.getInstance().jwt.sign({ id: "admin", role: "admin", rate: 0 }, { expiresIn: "15d" })
+    const refresh = appInstance.getInstance().jwt.sign({ id: "admin", role: "admin", rate: 0 }, { expiresIn: "30d" })
 
     return reply
         .setCookie(
@@ -37,5 +37,5 @@ export const signRootUser = (reply: FastifyReply) => {
 
 export const getFullRootUser = (psw?: boolean): Partial<IUser> => {
     const { rootUser } = appconfig
-    return { _id: rootUser.id, email: rootUser.email, psw: psw ? rootUser.psw : "", role: "admin", rate: "4" }
+    return { _id: rootUser.id, email: rootUser.email, psw: psw ? rootUser.psw : "", role: "admin", rate: 0 }
 }

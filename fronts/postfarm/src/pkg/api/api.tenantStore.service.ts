@@ -1,10 +1,10 @@
 import axios, { type AxiosInstance, type AxiosResponse, type AxiosError } from 'axios'
 import appconfig from '../../appconfig'
-import store from '../../store/store'
+import store, { type RootState } from '../../store/store'
 import { logout } from '../../store/slices/auth.slice'
 import { getAuthHeader, handlerError } from './api.util'
 
-class ApiTaxonomyService {
+class ApiTenantStoreService {
   private axiosInstance: AxiosInstance
   constructor() {
     this.axiosInstance = axios.create({
@@ -15,6 +15,7 @@ class ApiTaxonomyService {
     })
     this.setupInterceptors()
   }
+  
   private setupInterceptors() {
     this.axiosInstance.interceptors.response.use(
       (response: AxiosResponse) => response,
@@ -29,14 +30,24 @@ class ApiTaxonomyService {
       }
     )
   }
-  public async find() {
+
+  public async getPosts(): Promise<RootState["tenantStore"]["posts"]> {
     return await this.axiosInstance.get(
-      `/api/v1/taxonomy`,
+      `/api/posts`,
       { headers: getAuthHeader() },
     )
-      .then(r => r.data.taxonomy)
+      .then(r => r.data.posts)
+      .catch(e => handlerError(e))
+  }
+
+  public async usageTokens(): Promise<RootState["tenantStore"]["usageTokens"]> {
+    return await this.axiosInstance.get(
+      `/api/ai/usage-tokens`,
+      { headers: getAuthHeader() },
+    )
+      .then(r => r.data.usageTokens)
       .catch(e => handlerError(e))
   }
 }
 
-export default new ApiTaxonomyService()
+export default new ApiTenantStoreService()

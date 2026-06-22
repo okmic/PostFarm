@@ -1,11 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit'
 import authReducer from './slices/auth.slice'
-import taxonomySlice from './slices/taxonomy.slice'
+import tenantStoreReducer from './slices/tenantStore.slice'
 
 const store = configureStore({
   reducer: {
     auth: authReducer,
-    taxonomy: taxonomySlice,
+    tenantStore: tenantStoreReducer,
   },
 })
 

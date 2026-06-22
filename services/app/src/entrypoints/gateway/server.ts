@@ -14,8 +14,6 @@ import { setupGlobalErrorHandlers } from "../../pkg/errors/error-handler"
 import appInstance from "../../pkg/appInstance/appInstance"
 import GatewayModule from "../../modules/gateway/gateway.module"
 import { initializeDatabase } from "../../pkg/db/db.init"
-import { AITokens } from "../../models/AITokens.model"
-import { Post } from "../../models/Post.model"
 
 (async () => {
   const server = fastify({ logger: true })
@@ -52,23 +50,6 @@ import { Post } from "../../models/Post.model"
     await cheackOrCreateInitFoldersAndFiles()
     await initializeDatabase()
     setupGlobalErrorHandlers()
-/*    await initializeDatabase()
-       await AITokens.create({
-          usageTokens: 32,
-          beforeText: "props.msg",
-          afterText: "result.text",
-          type: "text",
-          ai: "yandex",
-          userId: "props.userId",
-          postId: "post._id",
-          service: "props.service"
-        }) */
-
-          await Post.create({
-                content: "result.text",
-                isAI: true,
-                userId: "6a390f6b02fc2a14f9623b42",
-              })
     
     await server.listen({
       port: appconfig.services.gateway.PORT,

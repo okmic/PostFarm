@@ -7,6 +7,7 @@ import { SimpleLogoLoading } from '../../../components/Logo/LogoLoading'
 import { MdStopScreenShare } from 'react-icons/md'
 import { useSelector } from 'react-redux'
 import type { RootState } from '../../../store/store'
+import { useGetData } from '../../../hooks/useGetData'
 
 type Tab = {
   id: string
@@ -31,6 +32,7 @@ const PostChronicleService = () => {
   const [currentStep, setCurrentStep] = useState(1)
   const [error, setError] = useState<string | null>(null)
   const userId = useSelector((s: RootState) => s.auth.user!._id!)
+  const { refreshAll } = useGetData()
 
   const tabs: Tab[] = [
     {
@@ -97,6 +99,7 @@ const PostChronicleService = () => {
       if (response && typeof response === 'string' && response.trim()) {
         setGeneratedContent(response)
         setCurrentStep(3)
+        refreshAll()
       } else {
         throw new Error('Не удалось получить ответ от сервера')
       }

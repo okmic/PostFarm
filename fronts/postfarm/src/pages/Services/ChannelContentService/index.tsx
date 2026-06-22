@@ -5,6 +5,7 @@ import type { PostChannelContentTypeEnum, PostChannelContentToneEnum } from '../
 import { SimpleLogoLoading } from '../../../components/Logo/LogoLoading'
 import { useSelector } from 'react-redux'
 import type { RootState } from '../../../store/store'
+import { useGetData } from '../../../hooks/useGetData'
 
 type Tab = {
   id: string
@@ -45,6 +46,7 @@ const ChannelContentService = () => {
   const [tone, setTone] = useState('friendly')
   const [currentStep, setCurrentStep] = useState(1)
   const [error, setError] = useState<string | null>(null)
+  const { refreshAll } = useGetData()
 
   const tabs: Tab[] = [
     { 
@@ -127,6 +129,7 @@ const ChannelContentService = () => {
           structureNote: getStructureNoteByTab(activeTab)
         })
         setCurrentStep(3)
+        refreshAll()
       } else {
         throw new Error('Не удалось получить ответ от сервера')
       }

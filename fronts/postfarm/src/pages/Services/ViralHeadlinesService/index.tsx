@@ -5,6 +5,7 @@ import apiAiService from '../../../pkg/api/api.ai.service'
 import { SimpleLogoLoading } from '../../../components/Logo/LogoLoading'
 import { useSelector } from 'react-redux'
 import type { RootState } from '../../../store/store'
+import { useGetData } from '../../../hooks/useGetData'
 
 type Tab = {
   id: string
@@ -30,7 +31,8 @@ const ViralHeadlinesService = () => {
   const [currentStep, setCurrentStep] = useState(1)
   const [error, setError] = useState<string | null>(null)
   const userId = useSelector((s: RootState) => s.auth.user!._id!)
-
+  const { refreshAll } = useGetData()
+  
   const tabs: Tab[] = [
     { 
       id: 'headlines', 
@@ -101,6 +103,7 @@ const ViralHeadlinesService = () => {
       if (response && response && response.trim()) {
         setGeneratedContent(response)
         setCurrentStep(3)
+        refreshAll()
       } else {
         throw new Error('Не удалось получить результат')
       }

@@ -17,6 +17,7 @@ import ViralHeadlinesService from "./pages/Services/ViralHeadlinesService"
 import EducationPostsService from "./pages/Services/EducationPostsService"
 import PostChronicleService from "./pages/Services/PostChronicleService"
 import ChannelContentService from "./pages/Services/ChannelContentService"
+import StatsPage from "./pages/Stats"
 
 function MainApp() {
   const auth = useSelector((s: RootState) => s.auth)
@@ -71,6 +72,7 @@ function MainApp() {
               <Route path="/services/education-posts" element={<EducationPostsService />} />
               <Route path="/services/post-chronicle" element={<PostChronicleService />} />
               <Route path="/settings" element={<UserSettingsPage />} />
+              <Route path="/stats" element={<StatsPage />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           ) : (

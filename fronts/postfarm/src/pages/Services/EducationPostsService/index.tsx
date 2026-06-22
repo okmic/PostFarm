@@ -5,6 +5,7 @@ import apiAiService from '../../../pkg/api/api.ai.service'
 import { SimpleLogoLoading } from '../../../components/Logo/LogoLoading'
 import { useSelector } from 'react-redux'
 import type { RootState } from '../../../store/store'
+import { useGetData } from '../../../hooks/useGetData'
 
 const EducationPostsService = () => {
   const [topic, setTopic] = useState('')
@@ -15,6 +16,7 @@ const EducationPostsService = () => {
   const [currentStep, setCurrentStep] = useState(1)
   const [error, setError] = useState<string | null>(null)
   const userId = useSelector((s: RootState) => s.auth.user!._id!)
+  const { refreshAll } = useGetData()
 
   const tabs = [
     { 
@@ -81,6 +83,7 @@ const EducationPostsService = () => {
       if (response?.trim()) {
         setGeneratedContent(response)
         setCurrentStep(3)
+        refreshAll()
       } else {
         throw new Error('Не удалось получить результат')
       }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { 
   FaFire, 
   FaGraduationCap, 
@@ -28,6 +28,7 @@ import type { IconType } from 'react-icons'
 import type { ServicesIdsType } from '../../pkg/types/user'
 import type { RootState } from '../../store/store'
 import apiUserService from '../../pkg/api/api.user.service'
+import { updateStateUser } from '../../store/slices/auth.slice'
 
 type Service = {
   id: ServicesIdsType
@@ -148,7 +149,7 @@ const serviceIcons: Record<string, IconType> = {
 export default function ServicePage() {
   const navigate = useNavigate()
   const user = useSelector((state: RootState) => state.auth.user)
-  
+  const dispatch = useDispatch()
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [favorites, setFavorites] = useState<ServicesIdsType[]>(user?.featuredServices || [])
   const [isUpdating, setIsUpdating] = useState(false)
@@ -173,6 +174,7 @@ export default function ServicePage() {
 
     try {
       await apiUserService.updateUser({ featuredServices: updatedFavorites })
+      dispatch(updateStateUser({ user: { featuredServices: updatedFavorites }}))
     } catch (error) {
       setFavorites(favorites)
       console.error('Failed to update favorites:', error)
