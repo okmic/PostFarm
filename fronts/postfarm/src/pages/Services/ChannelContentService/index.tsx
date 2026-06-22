@@ -3,6 +3,8 @@ import { FiSend, FiZap, FiCopy, FiRefreshCw, FiThumbsUp, FiMessageSquare, FiLaye
 import apiAiService from '../../../pkg/api/api.ai.service'
 import type { PostChannelContentTypeEnum, PostChannelContentToneEnum } from '../../../../../../pkg/types/ai.text.types'
 import { SimpleLogoLoading } from '../../../components/Logo/LogoLoading'
+import { useSelector } from 'react-redux'
+import type { RootState } from '../../../store/store'
 
 type Tab = {
   id: string
@@ -36,6 +38,7 @@ type GeneratedContent = {
 
 const ChannelContentService = () => {
   const [prompt, setPrompt] = useState('')
+  const userId = useSelector((s: RootState) => s.auth.user!._id!)
   const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [activeTab, setActiveTab] = useState('post')
@@ -112,7 +115,8 @@ const ChannelContentService = () => {
       const response = await apiAiService.chanelContent({ 
         text: prompt.trim(),
         type: apiType,
-        tone: apiTone
+        tone: apiTone,
+        userId,
       })
 
       if (response && typeof response === 'string' && response.trim()) {

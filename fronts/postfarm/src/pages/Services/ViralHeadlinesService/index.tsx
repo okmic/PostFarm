@@ -3,6 +3,8 @@ import { FiZap, FiCopy, FiRefreshCw, FiThumbsUp, FiTarget, FiTrendingUp, FiVolum
 import type { HeadlineStyleEnum, HeadlineContentEnum } from '../../../../../../pkg/types/ai.text.types'
 import apiAiService from '../../../pkg/api/api.ai.service'
 import { SimpleLogoLoading } from '../../../components/Logo/LogoLoading'
+import { useSelector } from 'react-redux'
+import type { RootState } from '../../../store/store'
 
 type Tab = {
   id: string
@@ -27,6 +29,7 @@ const ViralHeadlinesService = () => {
   const [style, setStyle] = useState<HeadlineStyleEnum>('VIRAL')
   const [currentStep, setCurrentStep] = useState(1)
   const [error, setError] = useState<string | null>(null)
+  const userId = useSelector((s: RootState) => s.auth.user!._id!)
 
   const tabs: Tab[] = [
     { 
@@ -91,7 +94,8 @@ const ViralHeadlinesService = () => {
       const response = await apiAiService.viralHeadlines({ 
         topic: topic.trim(), 
         type: activeTab as HeadlineContentEnum, 
-        style: style 
+        style: style,
+        userId,
       })
 
       if (response && response && response.trim()) {

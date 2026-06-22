@@ -5,6 +5,7 @@ import { ErrorForbidden } from "../../pkg/errors/errors"
 class SignService {
 
   public async signup({ name, email, psw }: { name: string, email: string, psw: string }): Promise<IUser> {
+    try {
       const findUser = await User.findOne({ email })
       if(findUser) throw new ErrorForbidden("Пользователь уже существует")
 
@@ -15,6 +16,10 @@ class SignService {
       })
 
       return user
+    } catch (e) {
+      console.error(e)
+      throw e
+    }
   }
 }
 

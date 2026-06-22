@@ -5,6 +5,8 @@ import apiAiService from '../../../pkg/api/api.ai.service'
 import type { PostChronicleTypeEnum } from '../../../../../../pkg/types/ai.text.types'
 import { SimpleLogoLoading } from '../../../components/Logo/LogoLoading'
 import { MdStopScreenShare } from 'react-icons/md'
+import { useSelector } from 'react-redux'
+import type { RootState } from '../../../store/store'
 
 type Tab = {
   id: string
@@ -28,6 +30,7 @@ const PostChronicleService = () => {
   const [activeTab, setActiveTab] = useState('continue')
   const [currentStep, setCurrentStep] = useState(1)
   const [error, setError] = useState<string | null>(null)
+  const userId = useSelector((s: RootState) => s.auth.user!._id!)
 
   const tabs: Tab[] = [
     {
@@ -87,7 +90,8 @@ const PostChronicleService = () => {
 
       const response = await apiAiService.postChronicle({
         type: apiType as PostChronicleTypeEnum,
-        text: historyPosts.trim()
+        text: historyPosts.trim(),
+        userId,
       })
 
       if (response && typeof response === 'string' && response.trim()) {

@@ -2,6 +2,7 @@ import { Model, Schema, Types, model } from 'mongoose'
 
 export interface IUser {
   _id: Types.ObjectId | string
+  createdAt: Date
   name: string
   date: Date
   email: string
@@ -12,6 +13,7 @@ export interface IUser {
 }
 
 const userSchema = new Schema<IUser>({
+  createdAt: { type: Date, default: Date.now },
   name: { type: String, default: "Пользователь ПостФермы" },
   date: { type: Date, default: Date.now },
   email: { type: String, required: true, unique: true },

@@ -5,15 +5,13 @@
   "author": "okmic <okmic.g@gmail.com>",
   "license": "MIT",
   "scripts": {
+    "dev": "concurrently -n gateway,ai-text,postfarm,posthub -c green,yellow,cyan,magenta \"yarn gateway:server:dev\" \"yarn gpt:text:server:dev\" \"yarn front:postfarm:dev\" \"yarn front:posthub:dev\"",
+    "dev:services": "concurrently -n gateway,ai-text -c green,yellow \"yarn gateway:server:dev\" \"yarn gpt:text:server:dev\"",
+    "dev:fronts": "concurrently -n postfarm,posthub -c cyan,magenta \"yarn front:postfarm:dev\" \"yarn front:posthub:dev\"",
     "gateway:server:dev": "cd services/app && yarn gateway:server:dev",
     "gpt:text:server:dev": "cd services/app && yarn gpt:text:server:dev",
     "front:postfarm:dev": "cd fronts/postfarm && yarn dev",
-    "front:posthub:dev": "cd fronts/posthuv && yarn dev"
-  },
-  "dependencies": {
-    "@reduxjs/toolkit": "^2.8.2",
-    "mongoose": "^8.14.2",
-    "react-redux": "^9.2.0"
+    "front:posthub:dev": "cd fronts/posthub && yarn dev"
   },
   "devDependencies": {
     "concurrently": "^9.2.0"

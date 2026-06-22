@@ -3,6 +3,8 @@ import { FiZap, FiCopy, FiRefreshCw, FiThumbsUp, FiBookOpen, FiLayers, FiCloudLi
 import type { EducationContentEnum, EducationLevelEnum } from '../../../../../../pkg/types/ai.text.types'
 import apiAiService from '../../../pkg/api/api.ai.service'
 import { SimpleLogoLoading } from '../../../components/Logo/LogoLoading'
+import { useSelector } from 'react-redux'
+import type { RootState } from '../../../store/store'
 
 const EducationPostsService = () => {
   const [topic, setTopic] = useState('')
@@ -12,6 +14,7 @@ const EducationPostsService = () => {
   const [activeTab, setActiveTab] = useState<EducationContentEnum>('GUIDE')
   const [currentStep, setCurrentStep] = useState(1)
   const [error, setError] = useState<string | null>(null)
+  const userId = useSelector((s: RootState) => s.auth.user!._id!)
 
   const tabs = [
     { 
@@ -71,7 +74,8 @@ const EducationPostsService = () => {
       const response = await apiAiService.educationPost({ 
         topic: topic.trim(), 
         type: activeTab, 
-        level: audience 
+        level: audience,
+        userId,
       })
 
       if (response?.trim()) {

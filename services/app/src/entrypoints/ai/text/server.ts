@@ -8,6 +8,7 @@ import appconfig from "../../../pkg/config/appconfig"
 import { setupGlobalErrorHandlers } from "../../../pkg/errors/error-handler"
 import appJwtPlugin from "../../../pkg/plugins/app.auth.plugin"
 import AITextModule from "../../../modules/ai/text/ai.text.module"
+import { initializeDatabase } from "../../../pkg/db/db.init"
 
 (async () => {
   const server = fastify({ logger: true })
@@ -30,6 +31,8 @@ import AITextModule from "../../../modules/ai/text/ai.text.module"
 
   try {
     setupGlobalErrorHandlers()
+    await initializeDatabase()
+    
     await server.listen({
       port: appconfig.services.ai.text.PORT,
       host: '0.0.0.0'

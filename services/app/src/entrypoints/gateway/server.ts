@@ -11,10 +11,11 @@ import usersAuthPlugin from "../../pkg/plugins/users.auth.plugin"
 import appconfig from "../../pkg/config/appconfig"
 import { cheackOrCreateInitFoldersAndFiles, getPath } from "../../utils/paths.util"
 import { setupGlobalErrorHandlers } from "../../pkg/errors/error-handler"
-import { initializeDatabase } from "../../pkg/db/db.init"
 import appInstance from "../../pkg/appInstance/appInstance"
-import UserModule from "../../modules/user/user.module"
 import GatewayModule from "../../modules/gateway/gateway.module"
+import { initializeDatabase } from "../../pkg/db/db.init"
+import { AITokens } from "../../models/AITokens.model"
+import { Post } from "../../models/Post.model"
 
 (async () => {
   const server = fastify({ logger: true })
@@ -49,8 +50,26 @@ import GatewayModule from "../../modules/gateway/gateway.module"
 
   try {
     await cheackOrCreateInitFoldersAndFiles()
-    setupGlobalErrorHandlers()
     await initializeDatabase()
+    setupGlobalErrorHandlers()
+/*    await initializeDatabase()
+       await AITokens.create({
+          usageTokens: 32,
+          beforeText: "props.msg",
+          afterText: "result.text",
+          type: "text",
+          ai: "yandex",
+          userId: "props.userId",
+          postId: "post._id",
+          service: "props.service"
+        }) */
+
+          await Post.create({
+                content: "result.text",
+                isAI: true,
+                userId: "6a390f6b02fc2a14f9623b42",
+              })
+    
     await server.listen({
       port: appconfig.services.gateway.PORT,
       host: '0.0.0.0'

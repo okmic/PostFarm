@@ -1,5 +1,9 @@
 import axios from 'axios';
 import { ErrorForbidden } from '../../../pkg/errors/errors'
+import { Types } from 'mongoose';
+import { Post } from '../../../models/Post.model';
+import { AITokens } from '../../../models/AITokens.model';
+import { ServicesTypeEnum } from '../../../../../../pkg/types/ai.text.types';
 
 class YandexGptTextService {
   public async YGpt(
@@ -9,11 +13,31 @@ class YandexGptTextService {
       'YandexOAuthToken': string
       'prompt': string | null
       'msg': string
+      "userId": Types.ObjectId | string
+      "service": ServicesTypeEnum
     }
   ): Promise<{ text: string, usageTokens: number }> {
     const result = await this.toGpt(
       props.temperature, props.prompt, props.msg, props.YandexOAuthToken, props.YandexFolderID,
     );
+    
+    const post = await Post.create({
+      content: result.text,
+      isAI: true,
+      userId: props.userId,
+    })
+
+    await AITokens.create({
+      usageTokens: result.usageTokens,
+      beforeText: props.msg,
+      afterText: result.text,
+      type: "text",
+      ai: "yandex",
+      userId: props.userId,
+      postId: post._id,
+      service: props.service
+    })
+
     return result;
   }
 
