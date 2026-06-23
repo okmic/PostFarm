@@ -270,7 +270,7 @@ const Card = ({
       }
     `}
   >
-    <button onClick={onNavigate} className='w-full text-left p-5 lg:p-6 cursor-pointer'>
+    <div onClick={onNavigate} className='w-full text-left p-5 lg:p-6 cursor-pointer'>
       <div className='flex items-start justify-between mb-5'>
         <div 
           className='w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-500 group-hover:scale-105'
@@ -321,7 +321,7 @@ const Card = ({
         <span className='text-xs font-light' style={{ color: service.color }}>Открыть инструмент</span>
         <FiArrowRight className='text-xs transition-transform duration-300 group-hover:translate-x-1' color={service.color} />
       </div>
-    </button>
+    </div>
 
     <div
       className={`

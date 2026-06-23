@@ -4,6 +4,7 @@ import store from '../../store/store'
 import { logout } from '../../store/slices/auth.slice'
 import { getAuthHeader, handlerError } from './api.util'
 import type { EducationContentEnum, EducationLevelEnum, HeadlineContentEnum, HeadlineStyleEnum, PostChannelContentToneEnum, PostChannelContentTypeEnum, PostChronicleTypeEnum } from "../../../../../pkg/types/ai.text.types"
+import { setAiLimitIsOver } from '../../store/slices/tenantStore.slice'
 
 class ApiAiService {
   private axiosInstance: AxiosInstance
@@ -25,6 +26,8 @@ class ApiAiService {
         if (originalRequest && error.response?.status === 401 && !(originalRequest as any)._retry) {
           (originalRequest as any)._retry = true
           store.dispatch(logout())
+        } else if(originalRequest && error.response?.status === 469) {
+          store.dispatch(setAiLimitIsOver(true))
         }
         return Promise.reject(error)
       }

@@ -40,12 +40,11 @@ import { initializeDatabase } from "../../pkg/db/db.init"
 
   if (!server.jwt) throw new Error('JWT plugin not initialized')
   appInstance.setApp(server)
-
   server.get('/api', async (_, reply) => reply.send({ msg: "pong" }))
   new SignModule(server)
   server.register(usersAuthPlugin)
   new GatewayModule(server)
-
+  
   try {
     await cheackOrCreateInitFoldersAndFiles()
     await initializeDatabase()

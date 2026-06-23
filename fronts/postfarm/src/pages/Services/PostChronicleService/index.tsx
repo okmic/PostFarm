@@ -31,7 +31,7 @@ const PostChronicleService = () => {
   const [activeTab, setActiveTab] = useState('continue')
   const [currentStep, setCurrentStep] = useState(1)
   const [error, setError] = useState<string | null>(null)
-  const userId = useSelector((s: RootState) => s.auth.user!._id!)
+  const userId = useSelector((s: RootState) => s.auth!.user!._id!)
   const { refreshAll } = useGetData()
 
   const tabs: Tab[] = [

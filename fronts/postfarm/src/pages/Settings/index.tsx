@@ -7,10 +7,10 @@ import {
   FaStar, FaCrown, FaRocket, 
   FaUserAstronaut, FaGem, FaEdit, FaSignOutAlt,
   FaCheckCircle, FaBell, FaShieldAlt, FaClock,
-  FaArrowLeft, FaLeaf, FaInfinity
+  FaArrowLeft, FaLeaf, FaInfinity, FaEnvelope
 } from "react-icons/fa"
 import { MdOutlineVerified } from "react-icons/md"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import apiUserService from "../../pkg/api/api.user.service"
 
 const RATE_CONFIG: Record<number, {
@@ -302,7 +302,17 @@ export default function SettingsPage() {
                       {renderStars()}
                     </div>
 
-                    <p className="text-[10px] text-white/20 mb-5">{rateConfig.description}</p>
+                    <p className="text-[10px] text-white/20 mb-3">{rateConfig.description}</p>
+
+                    {rateConfig.dailyLimit !== Infinity && (
+                      <Link
+                        to="/ai-limit"
+                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#FFA726]/10 border border-[#FFA726]/20 text-[#FFA726] text-[11px] font-medium transition-colors hover:bg-[#FFA726]/20 mb-4"
+                      >
+                        <FaEnvelope className="text-[10px]" />
+                        Увеличить лимит
+                      </Link>
+                    )}
                     
                     <div className="w-full space-y-3 pt-3 border-t border-white/10">
                       <div className="flex items-center justify-between text-xs">

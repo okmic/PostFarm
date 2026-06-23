@@ -18,9 +18,11 @@ import EducationPostsService from "./pages/Services/EducationPostsService"
 import PostChronicleService from "./pages/Services/PostChronicleService"
 import ChannelContentService from "./pages/Services/ChannelContentService"
 import StatsPage from "./pages/Stats"
+import AILimitIsOverPage from "./pages/AILimitIsOver"
 
 function MainApp() {
   const auth = useSelector((s: RootState) => s.auth)
+  const aiLimitIsOver = useSelector((s: RootState) => s.tenantStore.aiLimitIsOver)
   const {
     isCheckingAuth,
     initialized,
@@ -51,9 +53,9 @@ function MainApp() {
       />
       <div className="min-h-screen transition-all duration-300">
         <Routes>
-          {auth.authStatus === "auth" && auth.user ? (
+          {(auth.authStatus === "auth") && auth.user ? (
             <Route element={<DashboardLayout />}>
-              
+
               {auth.user.role === "admin" && (
                 <>
 
@@ -64,15 +66,27 @@ function MainApp() {
                 <>
                 </>
               )}
-              
+
               <Route path="/" element={<MainPage />} />
               <Route path="/services" element={<ServicePage />} />
-              <Route path="/services/channel-content" element={<ChannelContentService />} />
-              <Route path="/services/viral-headlines" element={<ViralHeadlinesService />} />
-              <Route path="/services/education-posts" element={<EducationPostsService />} />
-              <Route path="/services/post-chronicle" element={<PostChronicleService />} />
+              {
+                aiLimitIsOver
+                  ? <>
+                    <Route path="/services/channel-content" element={<AILimitIsOverPage />} />
+                    <Route path="/services/viral-headlines" element={<AILimitIsOverPage />} />
+                    <Route path="/services/education-posts" element={<AILimitIsOverPage />} />
+                    <Route path="/services/post-chronicle" element={<AILimitIsOverPage />} />
+                  </>
+                  : <>
+                    <Route path="/services/channel-content" element={<ChannelContentService />} />
+                    <Route path="/services/viral-headlines" element={<ViralHeadlinesService />} />
+                    <Route path="/services/education-posts" element={<EducationPostsService />} />
+                    <Route path="/services/post-chronicle" element={<PostChronicleService />} />
+                  </>
+              }
               <Route path="/settings" element={<UserSettingsPage />} />
               <Route path="/stats" element={<StatsPage />} />
+              <Route path="/ai-limit" element={<AILimitIsOverPage />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           ) : (

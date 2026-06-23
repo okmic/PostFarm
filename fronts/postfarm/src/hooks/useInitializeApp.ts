@@ -5,7 +5,6 @@ import { setOrUpdateUsafeTokens, setPosts } from "../store/slices/tenantStore.sl
 import { authStatus } from "../store/slices/auth.slice"
 import type { IUser } from "../pkg/types/user"
 import apiUserService from "../pkg/api/api.user.service"
-import { useNavigate } from "react-router-dom"
 import apiTenantStoreService from "../pkg/api/api.tenantStore.service"
 
 interface UseInitializeAppReturn {
@@ -24,7 +23,6 @@ export const useInitializeApp = (): UseInitializeAppReturn => {
     error: null,
   })
   const auth = useSelector((s: RootState) => s.auth)
-  const navigation = useNavigate()
 
   useEffect(() => {
     const initializeApp = async () => {
@@ -47,7 +45,6 @@ export const useInitializeApp = (): UseInitializeAppReturn => {
             user: me,
             error: null,
           })
-          navigation("/")
         } else {
           dispatch(authStatus({ status: "notAuth", user: null }))
           setState({

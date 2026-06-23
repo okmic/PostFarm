@@ -4,7 +4,8 @@ import {
   ErrorNotAuth, 
   ErrorBadRequest, 
   ErrorForbidden, 
-  ErrorUploadFile 
+  ErrorUploadFile, 
+  ErrorAIRateLimitIsOver
 } from '../errors/errors'
 
 const errorHandlerPlugin: FastifyPluginAsync = async (fastify) => {
@@ -48,6 +49,16 @@ const errorHandlerPlugin: FastifyPluginAsync = async (fastify) => {
         .status(500)
         .send({ 
           errorMsg: 'Error upload file', 
+          error: { message: error.message }, 
+          alertMsg 
+        })
+    }
+
+    if(error instanceof ErrorAIRateLimitIsOver) {
+      return reply 
+        .status(469)
+        .send({ 
+          errorMsg: 'AI Limit is over', 
           error: { message: error.message }, 
           alertMsg 
         })

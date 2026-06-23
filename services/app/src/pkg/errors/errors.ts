@@ -4,3 +4,5 @@ export class ErrorForbidden extends Error {}
 export class ErrorUploadFile extends Error {}
 //CORE ERRORS
 export class ErrorStopExecution extends Error {}
+//POSTFARM ERRORS
+export class ErrorAIRateLimitIsOver extends Error {}

@@ -19,6 +19,9 @@ const authSlice = createSlice({
       state.authStatus = "notAuth"
       localStorage.removeItem('token')
     },
+    updateLoadingStatus: (state, action: PayloadAction<{ status: AuthState["authStatus"] }>) => {
+      state.authStatus = action.payload.status
+    },
     authStatus(state, action: PayloadAction<{status: AuthState["authStatus"], user: IUser | null}>) {
       state.user = action.payload.user
       state.authStatus = action.payload.status
@@ -30,5 +33,5 @@ const authSlice = createSlice({
   }
 })
 
-export const { logout, authStatus, updateStateUser } = authSlice.actions
+export const { logout, authStatus, updateStateUser, updateLoadingStatus } = authSlice.actions
 export default authSlice.reducer

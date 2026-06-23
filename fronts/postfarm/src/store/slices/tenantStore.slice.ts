@@ -9,6 +9,7 @@ interface TenantStoreState {
         usedToday: number 
         history: IAITokens[]
     }
+    aiLimitIsOver: boolean
 }
 
 const initialState: TenantStoreState = {
@@ -17,7 +18,8 @@ const initialState: TenantStoreState = {
         limit: 0,
         usedToday: 0,
         history: []
-    }
+    },
+    aiLimitIsOver: false
 }
 
 const tenantStoreSlice = createSlice({
@@ -30,8 +32,11 @@ const tenantStoreSlice = createSlice({
         setOrUpdateUsafeTokens: (state, action: PayloadAction<{ usageTokens: Partial<TenantStoreState['usageTokens']>}>) => {
             state.usageTokens = { ...state.usageTokens, ...action.payload.usageTokens }
         },
+        setAiLimitIsOver: (state, action: PayloadAction<boolean>) => {
+            state.aiLimitIsOver = action.payload
+        }
     }
 })
 
-export const { setOrUpdateUsafeTokens, setPosts, } = tenantStoreSlice.actions
+export const { setOrUpdateUsafeTokens, setPosts, setAiLimitIsOver } = tenantStoreSlice.actions
 export default tenantStoreSlice.reducer
