@@ -3,7 +3,7 @@ import appInstance from "../../appInstance/appInstance";
 import appconfig from "../appconfig";
 import { IUser } from "../../../models/User.model";
 
-export const isRootUser = (email: string, psw: string): boolean => {
+export const isSystemRootUser = (email: string, psw: string): boolean => {
     if (email === appconfig.rootUser.email && psw === appconfig.rootUser.psw) {
         return true
     } else {
@@ -12,8 +12,8 @@ export const isRootUser = (email: string, psw: string): boolean => {
 }
 
 export const signRootUser = (reply: FastifyReply) => {
-    const access = appInstance.getInstance().jwt.sign({ id: "admin", role: "admin", rate: 0 }, { expiresIn: "15d" })
-    const refresh = appInstance.getInstance().jwt.sign({ id: "admin", role: "admin", rate: 0 }, { expiresIn: "30d" })
+    const access = appInstance.getInstance().jwt.sign({ id: "root", role: "root", rate: 0 }, { expiresIn: "15d" })
+    const refresh = appInstance.getInstance().jwt.sign({ id: "root", role: "root", rate: 0 }, { expiresIn: "30d" })
 
     return reply
         .setCookie(

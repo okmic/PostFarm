@@ -1,0 +1,32 @@
+import axios, { type AxiosInstance } from 'axios'
+import appconfig from '../../appconfig'
+import store from '../../store/store'
+import { authStatus } from '../../store/slices/auth.slice'
+import { handlerError } from './api.util'
+
+class ApiAuthService {
+    private axiosInstance: AxiosInstance
+    constructor() {
+        this.axiosInstance = axios.create({
+            baseURL: appconfig.backendUrl,
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+    }
+    async signin(payload: { email: string, psw: string }) {
+        return await this.axiosInstance.post<any>(
+            `/api/root/signin`,
+            payload,
+        ).then(r => {
+            store.dispatch(
+                authStatus({ status: "loading", user: r.data.user })
+            )
+            localStorage.setItem('token', r.data.accessToken)
+            return r.data
+        })
+        .catch(e => handlerError(e))
+    }
+}
+
+export default new ApiAuthService()
