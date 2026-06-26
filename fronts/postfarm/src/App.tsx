@@ -93,6 +93,7 @@ function MainApp() {
             <>
               <Route path="/signin" element={<SignInPage />} />
               <Route path="/signup" element={<SignUpPage />} />
+              <Route path="/signup/:refCode" element={<SignUpPage />} />
               <Route path="*" element={<Navigate to="/signin" replace />} />
             </>
           )}

@@ -27,7 +27,7 @@ class ApiAuthService {
         })
         .catch(e => handlerError(e))
     }
-    async signup(payload: { name: string, email: string, psw: string, role: "Admin" | "User"}) {
+    async signup(payload: { name: string, email: string, psw: string, refCode?: string}) {
         return await this.axiosInstance.post<any>(
             `/api/signup`,
             { ...payload }

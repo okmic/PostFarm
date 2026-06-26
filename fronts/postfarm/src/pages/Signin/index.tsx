@@ -1,15 +1,22 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { SignInForm } from './SigninForm'
 import { useNotifications } from '../../hooks/useNotifications'
 import apiAuthService from '../../pkg/api/api.auth.service'
 import { Logo } from '../../components/Logo/Logo'
+import { useSelector } from 'react-redux'
+import type { RootState } from '../../store/store'
 
 export const SignInPage: React.FC = () => {
+  const authStatus = useSelector((s: RootState) => s.auth.authStatus)
   const navigate = useNavigate()
   const notifications = useNotifications()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if(authStatus === "loading") navigate("/")
+  }, [authStatus])
 
   const handleSubmit = async (data: { email: string; psw: string }) => {
     setIsLoading(true)
@@ -17,7 +24,6 @@ export const SignInPage: React.FC = () => {
 
     try {
       await apiAuthService.signin(data)
-      navigate('/')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Ошибка входа'
       notifications.error(errorMessage)

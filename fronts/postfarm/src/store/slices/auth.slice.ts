@@ -29,7 +29,7 @@ const authSlice = createSlice({
     },
     updateStateUser(state, action: PayloadAction<{user: Partial<IUser>}>) {
       if(state.user) state.user = { ...state.user, ...action.payload.user }
-    }
+    },
   }
 })
 

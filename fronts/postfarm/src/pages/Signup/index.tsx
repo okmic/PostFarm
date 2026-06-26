@@ -1,15 +1,23 @@
-import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useNotifications } from '../../hooks/useNotifications'
 import apiAuthService from '../../pkg/api/api.auth.service'
 import { SignUpForm } from './SignupForm'
 import { Logo } from '../../components/Logo/Logo'
+import { useSelector } from 'react-redux'
+import type { RootState } from '../../store/store'
 
 export const SignUpPage: React.FC = () => {
+  const { refCode } = useParams<{ refCode?: string }>()
+  const authStatus = useSelector((s: RootState) => s.auth.authStatus)
   const navigate = useNavigate()
   const notifications = useNotifications()
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    if(authStatus === "loading") navigate("/")
+  }, [authStatus])
 
   const handleSubmit = async (data: { name: string; email: string; psw: string }) => {
     setIsLoading(true)
@@ -20,10 +28,9 @@ export const SignUpPage: React.FC = () => {
         name: data.name,
         email: data.email,
         psw: data.psw,
-        role: "User"
+        refCode: refCode || undefined,
       })
       notifications.success('Регистрация прошла успешно!')
-      navigate('/signin')
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Ошибка регистрации'
       notifications.error(errorMessage)

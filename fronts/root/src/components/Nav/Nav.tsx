@@ -7,7 +7,7 @@ import type { RootState } from "../../store/store"
 import { LiaLinkSolid, LiaUser } from "react-icons/lia"
 
 const navItems = [
-  { to: "/links", title: "Ссылки", Icon: LiaLinkSolid },
+  { to: "/referral-links", title: "Ссылки", Icon: LiaLinkSolid },
   { to: "/users", title: "Пользователи", Icon: LiaUser },
 ]
 

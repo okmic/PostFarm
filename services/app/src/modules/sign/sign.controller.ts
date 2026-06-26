@@ -46,10 +46,10 @@ class SignController {
     }
   }
 
-  async signup(req: FastifyRequest<{ Body: { name: string, email: string, psw: string } }>, reply: FastifyReply): Promise<void> {
+  async signup(req: FastifyRequest<{ Body: { name: string, email: string, psw: string, refCode?: string } }>, reply: FastifyReply): Promise<void> {
     try {
-      const { name, email, psw } = req.body
-      const user = await signService.signup({ name, email, psw })
+      const { name, email, psw, refCode } = req.body
+      const user = await signService.signup({ name, email, psw, refCode })
       const access = appInstance.getInstance().jwt.sign({ id: String(user._id), role: user.role, rate: user.rate || 3 }, { expiresIn: "15d" })
       const refresh = appInstance.getInstance().jwt.sign({ id: String(user._id), role: user.role, rate: user.rate || 3 }, { expiresIn: "30d" })
       

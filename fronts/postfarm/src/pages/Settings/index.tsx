@@ -93,18 +93,19 @@ const RATE_CONFIG: Record<number, {
     bg: "bg-[#FFA726]/10",
     border: "border-[#FFA726]/20",
     gradient: "from-[#FFA726]/20 via-orange-500/10 to-amber-500/20",
-    stars: 4,
+    stars: 5,
     dailyLimit: 1000,
     description: "До 1000 генераций в день"
   }
 }
 
 const getRateConfig = (rate: number) => {
-  if (rate === 0) return RATE_CONFIG[0]
+  if (rate === 0) return RATE_CONFIG[1]
   if (rate <= 3) return RATE_CONFIG[1]
   if (rate <= 10) return RATE_CONFIG[2]
   if (rate <= 50) return RATE_CONFIG[3]
   if (rate <= 100) return RATE_CONFIG[4]
+  if (rate <= 1000) return RATE_CONFIG[5]
   return RATE_CONFIG[5]
 }
 
@@ -212,7 +213,7 @@ export default function SettingsPage() {
         <div className="flex items-center gap-4 mb-8">
           <button
             onClick={() => navigate(-1)}
-            className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-colors"
+            className="cursor-pointer p-2 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-colors"
           >
             <FaArrowLeft className="text-lg" />
           </button>
@@ -234,7 +235,7 @@ export default function SettingsPage() {
         <div className="flex gap-1 mb-8 border-b border-white/10">
           <button
             onClick={() => setActiveTab("profile")}
-            className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-t-xl text-sm font-medium transition-colors ${
+            className={`cursor-pointer flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-t-xl text-sm font-medium transition-colors ${
               activeTab === "profile" 
                 ? "text-white border-b-2 border-[#4CAF50] bg-white/5" 
                 : "text-white/40 hover:text-white/60 hover:bg-white/5"
@@ -245,7 +246,7 @@ export default function SettingsPage() {
           </button>
           <button
             onClick={() => setActiveTab("notifications")}
-            className={`flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-t-xl text-sm font-medium transition-colors ${
+            className={`cursor-pointer flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-t-xl text-sm font-medium transition-colors ${
               activeTab === "notifications" 
                 ? "text-white border-b-2 border-[#4CAF50] bg-white/5" 
                 : "text-white/40 hover:text-white/60 hover:bg-white/5"
@@ -259,7 +260,7 @@ export default function SettingsPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           
           <div className="lg:col-span-1">
-            <div className="sticky top-8">
+            <div className="lg:sticky lg:top-8">
               <div className="relative bg-white/[0.03] backdrop-blur-sm rounded-2xl border border-white/[0.08] p-6 overflow-hidden group">
                 <div className={`absolute inset-0 bg-gradient-to-br ${rateConfig.gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
                 
@@ -267,7 +268,7 @@ export default function SettingsPage() {
                   <div className="flex flex-col items-center text-center">
                     <div className="relative mb-5">
                       <div 
-                        className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl flex items-center justify-center text-white text-3xl sm:text-4xl font-bold ring-4 ring-white/10"
+                        className="w-20 h-20 sm:w-28 sm:h-28 rounded-2xl flex items-center justify-center text-white text-2xl sm:text-4xl font-bold ring-4 ring-white/10"
                         style={{ 
                           background: `linear-gradient(135deg, ${rateConfig.color}60, ${rateConfig.color}20)`,
                           boxShadow: `0 8px 32px ${rateConfig.color}20`
@@ -275,25 +276,25 @@ export default function SettingsPage() {
                       >
                         {avatarLetter}
                       </div>
-                      <div className="absolute -bottom-2 -right-2 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-[#1E3A1E] border-2 border-white/10 flex items-center justify-center">
+                      <div className="absolute -bottom-2 -right-2 w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-[#1E3A1E] border-2 border-white/10 flex items-center justify-center">
                         {rateConfig.stars === 5 ? (
-                          <FaCrown className="w-3.5 h-3.5 sm:w-4 sm:h-4" style={{ color: rateConfig.color }} />
+                          <FaCrown className="w-3 h-3 sm:w-4 sm:h-4" style={{ color: rateConfig.color }} />
                         ) : (
-                          <MdOutlineVerified className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#4CAF50]" />
+                          <MdOutlineVerified className="w-3 h-3 sm:w-4 sm:h-4 text-[#4CAF50]" />
                         )}
                       </div>
                     </div>
                     
-                    <h2 className="text-lg sm:text-xl font-bold text-white mb-1">
+                    <h2 className="text-base sm:text-xl font-bold text-white mb-1">
                       {user?.name || "Пользователь"}
                     </h2>
-                    <p className="text-white/40 text-xs mb-4 break-all max-w-full">
+                    <p className="text-white/40 text-[11px] sm:text-xs mb-4 break-all max-w-full">
                       {user?.email || "—"}
                     </p>
                     
                     <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl ${rateConfig.bg} border ${rateConfig.border} mb-3`}>
-                      <RateIcon className={`${rateConfig.textColor} text-xs`} />
-                      <span className={`text-xs font-semibold ${rateConfig.textColor}`}>
+                      <RateIcon className={`${rateConfig.textColor} text-[10px] sm:text-xs`} />
+                      <span className={`text-[10px] sm:text-xs font-semibold ${rateConfig.textColor}`}>
                         {rateConfig.name}
                       </span>
                     </div>
@@ -302,31 +303,31 @@ export default function SettingsPage() {
                       {renderStars()}
                     </div>
 
-                    <p className="text-[10px] text-white/20 mb-3">{rateConfig.description}</p>
+                    <p className="text-[9px] sm:text-[10px] text-white/20 mb-3">{rateConfig.description}</p>
 
-                    {rateConfig.dailyLimit !== Infinity && (
+                    {(rateConfig.dailyLimit !== Infinity && userRate < 1000) && (
                       <Link
                         to="/ai-limit"
-                        className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#FFA726]/10 border border-[#FFA726]/20 text-[#FFA726] text-[11px] font-medium transition-colors hover:bg-[#FFA726]/20 mb-4"
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#FFA726]/10 border border-[#FFA726]/20 text-[#FFA726] text-[10px] sm:text-[11px] font-medium transition-colors hover:bg-[#FFA726]/20 mb-4"
                       >
-                        <FaEnvelope className="text-[10px]" />
+                        <FaEnvelope className="text-[9px] sm:text-[10px]" />
                         Увеличить лимит
                       </Link>
                     )}
                     
                     <div className="w-full space-y-3 pt-3 border-t border-white/10">
-                      <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center justify-between text-[11px] sm:text-xs">
                         <span className="text-white/40 flex items-center gap-1.5">
-                          <FaShieldAlt className="text-[10px]" />
+                          <FaShieldAlt className="text-[9px] sm:text-[10px]" />
                           ID
                         </span>
-                        <span className="text-white/60 font-mono text-[10px]">
+                        <span className="text-white/60 font-mono text-[9px] sm:text-[10px]">
                           {user?._id ? String(user._id).slice(-8) : "—"}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center justify-between text-[11px] sm:text-xs">
                         <span className="text-white/40 flex items-center gap-1.5">
-                          <FaClock className="text-[10px]" />
+                          <FaClock className="text-[9px] sm:text-[10px]" />
                           Статус
                         </span>
                         <span className="inline-flex items-center gap-1.5 text-[#4CAF50]">
@@ -334,12 +335,12 @@ export default function SettingsPage() {
                           Активен
                         </span>
                       </div>
-                      <div className="flex items-center justify-between text-xs">
+                      <div className="flex items-center justify-between text-[11px] sm:text-xs">
                         <span className="text-white/40 flex items-center gap-1.5">
-                          <FaInfinity className="text-[10px]" />
+                          <FaInfinity className="text-[9px] sm:text-[10px]" />
                           Лимит
                         </span>
-                        <span className="text-white/60 text-[10px]">
+                        <span className="text-white/60 text-[9px] sm:text-[10px]">
                           {rateConfig.dailyLimit === Infinity ? "Безлимит" : `${rateConfig.dailyLimit}/день`}
                         </span>
                       </div>
@@ -352,11 +353,11 @@ export default function SettingsPage() {
 
           <div className="lg:col-span-2">
             {activeTab === "profile" && (
-              <div className="bg-white/[0.03] backdrop-blur-sm rounded-2xl border border-white/[0.08] p-6 sm:p-8">
+              <div className="bg-white/[0.03] backdrop-blur-sm rounded-2xl border border-white/[0.08] p-5 sm:p-8">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-xl bg-[#4CAF50]/20 flex items-center justify-center">
-                      <FaUser className="text-[#4CAF50] text-sm" />
+                  <h3 className="text-base sm:text-lg font-semibold text-white flex items-center gap-2">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-[#4CAF50]/20 flex items-center justify-center">
+                      <FaUser className="text-[#4CAF50] text-xs sm:text-sm" />
                     </div>
                     Информация профиля
                   </h3>
@@ -364,21 +365,20 @@ export default function SettingsPage() {
                   {!isEditing && (
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-[#4CAF50]/20 border border-[#4CAF50]/30 text-[#4CAF50] text-sm font-medium transition-colors hover:bg-[#4CAF50]/30"
+                      className="cursor-pointer inline-flex items-center gap-1.5 px-3 py-2 sm:px-4 sm:py-2 rounded-xl bg-[#4CAF50]/20 border border-[#4CAF50]/30 text-[#4CAF50] text-xs sm:text-sm font-medium transition-colors hover:bg-[#4CAF50]/30"
                     >
-                      <FaEdit className="text-sm" />
-                      Редактировать
+                      <FaEdit className="text-xs sm:text-sm" />
                     </button>
                   )}
                 </div>
                 
                 {message && (
-                  <div className={`mb-6 p-4 rounded-xl border ${
+                  <div className={`mb-6 p-3 sm:p-4 rounded-xl border ${
                     message.type === "success" 
                       ? "bg-[#4CAF50]/10 border-[#4CAF50]/20" 
                       : "bg-[#E57373]/10 border-[#E57373]/20"
                   }`}>
-                    <div className={`flex items-center gap-2 text-sm ${message.type === "success" ? "text-[#4CAF50]" : "text-[#E57373]"}`}>
+                    <div className={`flex items-center gap-2 text-xs sm:text-sm ${message.type === "success" ? "text-[#4CAF50]" : "text-[#E57373]"}`}>
                       {message.type === "success" && <FaCheckCircle />}
                       {message.text}
                     </div>
@@ -386,99 +386,99 @@ export default function SettingsPage() {
                 )}
                 
                 <form onSubmit={handleSubmit}>
-                  <div className="space-y-5">
+                  <div className="space-y-4 sm:space-y-5">
                     <div>
-                      <label className="block text-sm font-medium text-white/60 mb-2">
+                      <label className="block text-xs sm:text-sm font-medium text-white/60 mb-2">
                         Имя пользователя
                       </label>
                       {isEditing ? (
                         <div className="relative">
-                          <FaUser className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 text-sm" />
+                          <FaUser className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-white/30 text-xs sm:text-sm" />
                           <input
                             type="text"
                             name="name"
                             value={formData.name}
                             onChange={handleChange}
-                            className="w-full pl-11 pr-4 py-3 rounded-xl bg-[#1E3A1E] border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-[#4CAF50] transition-colors"
+                            className="w-full pl-9 sm:pl-11 pr-3 sm:pr-4 py-2.5 sm:py-3 rounded-xl bg-[#1E3A1E] border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#4CAF50] transition-colors"
                             placeholder="Введите имя"
                           />
                         </div>
                       ) : (
-                        <div className="px-4 py-3 rounded-xl bg-[#1E3A1E] border border-white/10 text-white flex items-center gap-2">
-                          <FaUser className="text-white/40 text-sm" />
+                        <div className="px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-[#1E3A1E] border border-white/10 text-white flex items-center gap-2 text-sm">
+                          <FaUser className="text-white/40 text-xs sm:text-sm" />
                           <span>{user?.name || "—"}</span>
                         </div>
                       )}
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-white/60 mb-2">
+                      <label className="block text-xs sm:text-sm font-medium text-white/60 mb-2">
                         Email адрес
                       </label>
-                      <div className="px-4 py-3 rounded-xl bg-[#1E3A1E]/50 border border-white/10 text-white/60 flex items-center gap-2">
-                        <div className="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center">
-                          <svg className="w-3.5 h-3.5 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <div className="px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-[#1E3A1E]/50 border border-white/10 text-white/60 flex items-center gap-2 text-sm">
+                        <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-white/5 flex items-center justify-center">
+                          <svg className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                           </svg>
                         </div>
-                        <span className="text-sm">{user?.email || "—"}</span>
-                        <span className="ml-auto text-[10px] text-white/20 font-mono">не редактируется</span>
+                        <span className="text-xs sm:text-sm">{user?.email || "—"}</span>
+                        <span className="ml-auto text-[9px] sm:text-[10px] text-white/20 font-mono">не редактируется</span>
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-white/60 mb-2">
+                      <label className="block text-xs sm:text-sm font-medium text-white/60 mb-2">
                         Пароль
                       </label>
                       {isEditing ? (
-                        <div className="space-y-3">
+                        <div className="space-y-2 sm:space-y-3">
                           <div className="relative">
-                            <FaEye className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 text-sm" />
+                            <FaEye className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-white/30 text-xs sm:text-sm" />
                             <input
                               type={showPassword ? "text" : "password"}
                               name="psw"
                               value={formData.psw}
                               onChange={handleChange}
-                              className="w-full pl-11 pr-12 py-3 rounded-xl bg-[#1E3A1E] border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-[#4CAF50] transition-colors"
+                              className="w-full pl-9 sm:pl-11 pr-10 sm:pr-12 py-2.5 sm:py-3 rounded-xl bg-[#1E3A1E] border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#4CAF50] transition-colors"
                               placeholder="Новый пароль"
                             />
                             <button
                               type="button"
                               onClick={() => setShowPassword(!showPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-[#4CAF50] transition-colors p-1"
+                              className="cursor-pointer absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-[#4CAF50] transition-colors p-1"
                             >
-                              {showPassword ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
+                              {showPassword ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
                             </button>
                           </div>
                           <div className="relative">
-                            <FaEye className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 text-sm" />
+                            <FaEye className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 text-white/30 text-xs sm:text-sm" />
                             <input
                               type={showConfirmPassword ? "text" : "password"}
                               name="confirmPsw"
                               value={formData.confirmPsw}
                               onChange={handleChange}
-                              className="w-full pl-11 pr-12 py-3 rounded-xl bg-[#1E3A1E] border border-white/10 text-white placeholder-white/30 focus:outline-none focus:border-[#4CAF50] transition-colors"
+                              className="w-full pl-9 sm:pl-11 pr-10 sm:pr-12 py-2.5 sm:py-3 rounded-xl bg-[#1E3A1E] border border-white/10 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#4CAF50] transition-colors"
                               placeholder="Подтвердите пароль"
                             />
                             <button
                               type="button"
                               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-[#4CAF50] transition-colors p-1"
+                              className="cursor-pointer absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-[#4CAF50] transition-colors p-1"
                             >
-                              {showConfirmPassword ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
+                              {showConfirmPassword ? <FaEyeSlash size={14} /> : <FaEye size={14} />}
                             </button>
                           </div>
                         </div>
                       ) : (
-                        <div className="px-4 py-3 rounded-xl bg-[#1E3A1E] border border-white/10 text-white/60 flex items-center gap-2">
-                          <div className="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center">
-                            <FaEye className="w-3.5 h-3.5 text-white/40" />
+                        <div className="px-3 sm:px-4 py-2.5 sm:py-3 rounded-xl bg-[#1E3A1E] border border-white/10 text-white/60 flex items-center gap-2 text-sm">
+                          <div className="w-5 h-5 sm:w-6 sm:h-6 rounded-lg bg-white/5 flex items-center justify-center">
+                            <FaEye className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white/40" />
                           </div>
-                          <span className="text-sm">••••••••</span>
+                          <span className="text-xs sm:text-sm">••••••••</span>
                           <button
                             type="button"
                             onClick={() => setIsEditing(true)}
-                            className="ml-auto text-xs text-[#4CAF50]/60 hover:text-[#4CAF50] transition-colors"
+                            className="cursor-pointer ml-auto text-[10px] sm:text-xs text-[#4CAF50]/60 hover:text-[#4CAF50] transition-colors"
                           >
                             Изменить
                           </button>
@@ -487,27 +487,27 @@ export default function SettingsPage() {
                     </div>
 
                     {isEditing && (
-                      <div className="flex gap-3 pt-6">
+                      <div className="flex gap-2 sm:gap-3 pt-4 sm:pt-6">
                         <button
                           type="submit"
                           disabled={loading}
-                          className="flex-1 py-3 px-6 rounded-xl bg-gradient-to-r from-[#4CAF50] to-[#FFA726] text-white font-medium text-sm transition-colors hover:shadow-[0_0_12px_rgba(76,175,80,0.4)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                          className="cursor-pointer flex-1 py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl bg-gradient-to-r from-[#4CAF50] to-[#FFA726] text-white font-medium text-xs sm:text-sm transition-colors hover:shadow-[0_0_12px_rgba(76,175,80,0.4)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-1.5 sm:gap-2"
                         >
                           {loading ? (
-                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <div className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                           ) : (
                             <>
-                              <FaSave />
-                              Сохранить изменения
+                              <FaSave className="text-[10px] sm:text-sm" />
+                              Сохранить
                             </>
                           )}
                         </button>
                         <button
                           type="button"
                           onClick={handleCancel}
-                          className="flex-1 py-3 px-6 rounded-xl bg-white/5 border border-white/10 text-white/60 font-medium text-sm transition-colors hover:bg-white/10 hover:text-white flex items-center justify-center gap-2"
+                          className="cursor-pointer flex-1 py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl bg-white/5 border border-white/10 text-white/60 font-medium text-xs sm:text-sm transition-colors hover:bg-white/10 hover:text-white flex items-center justify-center gap-1.5 sm:gap-2"
                         >
-                          <FaTimes />
+                          <FaTimes className="text-[10px] sm:text-sm" />
                           Отменить
                         </button>
                       </div>
@@ -518,15 +518,15 @@ export default function SettingsPage() {
             )}
 
             {activeTab === "notifications" && (
-              <div className="bg-white/[0.03] backdrop-blur-sm rounded-2xl border border-white/[0.08] p-6 sm:p-8 min-h-[400px] flex items-center justify-center">
+              <div className="bg-white/[0.03] backdrop-blur-sm rounded-2xl border border-white/[0.08] p-5 sm:p-8 min-h-[300px] sm:min-h-[400px] flex items-center justify-center">
                 <div className="flex flex-col items-center justify-center text-center">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
-                    <FaBell className="text-3xl sm:text-4xl text-white/20" />
+                  <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
+                    <FaBell className="text-2xl sm:text-4xl text-white/20" />
                   </div>
-                  <h3 className="text-base sm:text-lg font-medium text-white mb-2">
+                  <h3 className="text-sm sm:text-lg font-medium text-white mb-2">
                     Нет уведомлений
                   </h3>
-                  <p className="text-white/40 text-xs sm:text-sm max-w-xs">
+                  <p className="text-white/40 text-[10px] sm:text-sm max-w-xs">
                     Здесь будут отображаться уведомления о синхронизации и обновлениях
                   </p>
                 </div>
@@ -536,12 +536,12 @@ export default function SettingsPage() {
             <div className="mt-6">
               <button
                 onClick={() => dispatch(logout())}
-                className="w-full py-4 px-6 rounded-xl bg-[#E57373]/5 border border-[#E57373]/20 text-[#E57373] font-medium text-sm transition-colors hover:bg-[#E57373]/15 flex items-center justify-center gap-2"
+                className="cursor-pointer w-full py-3 sm:py-4 px-5 sm:px-6 rounded-xl bg-[#E57373]/5 border border-[#E57373]/20 text-[#E57373] font-medium text-xs sm:text-sm transition-colors hover:bg-[#E57373]/15 flex items-center justify-center gap-2"
               >
-                <FaSignOutAlt />
+                <FaSignOutAlt className="text-[10px] sm:text-sm" />
                 Выйти из аккаунта
               </button>
-              <p className="mt-4 text-center text-[10px] text-white/20">
+              <p className="mt-4 text-center text-[9px] sm:text-[10px] text-white/20">
                 {rateConfig.name} • {rateConfig.dailyLimit === Infinity ? "Безлимит" : `${rateConfig.dailyLimit} ген/день`}
               </p>
             </div>

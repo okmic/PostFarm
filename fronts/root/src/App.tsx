@@ -11,6 +11,7 @@ import { SignInPage } from "./pages/Signin"
 import NotFound from "./pages/NotFound"
 import MainPage from "./pages/Main/Main"
 import UsersPage from "./pages/Users"
+import ReferralLinksPage from "./pages/ReferralLink"
 
 
 function MainApp() {
@@ -49,7 +50,7 @@ function MainApp() {
             <Route element={<DashboardLayout />}>
               <Route path="/" element={<MainPage />} />
               <Route path="/users" element={<UsersPage />} />
-              <Route path="/likns" element={<MainPage />} />
+              <Route path="/referral-links" element={<ReferralLinksPage />} />
               <Route path="*" element={<NotFound />} />
             </Route>
           ) : (

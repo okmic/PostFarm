@@ -1,30 +1,37 @@
 import { useState, useEffect, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import { 
-  FaArrowLeft, FaSearch, FaEdit, FaTimes, FaCrown,
+  FaArrowLeft, FaSearch, FaCrown,
   FaRocket, FaLeaf, FaGem, FaUserAstronaut,
-  FaKey, FaCheck, FaShieldAlt
+  FaKey, FaCheck, FaTimes, FaChevronDown, FaChevronUp
 } from "react-icons/fa"
-import { FiUser, FiMail } from "react-icons/fi"
+import { FiUser, FiMail, FiShield, FiCalendar, FiEdit3 } from "react-icons/fi"
 import type { IUser } from "../../pkg/types/user"
 import apiUserService from "../../pkg/api/api.user.service"
 
 const RATE_OPTIONS = [
-  { value: 0, label: "Создатель", icon: FaCrown, color: "#F59E0B", limit: "∞" },
-  { value: 1, label: "Росток", icon: FaRocket, color: "#26A5E4", limit: "3/день" },
-  { value: 2, label: "Колос", icon: FaLeaf, color: "#34D399", limit: "10/день" },
-  { value: 3, label: "Урожай", icon: FaGem, color: "#4CAF50", limit: "50/день" },
-  { value: 4, label: "Агроном", icon: FaUserAstronaut, color: "#FFA726", limit: "100/день" },
-  { value: 5, label: "Агроном Pro", icon: FaUserAstronaut, color: "#FFA726", limit: "1000/день" },
+  { value: 0, label: "Создатель", icon: FaCrown, color: "#F59E0B" },
+  { value: 3, label: "Росток", icon: FaRocket, color: "#26A5E4" },
+  { value: 10, label: "Колос", icon: FaLeaf, color: "#34D399" },
+  { value: 50, label: "Урожай", icon: FaGem, color: "#4CAF50" },
+  { value: 100, label: "Агроном", icon: FaUserAstronaut, color: "#FFA726" },
+  { value: 1000, label: "Агроном Pro", icon: FaUserAstronaut, color: "#FFA726" },
 ]
+
+const getRateInfo = (rate: number) => {
+  if (rate === 0) return RATE_OPTIONS[0]
+  if (rate <= 3) return RATE_OPTIONS[1]
+  if (rate <= 10) return RATE_OPTIONS[2]
+  if (rate <= 50) return RATE_OPTIONS[3]
+  if (rate <= 100) return RATE_OPTIONS[4]
+  return RATE_OPTIONS[5]
+}
 
 const ROLE_OPTIONS: { value: IUser["role"], label: string }[] = [
   { value: "user", label: "Пользователь" },
   { value: "admin", label: "Администратор" },
   { value: "root", label: "Root" },
 ]
-
-const getRateInfo = (rate: number) => RATE_OPTIONS.find(r => r.value === rate) || RATE_OPTIONS[1]
 
 const getRoleStyle = (role: string) => {
   switch (role) {
@@ -44,10 +51,12 @@ export default function UsersPage() {
     name: "",
     email: "",
     psw: "",
-    rate: 1 as number,
+    rate: 3 as number,
     role: "user" as IUser["role"]
   })
   const [message, setMessage] = useState<{ type: "success" | "error", text: string } | null>(null)
+  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [roleOpen, setRoleOpen] = useState(false)
 
   const loadUsers = useCallback(async () => {
     try {
@@ -64,12 +73,21 @@ export default function UsersPage() {
 
   const startEdit = (user: IUser) => {
     setEditingId(user._id)
-    setEditForm({ name: user.name, email: user.email, psw: "", rate: user.rate, role: user.role })
+    setEditForm({ 
+      name: user.name, 
+      email: user.email, 
+      psw: "", 
+      rate: user.rate, 
+      role: user.role 
+    })
+    setExpandedId(user._id)
   }
 
   const cancelEdit = () => {
     setEditingId(null)
-    setEditForm({ name: "", email: "", psw: "", rate: 1, role: "user" })
+    setExpandedId(null)
+    setRoleOpen(false)
+    setEditForm({ name: "", email: "", psw: "", rate: 3, role: "user" })
   }
 
   const saveEdit = async (id: string) => {
@@ -109,7 +127,7 @@ export default function UsersPage() {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         
         <div className="flex items-center gap-4 mb-8">
           <button onClick={() => navigate(-1)} className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/60 hover:text-white hover:bg-white/10 transition-colors">
@@ -156,32 +174,171 @@ export default function UsersPage() {
               const rateInfo = getRateInfo(user.rate)
               const RateIcon = rateInfo.icon
               const isEditing = editingId === user._id
-              const roleStyle = getRoleStyle(user.role)
+              const isExpanded = expandedId === user._id
 
               return (
                 <div 
                   key={user._id} 
-                  className={`rounded-2xl border transition-all duration-300 ${
-                    isEditing 
-                      ? 'bg-white/[0.04] border-white/[0.10]' 
-                      : 'bg-white/[0.02] border-white/[0.04] hover:border-white/[0.06]'
-                  }`}
+                  className="rounded-2xl bg-white/[0.02] border border-white/[0.04] overflow-hidden transition-colors"
                 >
-                  {isEditing ? (
-                    <EditMode
-                      editForm={editForm}
-                      onChange={setEditForm}
-                      onSave={() => saveEdit(user._id)}
-                      onCancel={cancelEdit}
-                    />
-                  ) : (
-                    <ViewMode
-                      user={user}
-                      rateInfo={rateInfo}
-                      RateIcon={RateIcon}
-                      roleStyle={roleStyle}
-                      onEdit={() => startEdit(user)}
-                    />
+                  <div 
+                    className="p-4 sm:p-5 flex items-center justify-between cursor-pointer"
+                    onClick={() => {
+                      if (!isEditing) {
+                        setExpandedId(isExpanded ? null : user._id)
+                      }
+                    }}
+                  >
+                    <div className="flex items-center gap-4 min-w-0 flex-1">
+                      <div className="w-10 h-10 rounded-xl bg-[#4CAF50]/10 flex items-center justify-center text-sm font-medium text-[#4CAF50] flex-shrink-0">
+                        {user.name?.charAt(0).toUpperCase() || "?"}
+                      </div>
+                      
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-white truncate">{user.name}</p>
+                        <p className="text-[11px] text-white/25 font-light truncate">{user.email}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 flex-shrink-0 ml-4">
+                      <div className="hidden sm:flex items-center gap-2">
+                        <RateIcon className="text-xs" style={{ color: rateInfo.color }} />
+                        <span className="text-xs text-white/40 font-light">{rateInfo.label}</span>
+                      </div>
+                      
+                      <span className={`hidden sm:inline text-[10px] px-1.5 py-0.5 rounded-md border ${getRoleStyle(user.role)}`}>
+                        {user.role}
+                      </span>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          isEditing ? cancelEdit() : startEdit(user)
+                        }}
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-white/40 hover:text-white hover:bg-white/[0.08] transition-colors text-xs"
+                      >
+                        {isEditing ? (
+                          <><FaTimes className="text-[10px]" /><span className="hidden sm:inline">Закрыть</span></>
+                        ) : (
+                          <><FiEdit3 className="text-[10px]" /><span className="hidden sm:inline">Изменить</span></>
+                        )}
+                      </button>
+
+                      <div className="text-white/20">
+                        {isExpanded && !isEditing ? <FaChevronUp className="text-[10px]" /> : <FaChevronDown className="text-[10px]" />}
+                      </div>
+                    </div>
+                  </div>
+
+                  {isEditing && (
+                    <div className="px-5 pb-5 border-t border-white/[0.04]">
+                      <div className="pt-5 space-y-4">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <InputField
+                            icon={<FiUser className="text-[10px]" />}
+                            label="Имя"
+                            value={editForm.name}
+                            onChange={v => setEditForm(prev => ({ ...prev, name: v }))}
+                            placeholder="Имя пользователя"
+                          />
+                          <InputField
+                            icon={<FiMail className="text-[10px]" />}
+                            label="Email"
+                            value={editForm.email}
+                            onChange={v => setEditForm(prev => ({ ...prev, email: v }))}
+                            placeholder="email@example.com"
+                          />
+                          <InputField
+                            icon={<FaKey className="text-[10px]" />}
+                            label="Пароль"
+                            value={editForm.psw}
+                            onChange={v => setEditForm(prev => ({ ...prev, psw: v }))}
+                            placeholder="Оставьте пустым чтобы не менять"
+                            hint="Оставьте пустым чтобы не менять пароль"
+                          />
+                          <Dropdown
+                            icon={<FiShield className="text-[10px]" />}
+                            label="Роль"
+                            value={editForm.role}
+                            options={ROLE_OPTIONS}
+                            isOpen={roleOpen}
+                            onToggle={() => setRoleOpen(!roleOpen)}
+                            onSelect={(v) => {
+                              setEditForm(prev => ({ ...prev, role: v as IUser["role"] }))
+                              setRoleOpen(false)
+                            }}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="flex items-center gap-1.5 text-[10px] text-white/30 uppercase tracking-[0.05em] mb-3">
+                            <FaCrown className="text-[10px]" />
+                            Тариф
+                          </label>
+                          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                            {RATE_OPTIONS.map(opt => {
+                              const OptIcon = opt.icon
+                              const isActive = editForm.rate === opt.value
+                              return (
+                                <button
+                                  key={opt.value}
+                                  type="button"
+                                  onClick={() => setEditForm(prev => ({ ...prev, rate: opt.value }))}
+                                  className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border transition-colors text-center ${
+                                    isActive 
+                                      ? 'bg-white/[0.06] border-white/[0.15]' 
+                                      : 'bg-transparent border-white/[0.04] hover:border-white/[0.08]'
+                                  }`}
+                                >
+                                  <OptIcon className="text-sm" style={{ color: opt.color }} />
+                                  <span className={`text-[10px] font-medium ${isActive ? 'text-white' : 'text-white/40'}`}>
+                                    {opt.label}
+                                  </span>
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-3 pt-4 border-t border-white/[0.04]">
+                          <button
+                            onClick={() => saveEdit(user._id)}
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#4CAF50]/20 border border-[#4CAF50]/30 text-[#4CAF50] text-sm font-medium transition-colors hover:bg-[#4CAF50]/30"
+                          >
+                            <FaCheck className="text-xs" />
+                            Сохранить
+                          </button>
+                          <button
+                            onClick={cancelEdit}
+                            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] text-white/40 text-sm font-medium transition-colors hover:bg-white/[0.08] hover:text-white/60"
+                          >
+                            <FaTimes className="text-xs" />
+                            Отмена
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {isExpanded && !isEditing && (
+                    <div className="px-5 pb-5 border-t border-white/[0.04]">
+                      <div className="pt-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                        <div className="flex items-center gap-2 text-white/25">
+                          <FiCalendar className="text-[10px] text-white/15" />
+                          <span>{new Date(user.createdAt).toLocaleDateString("ru")}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-white/25">
+                          <FiShield className="text-[10px] text-white/15" />
+                          <span className={`px-1.5 py-0.5 rounded-md border ${getRoleStyle(user.role)}`}>
+                            {user.role}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-white/25">
+                          <RateIcon className="text-[10px]" style={{ color: rateInfo.color }} />
+                          <span>{rateInfo.label}</span>
+                        </div>
+                      </div>
+                    </div>
                   )}
                 </div>
               )
@@ -199,172 +356,73 @@ export default function UsersPage() {
   )
 }
 
-const ViewMode = ({ user, rateInfo, RateIcon, roleStyle, onEdit }: {
-  user: IUser
-  rateInfo: typeof RATE_OPTIONS[0]
-  RateIcon: typeof FaCrown
-  roleStyle: string
-  onEdit: () => void
+const InputField = ({ icon, label, value, onChange, placeholder, hint }: {
+  icon: React.ReactNode
+  label: string
+  value: string
+  onChange: (v: string) => void
+  placeholder: string
+  hint?: string
 }) => (
-  <div className="p-4 sm:p-5">
-    <div className="flex items-center justify-between">
-      <div className="flex items-center gap-4 min-w-0">
-        <div className="w-10 h-10 rounded-xl bg-[#4CAF50]/10 flex items-center justify-center text-sm font-medium text-[#4CAF50] flex-shrink-0">
-          {user.name?.charAt(0).toUpperCase() || "?"}
-        </div>
-        
-        <div className="min-w-0">
-          <div className="flex items-center gap-2 mb-0.5">
-            <p className="text-sm font-medium text-white truncate">{user.name}</p>
-            <span className={`text-[10px] px-1.5 py-0.5 rounded-md border ${roleStyle}`}>
-              {user.role}
-            </span>
-          </div>
-          <div className="flex items-center gap-3 text-[11px] text-white/25 font-light">
-            <span className="flex items-center gap-1">
-              <FiMail className="text-[10px]" />
-              {user.email}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-3 flex-shrink-0 ml-4">
-        <div className="hidden sm:flex items-center gap-2">
-          <RateIcon className="text-xs" style={{ color: rateInfo.color }} />
-          <span className="text-xs text-white/40 font-light">{rateInfo.label}</span>
-        </div>
-        
-        <div className="hidden sm:block text-[11px] text-white/20 font-light">
-          {new Date(user.createdAt).toLocaleDateString("ru")}
-        </div>
-
-        <button
-          onClick={onEdit}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-white/40 hover:text-white hover:bg-white/[0.08] hover:border-white/[0.10] transition-colors text-xs"
-        >
-          <FaEdit className="text-[10px]" />
-          <span className="hidden sm:inline">Изменить</span>
-        </button>
-      </div>
-    </div>
+  <div>
+    <label className="flex items-center gap-1.5 text-[10px] text-white/30 uppercase tracking-[0.05em] mb-2">
+      {icon}
+      {label}
+    </label>
+    <input
+      type="text"
+      value={value}
+      onChange={e => onChange(e.target.value)}
+      className="w-full px-3 py-2.5 rounded-xl bg-[#1E3A1E] border border-white/[0.08] text-white text-sm focus:outline-none focus:border-[#4CAF50] transition-colors font-light placeholder-white/15"
+      placeholder={placeholder}
+    />
+    {hint && <p className="text-[10px] text-white/15 mt-1 font-light">{hint}</p>}
   </div>
 )
 
-const EditMode = ({ editForm, onChange, onSave, onCancel }: {
-  editForm: { name: string; email: string; psw: string; rate: number; role: IUser["role"] }
-  onChange: (form: typeof editForm) => void
-  onSave: () => void
-  onCancel: () => void
-}) => (
-  <div className="p-5 sm:p-6">
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-      <div>
-        <label className="flex items-center gap-1.5 text-[10px] text-white/30 uppercase tracking-[0.05em] mb-2">
-          <FiUser className="text-[10px]" />
-          Имя
-        </label>
-        <input
-          type="text"
-          value={editForm.name}
-          onChange={e => onChange({ ...editForm, name: e.target.value })}
-          className="w-full px-3 py-2.5 rounded-xl bg-[#1E3A1E] border border-white/[0.08] text-white text-sm focus:outline-none focus:border-[#4CAF50] transition-colors font-light placeholder-white/15"
-          placeholder="Имя пользователя"
-        />
-      </div>
+const Dropdown = ({ icon, label, value, options, isOpen, onToggle, onSelect }: {
+  icon: React.ReactNode
+  label: string
+  value: string
+  options: { value: string; label: string }[]
+  isOpen: boolean
+  onToggle: () => void
+  onSelect: (v: string) => void
+}) => {
+  const selected = options.find(o => o.value === value)
 
-      <div>
-        <label className="flex items-center gap-1.5 text-[10px] text-white/30 uppercase tracking-[0.05em] mb-2">
-          <FiMail className="text-[10px]" />
-          Email
-        </label>
-        <input
-          type="email"
-          value={editForm.email}
-          onChange={e => onChange({ ...editForm, email: e.target.value })}
-          className="w-full px-3 py-2.5 rounded-xl bg-[#1E3A1E] border border-white/[0.08] text-white text-sm focus:outline-none focus:border-[#4CAF50] transition-colors font-light placeholder-white/15"
-          placeholder="email@example.com"
-        />
-      </div>
-
-      <div>
-        <label className="flex items-center gap-1.5 text-[10px] text-white/30 uppercase tracking-[0.05em] mb-2">
-          <FaKey className="text-[10px]" />
-          Пароль
-        </label>
-        <input
-          type="text"
-          value={editForm.psw}
-          onChange={e => onChange({ ...editForm, psw: e.target.value })}
-          className="w-full px-3 py-2.5 rounded-xl bg-[#1E3A1E] border border-white/[0.08] text-white text-sm focus:outline-none focus:border-[#4CAF50] transition-colors font-light placeholder-white/15"
-          placeholder="Оставьте пустым чтобы не менять"
-        />
-        <p className="text-[10px] text-white/15 mt-1 font-light">Оставьте пустым чтобы не менять пароль</p>
-      </div>
-
-      <div>
-        <label className="flex items-center gap-1.5 text-[10px] text-white/30 uppercase tracking-[0.05em] mb-2">
-          <FaShieldAlt className="text-[10px]" />
-          Роль
-        </label>
-        <select
-          value={editForm.role}
-          onChange={e => onChange({ ...editForm, role: e.target.value as IUser["role"] })}
-          className="w-full px-3 py-2.5 rounded-xl bg-[#1E3A1E] border border-white/[0.08] text-white text-sm focus:outline-none focus:border-[#4CAF50] transition-colors font-light"
-        >
-          {ROLE_OPTIONS.map(opt => (
-            <option key={opt.value} value={opt.value}>{opt.label}</option>
+  return (
+    <div className="relative">
+      <label className="flex items-center gap-1.5 text-[10px] text-white/30 uppercase tracking-[0.05em] mb-2">
+        {icon}
+        {label}
+      </label>
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl bg-[#1E3A1E] border border-white/[0.08] text-white text-sm transition-colors font-light hover:border-white/[0.12]"
+      >
+        <span>{selected?.label || value}</span>
+        <FaChevronDown className={`text-[10px] text-white/30 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+      </button>
+      {isOpen && (
+        <div className="absolute top-full left-0 right-0 mt-1 rounded-xl bg-[#1A2E1A] border border-white/[0.10] shadow-[0_8px_24px_rgba(0,0,0,0.4)] overflow-hidden z-20">
+          {options.map(opt => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => onSelect(opt.value)}
+              className={`w-full text-left px-3 py-2.5 text-sm transition-colors font-light ${
+                opt.value === value 
+                  ? 'bg-white/[0.06] text-white' 
+                  : 'text-white/50 hover:bg-white/[0.04] hover:text-white/80'
+              }`}
+            >
+              {opt.label}
+            </button>
           ))}
-        </select>
-      </div>
-
-      <div className="sm:col-span-2">
-        <label className="flex items-center gap-1.5 text-[10px] text-white/30 uppercase tracking-[0.05em] mb-2">
-          <FaCrown className="text-[10px]" />
-          Тариф
-        </label>
-        <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
-          {RATE_OPTIONS.map(opt => {
-            const OptIcon = opt.icon
-            const isActive = editForm.rate === opt.value
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => onChange({ ...editForm, rate: opt.value })}
-                className={`flex flex-col items-center gap-1 p-2.5 rounded-xl border transition-colors text-center ${
-                  isActive 
-                    ? 'bg-white/[0.06] border-white/[0.15]' 
-                    : 'bg-transparent border-white/[0.04] hover:border-white/[0.08]'
-                }`}
-              >
-                <OptIcon className="text-sm" style={{ color: opt.color }} />
-                <span className={`text-[10px] font-medium ${isActive ? 'text-white' : 'text-white/40'}`}>
-                  {opt.label}
-                </span>
-                <span className="text-[9px] text-white/20">{opt.limit}</span>
-              </button>
-            )
-          })}
         </div>
-      </div>
+      )}
     </div>
-
-    <div className="flex items-center gap-3 pt-4 border-t border-white/[0.04]">
-      <button
-        onClick={onSave}
-        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#4CAF50]/20 border border-[#4CAF50]/30 text-[#4CAF50] text-sm font-medium transition-colors hover:bg-[#4CAF50]/30"
-      >
-        <FaCheck className="text-xs" />
-        Сохранить
-      </button>
-      <button
-        onClick={onCancel}
-        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white/[0.04] border border-white/[0.06] text-white/40 text-sm font-medium transition-colors hover:bg-white/[0.08] hover:text-white/60"
-      >
-        <FaTimes className="text-xs" />
-        Отмена
-      </button>
-    </div>
-  </div>
-)
+  )
+}
