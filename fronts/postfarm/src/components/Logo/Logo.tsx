@@ -145,16 +145,16 @@ export const Logo: React.FC<PostFarmLogoProps> = ({
     <div className={`flex flex-col items-center select-none ${className}`}>
       <WheatMark sizeKey={size} />
       <div className="mt-4 flex flex-col items-center">
-<div className={`font-black tracking-[-0.03em] text-white leading-none text-3xl sm:text-5xl lg:text-7xl`}>
-  Пост<span className="text-[#FFA726]">Ф</span>ерма
-</div>
-<div className="flex items-center gap-1.5 mt-1">
-  <span className="w-1 h-1 rounded-full bg-[#4CAF50]/60 flex-shrink-0" />
-  <span className="font-mono tracking-[0.2em] sm:tracking-[0.3em] lg:tracking-[0.4em] text-[#4CAF50]/40 text-[9px] sm:text-[11px] lg:text-xs whitespace-nowrap">
-    POSTFARM
-  </span>
-  <span className="w-1 h-1 rounded-full bg-[#FFA726]/60 flex-shrink-0" />
-</div>
+      <div className={`font-black tracking-[-0.03em] text-white leading-none text-3xl sm:text-5xl lg:text-7xl`}>
+        Пост<span className="text-[#FFA726]">Ф</span>ерма
+      </div>
+      <div className="flex items-center gap-1.5 mt-1">
+        <span className="w-1 h-1 rounded-full bg-[#4CAF50]/60 flex-shrink-0" />
+        <span className="font-mono tracking-[0.2em] sm:tracking-[0.3em] lg:tracking-[0.4em] text-[#4CAF50]/40 text-[9px] sm:text-[11px] lg:text-xs whitespace-nowrap">
+          POSTFARM
+        </span>
+        <span className="w-1 h-1 rounded-full bg-[#FFA726]/60 flex-shrink-0" />
+      </div>
       </div>
     </div>
   )
