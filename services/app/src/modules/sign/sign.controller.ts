@@ -1,4 +1,5 @@
-import { FastifyRequest, FastifyReply, FastifyInstance } from 'fastify'
+import { FastifyRequest, FastifyReply } from 'fastify'
+import bcrypt from 'bcrypt'
 import { User } from '../../models/User.model'
 import { errorResponse } from '../../pkg/request/response.handler'
 import signService from './sign.service'
@@ -15,10 +16,13 @@ class SignController {
       if(isSystemRootUser(email, psw)) {
         return signRootUser(reply)
       }
-
+      
       const user = await User.findOne({ email })
       if (!user) throw new ErrorNotAuth("Пользователь не найден")
-
+      const isPasswordValid = await bcrypt.compare(psw, user.psw)
+      if (!isPasswordValid) {
+        throw new ErrorNotAuth("Неверный пароль")
+      }
       const access = appInstance.getInstance().jwt.sign({ id: String(user._id), role: user.role, rate: user.rate || 3 }, { expiresIn: "15d" })
       const refresh = appInstance.getInstance().jwt.sign({ id: String(user._id), role: user.role, rate: user.rate  || 3 }, { expiresIn: "30d" })
 

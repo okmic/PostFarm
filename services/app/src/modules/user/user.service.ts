@@ -30,8 +30,9 @@ class UserService {
         if (payload.psw) {
             hashedPsw = await bcrypt.hash(payload.psw, 6)
         }
-    
-        return await User.updateOne({ _id: id }, { "$set": { ...payload, psw: hashedPsw, 
+
+        return await User.updateOne({ _id: id }, { "$set": { ...payload, 
+            psw: hashedPsw, 
             featuredServices: payload.featuredServices
             ? payload.featuredServices
             : undefined

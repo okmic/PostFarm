@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import httpProxy from "@fastify/http-proxy"
 import appconfig from '../../../pkg/config/appconfig';
-import { AIRateLimitHandler } from '../../../utils/ai.rate.util';
+import { cheackJwtInHeader } from '../../../utils/auth.util';
 
 export default class GptTextModule {
 
@@ -10,11 +10,9 @@ export default class GptTextModule {
     }
 
     private getRoutes(server: FastifyInstance) {
+
         server.register(httpProxy, {
-            preHandler: async (req) => {
-                const reqUserId = (req?.user as any)?.id
-                await AIRateLimitHandler(reqUserId)
-            },
+            preHandler: cheackJwtInHeader,
             upstream: appconfig.services.ai.text.uri,
             prefix: '/api/ai/text/post-chronicle',
             rewritePrefix: '/api/ai/text/post-chronicle',
@@ -22,6 +20,7 @@ export default class GptTextModule {
                 rewriteRequestHeaders: (_originalReq, headers) => {
                     return {
                         ...headers,
+                        userid: (_originalReq?.user as any)?.id,
                         authorization: server.jwt.sign({ id: "root", role: "root", rate: 0 }),
                     }
                 }
@@ -29,10 +28,7 @@ export default class GptTextModule {
         })
 
         server.register(httpProxy, {
-            preHandler: async (req) => {
-                const reqUserId = (req?.user as any)?.id
-                await AIRateLimitHandler(reqUserId)
-            },
+            preHandler: cheackJwtInHeader,
             upstream: appconfig.services.ai.text.uri,
             prefix: '/api/ai/text/channel-content',
             rewritePrefix: '/api/ai/text/channel-content',
@@ -40,6 +36,7 @@ export default class GptTextModule {
                 rewriteRequestHeaders: (_originalReq, headers) => {
                     return {
                         ...headers,
+                        userid: (_originalReq?.user as any)?.id,
                         authorization: server.jwt.sign({ id: "root", role: "root", rate: 0 }),
                     }
                 }
@@ -47,10 +44,7 @@ export default class GptTextModule {
         })
 
         server.register(httpProxy, {
-            preHandler: async (req) => {
-                const reqUserId = (req?.user as any)?.id
-                await AIRateLimitHandler(reqUserId)
-            },
+            preHandler: cheackJwtInHeader,
             upstream: appconfig.services.ai.text.uri,
             prefix: '/api/ai/text/viral-headlines',
             rewritePrefix: '/api/ai/text/viral-headlines',
@@ -58,6 +52,7 @@ export default class GptTextModule {
                 rewriteRequestHeaders: (_originalReq, headers) => {
                     return {
                         ...headers,
+                        userid: (_originalReq?.user as any)?.id,
                         authorization: server.jwt.sign({ id: "root", role: "root", rate: 0 }),
                     }
                 }
@@ -65,10 +60,7 @@ export default class GptTextModule {
         })
 
         server.register(httpProxy, {
-            preHandler: async (req) => {
-                const reqUserId = (req?.user as any)?.id
-                await AIRateLimitHandler(reqUserId)
-            },
+            preHandler: cheackJwtInHeader,
             upstream: appconfig.services.ai.text.uri,
             prefix: '/api/ai/text/education-post',
             rewritePrefix: '/api/ai/text/education-post',
@@ -76,6 +68,7 @@ export default class GptTextModule {
                 rewriteRequestHeaders: (_originalReq, headers) => {
                     return {
                         ...headers,
+                        userid: (_originalReq?.user as any)?.id,
                         authorization: server.jwt.sign({ id: "root", role: "root", rate: 0 }),
                     }
                 }

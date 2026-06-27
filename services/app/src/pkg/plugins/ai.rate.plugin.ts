@@ -12,7 +12,6 @@ const userJWTPlugin: FastifyPluginAsync = async (fastify) => {
       if (!reqUserId) {
         throw new ErrorForbidden('Пользователь не опознан')
       }
-
       const user = await User.findById(reqUserId)
       if (!user) {
         throw new ErrorNotAuth()
