@@ -8,14 +8,10 @@ import { generateChannelContentPrompt } from "./prompts/ai.text.post-channel-con
 import { generateHeadlinePrompt } from "./prompts/ai.viralHeadlines.prompt";
 import { generateEducationPrompt } from "./prompts/ai.educationPost.prompt";
 import { Types } from "mongoose";
-import { AIRateLimitHandler } from "../../../utils/ai.rate.util";
 
 class AITextController {
 
     async postChronicle(req: FastifyRequest<{ Body: { type: PostChronicleTypeEnum, text: string, userId: Types.ObjectId | string, service: ServicesTypeEnum } }>, reply: FastifyReply) {
-        const { userid } = req.headers
-        await AIRateLimitHandler(userid as string)
-        
         const result = await yandexGptTextService.YGpt({
             temperature: 0.7,
             prompt: null,
@@ -38,9 +34,6 @@ class AITextController {
             service: ServicesTypeEnum,
         }
     }>, reply: FastifyReply) {
-        const { userid } = req.headers
-        await AIRateLimitHandler(userid as string)
-        
         const result = await yandexGptTextService.YGpt({
             temperature: 0.7,
             prompt: null,
@@ -65,9 +58,6 @@ class AITextController {
         }>,
         reply: FastifyReply
     ) {
-        const { userid } = req.headers
-        await AIRateLimitHandler(userid as string)
-        
         const { topic, type, style } = req.body
 
         const prompt = generateHeadlinePrompt(topic, type, style)
@@ -96,9 +86,6 @@ class AITextController {
         }>,
         reply: FastifyReply
     ) {
-        const { userid } = req.headers
-        await AIRateLimitHandler(userid as string)
-        
         const { topic, type, level } = req.body
 
         const prompt = generateEducationPrompt(

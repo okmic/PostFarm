@@ -42,4 +42,3 @@ import { initializeDatabase } from "../../../pkg/db/db.init"
     process.exit(1)
   }
 })()
-

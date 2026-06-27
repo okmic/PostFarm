@@ -2,6 +2,7 @@ import { FastifyInstance } from 'fastify';
 import httpProxy from "@fastify/http-proxy"
 import appconfig from '../../../pkg/config/appconfig';
 import { cheackJwtInHeader } from '../../../utils/auth.util';
+import { AIRateLimitHandler } from '../../../utils/ai.rate.util';
 
 export default class GptTextModule {
 
@@ -12,7 +13,10 @@ export default class GptTextModule {
     private getRoutes(server: FastifyInstance) {
 
         server.register(httpProxy, {
-            preHandler: cheackJwtInHeader,
+            preHandler: async (req, res, next) => {
+                await cheackJwtInHeader(req, res, next)
+                .then(async () => await AIRateLimitHandler((req?.user as any)?.id))
+            },
             upstream: appconfig.services.ai.text.uri,
             prefix: '/api/ai/text/post-chronicle',
             rewritePrefix: '/api/ai/text/post-chronicle',
@@ -28,7 +32,10 @@ export default class GptTextModule {
         })
 
         server.register(httpProxy, {
-            preHandler: cheackJwtInHeader,
+            preHandler: async (req, res, next) => {
+                await cheackJwtInHeader(req, res, next)
+                .then(async () => await AIRateLimitHandler((req?.user as any)?.id))
+            },
             upstream: appconfig.services.ai.text.uri,
             prefix: '/api/ai/text/channel-content',
             rewritePrefix: '/api/ai/text/channel-content',
@@ -44,7 +51,10 @@ export default class GptTextModule {
         })
 
         server.register(httpProxy, {
-            preHandler: cheackJwtInHeader,
+            preHandler: async (req, res, next) => {
+                await cheackJwtInHeader(req, res, next)
+                .then(async () => await AIRateLimitHandler((req?.user as any)?.id))
+            },
             upstream: appconfig.services.ai.text.uri,
             prefix: '/api/ai/text/viral-headlines',
             rewritePrefix: '/api/ai/text/viral-headlines',
@@ -60,7 +70,10 @@ export default class GptTextModule {
         })
 
         server.register(httpProxy, {
-            preHandler: cheackJwtInHeader,
+            preHandler: async (req, res, next) => {
+                await cheackJwtInHeader(req, res, next)
+                .then(async () => await AIRateLimitHandler((req?.user as any)?.id))
+            },
             upstream: appconfig.services.ai.text.uri,
             prefix: '/api/ai/text/education-post',
             rewritePrefix: '/api/ai/text/education-post',
