@@ -9,6 +9,7 @@ import {
 import { FiUser, FiMail, FiShield, FiCalendar, FiEdit3 } from "react-icons/fi"
 import type { IUser } from "../../pkg/types/user"
 import apiUserService from "../../pkg/api/api.user.service"
+import { useNotifications } from "../../hooks/useNotifications"
 
 const RATE_OPTIONS = [
   { value: 0, label: "Создатель", icon: FaCrown, color: "#F59E0B" },
@@ -44,6 +45,7 @@ const getRoleStyle = (role: string) => {
 
 export default function UsersPage() {
   const navigate = useNavigate()
+  const { success, error } = useNotifications()
   const [users, setUsers] = useState<IUser[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState("")
@@ -56,7 +58,6 @@ export default function UsersPage() {
     blocked: false,
     role: "user" as IUser["role"]
   })
-  const [message, setMessage] = useState<{ type: "success" | "error", text: string } | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [roleOpen, setRoleOpen] = useState(false)
 
@@ -65,11 +66,11 @@ export default function UsersPage() {
       const result = await apiUserService.find()
       setUsers(Array.isArray(result) ? result : [])
     } catch (err) {
-      setMessage({ type: "error", text: "Ошибка загрузки пользователей" })
+      error("Ошибка загрузки пользователей")
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [error])
 
   useEffect(() => { loadUsers() }, [loadUsers])
 
@@ -103,13 +104,9 @@ export default function UsersPage() {
         if (u._id !== user._id) return u
         return { ...u, blocked: !user.blocked }
       }))
-      setMessage({ 
-        type: "success", 
-        text: user.blocked ? "Пользователь разблокирован" : "Пользователь заблокирован" 
-      })
-      setTimeout(() => setMessage(null), 3000)
+      success(user.blocked ? "Пользователь разблокирован" : "Пользователь заблокирован")
     } catch (err) {
-      setMessage({ type: "error", text: "Ошибка обновления" })
+      error("Ошибка обновления")
     }
   }
 
@@ -137,10 +134,9 @@ export default function UsersPage() {
         return { ...u, name: editForm.name, email: editForm.email, rate: editForm.rate, blocked: editForm.blocked, role: editForm.role }
       }))
       cancelEdit()
-      setMessage({ type: "success", text: "Пользователь обновлён" })
-      setTimeout(() => setMessage(null), 3000)
+      success("Пользователь обновлён")
     } catch (err) {
-      setMessage({ type: "error", text: "Ошибка обновления" })
+      error("Ошибка обновления")
     }
   }
 
@@ -166,16 +162,6 @@ export default function UsersPage() {
             </p>
           </div>
         </div>
-
-        {message && (
-          <div className={`mb-6 p-4 rounded-xl border text-sm ${
-            message.type === "success" 
-              ? "bg-[#4CAF50]/10 border-[#4CAF50]/20 text-[#4CAF50]" 
-              : "bg-[#E57373]/10 border-[#E57373]/20 text-[#E57373]"
-          }`}>
-            {message.text}
-          </div>
-        )}
 
         <div className="relative mb-6">
           <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 text-sm" />

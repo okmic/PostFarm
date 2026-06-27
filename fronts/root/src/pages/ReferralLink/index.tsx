@@ -7,6 +7,7 @@ import {
 } from "react-icons/fa"
 import { FiShield, FiEdit3, FiCalendar, FiRefreshCw } from "react-icons/fi"
 import apiReferralLinkService, { type IReferralLink } from "../../pkg/api/api.referralLink.service"
+import { useNotifications } from "../../hooks/useNotifications"
 
 const RATE_OPTIONS = [
   { value: 3, label: "Росток", icon: FaRocket, color: "#26A5E4", limit: "3/день" },
@@ -37,9 +38,9 @@ const getReferralUrl = (code: string) => `https://admin.postfarm.ru/signup/${cod
 
 export default function ReferralLinksPage() {
   const navigate = useNavigate()
+  const { success, error } = useNotifications()
   const [links, setLinks] = useState<IReferralLink[]>([])
   const [loading, setLoading] = useState(true)
-  const [message, setMessage] = useState<{ type: "success" | "error", text: string } | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [isCreating, setIsCreating] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -58,11 +59,11 @@ export default function ReferralLinksPage() {
       const result = await apiReferralLinkService.find()
       setLinks(Array.isArray(result) ? result : [])
     } catch (err) {
-      setMessage({ type: "error", text: "Ошибка загрузки ссылок" })
+      error("Ошибка загрузки ссылок")
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [error])
 
   useEffect(() => { loadLinks() }, [loadLinks])
 
@@ -74,46 +75,40 @@ export default function ReferralLinksPage() {
   }
 
   const handleCreate = async () => {
-  try {
-    await apiReferralLinkService.create({
-      code: form.code || generateCode(),
-      creationLimit: form.creationLimit,
-      source: form.source,
-      rate:form.rate,
-      role: form.role,
-    })
-    await loadLinks()
-    resetForm()
-    setMessage({ type: "success", text: "Ссылка создана" })
-    setTimeout(() => setMessage(null), 3000)
-  } catch (err) {
-    setMessage({ type: "error", text: "Ошибка создания ссылки" })
+    try {
+      await apiReferralLinkService.create({
+        code: form.code || generateCode(),
+        creationLimit: form.creationLimit,
+        source: form.source,
+        rate: form.rate,
+        role: form.role,
+      })
+      await loadLinks()
+      resetForm()
+      success("Ссылка создана")
+    } catch (err) {
+      error("Ошибка создания ссылки")
+    }
   }
-}
 
-const handleUpdate = async (id: string) => {
-  try {
-    await apiReferralLinkService.update(id, {
-      ...form,
-      rate: form.rate,
-    })
-    await loadLinks()
-    resetForm()
-    setMessage({ type: "success", text: "Ссылка обновлена" })
-    setTimeout(() => setMessage(null), 3000)
-  } catch (err) {
-    setMessage({ type: "error", text: "Ошибка обновления ссылки" })
+  const handleUpdate = async (id: string) => {
+    try {
+      await apiReferralLinkService.update(id, form)
+      await loadLinks()
+      resetForm()
+      success("Ссылка обновлена")
+    } catch (err) {
+      error("Ошибка обновления ссылки")
+    }
   }
-}
 
   const handleDelete = async (id: string) => {
     try {
       await apiReferralLinkService.remove(id)
       await loadLinks()
-      setMessage({ type: "success", text: "Ссылка удалена" })
-      setTimeout(() => setMessage(null), 3000)
+      success("Ссылка удалена")
     } catch (err) {
-      setMessage({ type: "error", text: "Ошибка удаления ссылки" })
+      error("Ошибка удаления ссылки")
     }
   }
 
@@ -121,15 +116,15 @@ const handleUpdate = async (id: string) => {
     try {
       await apiReferralLinkService.update(link._id, { active: !link.active })
       await loadLinks()
+      success(link.active ? "Ссылка отключена" : "Ссылка включена")
     } catch (err) {
-      setMessage({ type: "error", text: "Ошибка обновления" })
+      error("Ошибка обновления")
     }
   }
 
   const copyToClipboard = (code: string) => {
     navigator.clipboard.writeText(getReferralUrl(code))
-    setMessage({ type: "success", text: "Ссылка скопирована" })
-    setTimeout(() => setMessage(null), 2000)
+    success("Ссылка скопирована")
   }
 
   const startEdit = (link: IReferralLink) => {
@@ -175,16 +170,6 @@ const handleUpdate = async (id: string) => {
             <span className="hidden sm:inline">Создать ссылку</span>
           </button>
         </div>
-
-        {message && (
-          <div className={`mb-6 p-4 rounded-xl border text-sm ${
-            message.type === "success" 
-              ? "bg-[#4CAF50]/10 border-[#4CAF50]/20 text-[#4CAF50]" 
-              : "bg-[#E57373]/10 border-[#E57373]/20 text-[#E57373]"
-          }`}>
-            {message.text}
-          </div>
-        )}
 
         {isCreating && (
           <div className="mb-6 rounded-2xl bg-white/[0.04] border border-white/[0.10] overflow-hidden">
@@ -329,7 +314,7 @@ const handleUpdate = async (id: string) => {
                       <div className="min-w-0">
                         <div className="flex items-center gap-2 mb-0.5">
                           <p className="text-sm font-medium text-white truncate font-mono">{link.code.slice(0, 8)}...</p>
-                          <span className={`text-[10px] px-1.5 py-0.5 rounded-md border ${
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded-md border flex-shrink-0 ${
                             link.active 
                               ? 'text-[#4CAF50] bg-[#4CAF50]/10 border-[#4CAF50]/20' 
                               : 'text-white/30 bg-white/[0.02] border-white/[0.04]'
@@ -373,29 +358,29 @@ const handleUpdate = async (id: string) => {
                           </span>
                         </div>
 
-                        <div className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/[0.04]">
+                        <div className="flex items-center gap-2 p-2.5 sm:p-3 rounded-xl bg-white/[0.03] border border-white/[0.04]">
                           <FaLink className="text-[10px] text-white/20 flex-shrink-0" />
-                          <span className="text-xs text-white/40 font-light font-mono truncate flex-1">{referralUrl}</span>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              copyToClipboard(link.code)
-                            }}
-                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-white/40 hover:text-white hover:bg-white/[0.08] transition-colors text-[10px] flex-shrink-0"
-                          >
-                            <FaCopy className="text-[8px]" />
-                            Копировать
-                          </button>
-                          <a
-                            href={referralUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-white/40 hover:text-white hover:bg-white/[0.08] transition-colors text-[10px] flex-shrink-0"
-                          >
-                            <FaExternalLinkAlt className="text-[8px]" />
-                            Открыть
-                          </a>
+                          <span className="text-[10px] sm:text-xs text-white/40 font-light font-mono truncate flex-1 select-all">{referralUrl}</span>
+                          <div className="flex items-center gap-1 flex-shrink-0">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                copyToClipboard(link.code)
+                              }}
+                              className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-white/40 hover:text-white hover:bg-white/[0.08] transition-colors"
+                            >
+                              <FaCopy className="text-[8px] sm:text-[10px]" />
+                            </button>
+                            <a
+                              href={referralUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-white/40 hover:text-white hover:bg-white/[0.08] transition-colors"
+                            >
+                              <FaExternalLinkAlt className="text-[8px] sm:text-[10px]" />
+                            </a>
+                          </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
@@ -422,7 +407,7 @@ const handleUpdate = async (id: string) => {
                             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white/[0.04] border border-white/[0.06] text-white/40 hover:text-white hover:bg-white/[0.08] transition-colors text-xs"
                           >
                             <FiEdit3 className="text-[10px]" />
-                            Изменить
+                            <span className="hidden sm:inline">Изменить</span>
                           </button>
                           <button
                             onClick={(e) => {
@@ -436,7 +421,7 @@ const handleUpdate = async (id: string) => {
                             }`}
                           >
                             <FaPowerOff className="text-[10px]" />
-                            {link.active ? 'Отключить' : 'Включить'}
+                            <span className="hidden sm:inline">{link.active ? 'Отключить' : 'Включить'}</span>
                           </button>
                           <button
                             onClick={(e) => {
