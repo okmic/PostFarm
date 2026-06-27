@@ -1,11 +1,16 @@
-import React from 'react'
-import { Outlet } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { Outlet, useLocation } from 'react-router-dom'
 import { useTheme } from '../providers/ThemeProvider'
 import Nav from '../Nav/Nav'
 import { Logo } from '../Logo/Logo'
 
 export const DashboardLayout: React.FC = () => {
   const { colors } = useTheme()
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" as ScrollBehavior })
+  }, [pathname])
 
   return (
     <div 
