@@ -1,7 +1,6 @@
 import { ErrorAIRateLimitIsOver, ErrorForbidden } from '../pkg/errors/errors'
 import { User } from '../models/User.model'
 import { Types } from 'mongoose'
-import { logger } from '../pkg/logger/logger.service'
 import { AITokens } from '../models/AITokens.model'
 
 export const AIRateLimitHandler = async (userId: string | Types.ObjectId) => {
@@ -10,12 +9,14 @@ export const AIRateLimitHandler = async (userId: string | Types.ObjectId) => {
     if(!user) {
       throw new ErrorAIRateLimitIsOver()
     }
-    if (user.rate === 0) {
-      return
-    }
     if(user.blocked) {
       throw new ErrorForbidden("Пользователь заблокирован обратитесь в поддержку miconext@yandex.ru")
     }
+
+    if (user.role === "root") {
+      return
+    }
+
     const todayStart = new Date()
     todayStart.setHours(0, 0, 0, 0)
 
@@ -30,7 +31,7 @@ export const AIRateLimitHandler = async (userId: string | Types.ObjectId) => {
 
     return
   } catch (error) {
-    logger.error(`Invalid cheack rate limit`)
+    if(error instanceof Error) throw error
     throw new ErrorAIRateLimitIsOver()
   }
 }

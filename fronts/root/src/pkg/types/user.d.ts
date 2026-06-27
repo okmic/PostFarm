@@ -6,6 +6,7 @@ export interface IUser {
     email: string
     psw?: string | null
     rate: 0 | number
+    blocked: boolean
     featuredServices: ServicesIdsType[]
 }
 

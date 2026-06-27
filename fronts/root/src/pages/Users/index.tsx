@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom"
 import { 
   FaArrowLeft, FaSearch, FaCrown,
   FaRocket, FaLeaf, FaGem, FaUserAstronaut,
-  FaKey, FaCheck, FaTimes, FaChevronDown, FaChevronUp
+  FaKey, FaCheck, FaTimes, FaChevronDown, FaChevronUp,
+  FaLock, FaUnlock
 } from "react-icons/fa"
 import { FiUser, FiMail, FiShield, FiCalendar, FiEdit3 } from "react-icons/fi"
 import type { IUser } from "../../pkg/types/user"
@@ -52,6 +53,7 @@ export default function UsersPage() {
     email: "",
     psw: "",
     rate: 3 as number,
+    blocked: false,
     role: "user" as IUser["role"]
   })
   const [message, setMessage] = useState<{ type: "success" | "error", text: string } | null>(null)
@@ -78,7 +80,8 @@ export default function UsersPage() {
       email: user.email, 
       psw: "", 
       rate: user.rate, 
-      role: user.role 
+      role: user.role,
+      blocked: user.blocked || false,
     })
     setExpandedId(user._id)
   }
@@ -87,12 +90,32 @@ export default function UsersPage() {
     setEditingId(null)
     setExpandedId(null)
     setRoleOpen(false)
-    setEditForm({ name: "", email: "", psw: "", rate: 3, role: "user" })
+    setEditForm({ name: "", email: "", psw: "", rate: 3, role: "user", blocked: false })
+  }
+
+  const handleToggleBlocked = async (user: IUser) => {
+    try {
+      await apiUserService.updateUser({ 
+        userId: user._id, 
+        payload: { blocked: !user.blocked } 
+      })
+      setUsers(prev => prev.map(u => {
+        if (u._id !== user._id) return u
+        return { ...u, blocked: !user.blocked }
+      }))
+      setMessage({ 
+        type: "success", 
+        text: user.blocked ? "Пользователь разблокирован" : "Пользователь заблокирован" 
+      })
+      setTimeout(() => setMessage(null), 3000)
+    } catch (err) {
+      setMessage({ type: "error", text: "Ошибка обновления" })
+    }
   }
 
   const saveEdit = async (id: string) => {
     try {
-      const data: Record<string, string | number> = {}
+      const data: Record<string, string | number | boolean> = {}
       const user = users.find(u => u._id === id)
       if (!user) return
 
@@ -100,6 +123,7 @@ export default function UsersPage() {
       if (editForm.email !== user.email) data.email = editForm.email
       if (editForm.psw) data.psw = editForm.psw
       if (editForm.rate !== user.rate) data.rate = editForm.rate
+      if (editForm.blocked !== user.blocked) data.blocked = editForm.blocked
       if (editForm.role !== user.role) data.role = editForm.role
 
       if (Object.keys(data).length === 0) {
@@ -110,7 +134,7 @@ export default function UsersPage() {
       await apiUserService.updateUser({ userId: id, payload: data })
       setUsers(prev => prev.map(u => {
         if (u._id !== id) return u
-        return { ...u, name: editForm.name, email: editForm.email, rate: editForm.rate, role: editForm.role }
+        return { ...u, name: editForm.name, email: editForm.email, rate: editForm.rate, blocked: editForm.blocked, role: editForm.role }
       }))
       cancelEdit()
       setMessage({ type: "success", text: "Пользователь обновлён" })
@@ -138,7 +162,7 @@ export default function UsersPage() {
               Пользователи
             </h1>
             <p className="text-white/30 text-xs sm:text-sm font-light">
-              {users.length} пользователей
+              {users.length} пользователей · {users.filter(u => u.blocked).length} заблокировано
             </p>
           </div>
         </div>
@@ -179,7 +203,11 @@ export default function UsersPage() {
               return (
                 <div 
                   key={user._id} 
-                  className="rounded-2xl bg-white/[0.02] border border-white/[0.04] overflow-hidden transition-colors"
+                  className={`rounded-2xl border overflow-hidden transition-colors ${
+                    user.blocked 
+                      ? 'bg-[#E57373]/[0.02] border-[#E57373]/[0.08]' 
+                      : 'bg-white/[0.02] border-white/[0.04]'
+                  }`}
                 >
                   <div 
                     className="p-4 sm:p-5 flex items-center justify-between cursor-pointer"
@@ -190,12 +218,21 @@ export default function UsersPage() {
                     }}
                   >
                     <div className="flex items-center gap-4 min-w-0 flex-1">
-                      <div className="w-10 h-10 rounded-xl bg-[#4CAF50]/10 flex items-center justify-center text-sm font-medium text-[#4CAF50] flex-shrink-0">
-                        {user.name?.charAt(0).toUpperCase() || "?"}
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-medium flex-shrink-0 ${
+                        user.blocked ? 'bg-[#E57373]/10 text-[#E57373]' : 'bg-[#4CAF50]/10 text-[#4CAF50]'
+                      }`}>
+                        {user.blocked ? <FaLock className="text-xs" /> : user.name?.charAt(0).toUpperCase() || "?"}
                       </div>
                       
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-white truncate">{user.name}</p>
+                        <div className="flex items-center gap-2">
+                          <p className={`text-sm font-medium truncate ${user.blocked ? 'text-white/50' : 'text-white'}`}>{user.name}</p>
+                          {user.blocked && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-md border border-[#E57373]/20 bg-[#E57373]/10 text-[#E57373] flex-shrink-0">
+                              Заблокирован
+                            </span>
+                          )}
+                        </div>
                         <p className="text-[11px] text-white/25 font-light truncate">{user.email}</p>
                       </div>
                     </div>
@@ -209,6 +246,24 @@ export default function UsersPage() {
                       <span className={`hidden sm:inline text-[10px] px-1.5 py-0.5 rounded-md border ${getRoleStyle(user.role)}`}>
                         {user.role}
                       </span>
+
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleToggleBlocked(user)
+                        }}
+                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-colors text-xs ${
+                          user.blocked 
+                            ? 'bg-[#4CAF50]/10 border-[#4CAF50]/20 text-[#4CAF50] hover:bg-[#4CAF50]/20'
+                            : 'bg-[#E57373]/10 border-[#E57373]/20 text-[#E57373] hover:bg-[#E57373]/20'
+                        }`}
+                      >
+                        {user.blocked ? (
+                          <><FaUnlock className="text-[10px]" /><span className="hidden sm:inline">Разблокировать</span></>
+                        ) : (
+                          <><FaLock className="text-[10px]" /><span className="hidden sm:inline">Заблокировать</span></>
+                        )}
+                      </button>
 
                       <button
                         onClick={(e) => {
@@ -298,6 +353,28 @@ export default function UsersPage() {
                               )
                             })}
                           </div>
+                        </div>
+
+                        <div>
+                          <label className="flex items-center gap-1.5 text-[10px] text-white/30 uppercase tracking-[0.05em] mb-3">
+                            <FaLock className="text-[10px]" />
+                            Блокировка
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => setEditForm(prev => ({ ...prev, blocked: !prev.blocked }))}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-colors text-sm font-light ${
+                              editForm.blocked
+                                ? 'bg-[#E57373]/10 border-[#E57373]/20 text-[#E57373]'
+                                : 'bg-white/[0.04] border-white/[0.06] text-white/60'
+                            }`}
+                          >
+                            {editForm.blocked ? (
+                              <><FaLock className="text-xs" /> Заблокирован</>
+                            ) : (
+                              <><FaUnlock className="text-xs" /> Активен</>
+                            )}
+                          </button>
                         </div>
 
                         <div className="flex items-center gap-3 pt-4 border-t border-white/[0.04]">
