@@ -10,6 +10,7 @@ export interface IUser {
   role: "root" | "admin" | "user" 
   rate: number
   featuredServices: ("channel-content" | "viral-headlines" | "education-posts" | "post-chronicle")[]
+  blocked: boolean
 }
 
 const userSchema = new Schema<IUser>({
@@ -21,6 +22,7 @@ const userSchema = new Schema<IUser>({
   role: { type: String, enum: ["root", "admin", "user"], default: "user" },
   rate: { type: Number, default: 3 },
   featuredServices: { type: [String], enum: ["channel-content", "viral-headlines", "education-posts", "post-chronicle"], default: [] },
+  blocked: { type: Boolean, required: false, default: false }
 })
 
 interface IUserModel extends Model<IUser> {

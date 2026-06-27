@@ -1,4 +1,4 @@
-import { ErrorAIRateLimitIsOver } from '../pkg/errors/errors'
+import { ErrorAIRateLimitIsOver, ErrorForbidden } from '../pkg/errors/errors'
 import { User } from '../models/User.model'
 import { Types } from 'mongoose'
 import { logger } from '../pkg/logger/logger.service'
@@ -13,7 +13,9 @@ export const AIRateLimitHandler = async (userId: string | Types.ObjectId) => {
     if (user.rate === 0) {
       return
     }
-
+    if(user.blocked) {
+      throw new ErrorForbidden("Пользователь заблокирован обратитесь в поддержку miconext@yandex.ru")
+    }
     const todayStart = new Date()
     todayStart.setHours(0, 0, 0, 0)
 

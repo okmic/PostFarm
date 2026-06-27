@@ -12,7 +12,6 @@ export const DashboardLayout: React.FC = () => {
     window.scrollTo({ top: 0, behavior: "smooth" as ScrollBehavior })
   }, [pathname])
 
-
   return (
     <div 
       className="relative min-h-screen w-full font-inter flex flex-col lg:flex-row"
