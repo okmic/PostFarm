@@ -13,7 +13,6 @@ import MainPage from "./pages/Main/Main"
 import UsersPage from "./pages/Users"
 import ReferralLinksPage from "./pages/ReferralLink"
 
-
 function MainApp() {
   const auth = useSelector((s: RootState) => s.auth)
   const {

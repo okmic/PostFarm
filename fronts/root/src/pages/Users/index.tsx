@@ -72,7 +72,7 @@ export default function UsersPage() {
     }
   }, [error])
 
-  useEffect(() => { loadUsers() }, [loadUsers])
+  useEffect(() => { loadUsers() }, [])
 
   const startEdit = (user: IUser) => {
     setEditingId(user._id)

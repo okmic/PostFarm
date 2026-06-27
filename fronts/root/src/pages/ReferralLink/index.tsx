@@ -65,7 +65,7 @@ export default function ReferralLinksPage() {
     }
   }, [error])
 
-  useEffect(() => { loadLinks() }, [loadLinks])
+  useEffect(() => { loadLinks() }, [])
 
   const resetForm = () => {
     setForm({ code: "", creationLimit: 1, source: "", rate: 3, role: "user" })
