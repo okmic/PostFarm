@@ -100,7 +100,7 @@ const RATE_CONFIG: Record<number, {
 }
 
 const getRateConfig = (rate: number) => {
-  if (rate === 0) return RATE_CONFIG[1]
+  if (rate === 0) return RATE_CONFIG[0]
   if (rate <= 3) return RATE_CONFIG[1]
   if (rate <= 10) return RATE_CONFIG[2]
   if (rate <= 50) return RATE_CONFIG[3]

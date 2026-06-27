@@ -12,10 +12,8 @@ export const cheackJwtInHeader = async (req: any, reply: any, next: () => void) 
 export const cheackJwtInHeaderRoot = async (req: any, reply: any, next: () => void) => {
     try {
         const user = await req.jwtVerify({})
-        console.log(user)
         if(
-            user.rate !== 0
-            || user.role !== "root"
+           user.role !== "root"
         ) {
             throw new ErrorForbidden()
         }
