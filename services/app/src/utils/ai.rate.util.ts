@@ -24,7 +24,6 @@ export const AIRateLimitHandler = async (userId: string | Types.ObjectId) => {
       userId: user._id,
       createdAt: { $gte: todayStart }
     })
-
     if (todayTokens.length >= user.rate) {
       throw new ErrorAIRateLimitIsOver()
     }

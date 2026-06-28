@@ -5,8 +5,7 @@
   "author": "okmic <okmic.g@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "gateway:server:dev": "nodemon --watch src --ext ts --ignore src/**/*.json --exec \"ts-node src/entrypoints/gateway/server.ts\"",
-    "gpt:text:server:dev": "nodemon --watch src --ext ts --ignore src/**/*.json --exec \"ts-node src/entrypoints/ai/text/server.ts\"",
+    "gateway:server:dev": "nodemon --watch src --ext ts --ignore src/**/*.json --exec \"ts-node src/index.ts\"",
     "build": "tsc -p ."
   },
   "dependencies": {

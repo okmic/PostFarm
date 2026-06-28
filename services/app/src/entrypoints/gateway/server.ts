@@ -1,61 +1,17 @@
-import fastify from "fastify"
-import formBody from "@fastify/formbody"
-import cors from '@fastify/cors'
-import config from "../../pkg/config/appconfig"
-import fastifyJwt from '@fastify/jwt'
-import fastifyStatic from "@fastify/static"
-import cookie from "@fastify/cookie"
-import errorHandlerPlugin from "../../pkg/plugins/global.errors.plugin"
-import SignModule from "../../modules/sign/sign.module"
-import usersAuthPlugin from "../../pkg/plugins/users.auth.plugin"
-import appconfig from "../../pkg/config/appconfig"
-import { cheackOrCreateInitFoldersAndFiles, getPath } from "../../utils/paths.util"
-import { setupGlobalErrorHandlers } from "../../pkg/errors/error-handler"
-import appInstance from "../../pkg/appInstance/appInstance"
-import GatewayModule from "../../modules/gateway/gateway.module"
-import { initializeDatabase } from "../../pkg/db/db.init"
+import { type FastifyInstance } from "fastify"
+import UserModule from "../../modules/user/user.module"
+import PostModule from "../../modules/post/post.module"
+import RootModule from "../../modules/root/root.module"
 
-(async () => {
-  const server = fastify({ logger: true })
-
-  await server.register(formBody)
-  await server.register(cookie)
-  await server.register(fastifyJwt, {
-    secret: config.JWT_SECRET,
-    decoratorName: 'jwt'
-  })
-  await server.register(cors, {
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
-  })
-  await server.register(fastifyStatic, {
-    root: getPath("static"),
-    prefix: "/api/public",
-    decorateReply: false
-  })
-
-  server.register(errorHandlerPlugin)
-
-  if (!server.jwt) throw new Error('JWT plugin not initialized')
-  appInstance.setApp(server)
-  server.get('/api', async (_, reply) => reply.send({ msg: "pong" }))
-  new SignModule(server)
-  server.register(usersAuthPlugin)
-  new GatewayModule(server)
-  
-  try {
-    await cheackOrCreateInitFoldersAndFiles()
-    await initializeDatabase()
-    setupGlobalErrorHandlers()
-    
-    await server.listen({
-      port: appconfig.services.gateway.PORT,
-      host: '0.0.0.0'
-    })
-  } catch (err) {
-    server.log.error(err)
-    process.exit(1)
+export default class TenantServer {
+  constructor(server: FastifyInstance) {
+    this.initModules(server)
   }
-})()
+
+  initModules(server: FastifyInstance){
+    new UserModule(server)
+    new PostModule(server)
+    new RootModule(server)
+  }
+
+}

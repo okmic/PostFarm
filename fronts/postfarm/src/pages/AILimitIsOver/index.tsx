@@ -2,7 +2,7 @@ import { useSelector } from "react-redux"
 import { useNavigate } from "react-router-dom"
 import type { RootState } from "../../store/store"
 import { 
-  FaArrowLeft, FaBolt, FaCrown, FaEnvelope, FaClock,
+  FaArrowLeft, FaBolt, FaEnvelope, FaClock,
   FaRocket, FaGem, FaUserAstronaut, FaLeaf, FaStar,
   FaCheckCircle
 } from "react-icons/fa"
@@ -17,16 +17,6 @@ const RATE_CONFIG: Record<number, {
   stars: number
   features: string[]
 }> = {
-  0: {
-    name: "Создатель",
-    icon: FaCrown,
-    color: "#F59E0B",
-    bg: "bg-amber-500/10",
-    border: "border-amber-500/30",
-    dailyLimit: "∞",
-    stars: 5,
-    features: ["Безлимитные генерации", "Все сервисы", "Приоритетная поддержка"]
-  },
   1: {
     name: "Росток",
     icon: FaRocket,
@@ -80,7 +70,6 @@ const RATE_CONFIG: Record<number, {
 }
 
 const getRateConfig = (rate: number) => {
-  if (rate === 0) return RATE_CONFIG[0]
   if (rate <= 3) return RATE_CONFIG[1]
   if (rate <= 10) return RATE_CONFIG[2]
   if (rate <= 50) return RATE_CONFIG[3]
@@ -109,7 +98,7 @@ export default function AILimitIsOverPage() {
     return `${hours} ч ${minutes} мин`
   }
 
-  const allRates = [0, 1, 2, 3, 4, 5].map(key => RATE_CONFIG[key])
+  const allRates = [1, 2, 3, 4, 5].map(key => RATE_CONFIG[key])
   const currentRateIndex = allRates.findIndex(r => r.dailyLimit === dailyLimit)
 
   return (
@@ -176,7 +165,7 @@ export default function AILimitIsOverPage() {
 
         <div className="rounded-2xl bg-white/[0.03] border border-white/[0.08] p-6 sm:p-8 mb-10">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-xl bg-[#FFA726]/10 border border-[#FFA726]/20 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center">
               <FaEnvelope className="text-[#FFA726] text-lg" />
             </div>
             <div>
