@@ -11,6 +11,11 @@ export interface IUser {
   rate: number
   featuredServices: ("channel-content" | "viral-headlines" | "education-posts" | "post-chronicle")[]
   blocked: boolean
+  expirationRateDate: {
+    date: Date | null
+    role: IUser["role"] | null
+    rate: IUser["rate"] | null
+  }
 }
 
 const userSchema = new Schema<IUser>({
@@ -22,7 +27,12 @@ const userSchema = new Schema<IUser>({
   role: { type: String, enum: ["root", "admin", "user"], default: "user" },
   rate: { type: Number, default: 3 },
   featuredServices: { type: [String], enum: ["channel-content", "viral-headlines", "education-posts", "post-chronicle"], default: [] },
-  blocked: { type: Boolean, required: false, default: false }
+  blocked: { type: Boolean, required: false, default: false },
+  expirationRateDate: {
+    date: { type: Date, required: false, default: null },
+    role: { type: String, enum: ["root", "admin", "user"], required: false },
+    rate: { type: Number, required: false},
+  }
 })
 
 interface IUserModel extends Model<IUser> {

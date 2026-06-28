@@ -8,6 +8,11 @@ export interface IUser {
     rate: 0 | number
     blocked: boolean
     featuredServices: ServicesIdsType[]
+    expirationRateDate: {
+        date: Date | null
+        role: IUser["role"] | null
+        rate: IUser["rate"] | null
+    }
 }
 
 export type ServicesIdsType = "channel-content" | "viral-headlines" | "education-posts" | "post-chronicle"
