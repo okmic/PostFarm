@@ -12,6 +12,7 @@ import TenantServer from "./entrypoints/gateway/server"
 import AIGPTTextServer from "./entrypoints/ai/text/server"
 import { cheackOrCreateInitFoldersAndFiles, getPath } from "./utils/paths.util"
 import appInstance from "./pkg/appInstance/appInstance"
+import ScheduleCore from "./entrypoints/schedule/core"
 
 (async () => {
   const server = fastify({ logger: true })
@@ -41,6 +42,7 @@ import appInstance from "./pkg/appInstance/appInstance"
   server.get('/api', async (_, reply) => reply.send({ msg: "pong" }))
   new TenantServer(server)
   new AIGPTTextServer(server)
+  new ScheduleCore()
 
   try {
     await cheackOrCreateInitFoldersAndFiles()

@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom"
 import { 
   FaArrowLeft, FaPlus, FaTimes, FaCheck, FaTrash, FaCrown,
   FaRocket, FaLeaf, FaGem, FaUserAstronaut, FaChevronDown, FaChevronUp,
-  FaCopy, FaLink, FaUsers, FaPowerOff, FaKey, FaExternalLinkAlt
+  FaCopy, FaLink, FaUsers, FaPowerOff, FaKey, FaExternalLinkAlt,
+  FaClock, FaCalendarTimes
 } from "react-icons/fa"
 import { FiShield, FiEdit3, FiCalendar, FiRefreshCw } from "react-icons/fi"
 import apiReferralLinkService, { type IReferralLink } from "../../pkg/api/api.referralLink.service"
@@ -18,13 +19,13 @@ const RATE_OPTIONS = [
   { value: 0, label: "Создатель", icon: FaCrown, color: "#F59E0B", limit: "∞" },
 ]
 
-const getRateInfo = (rate: number) => RATE_OPTIONS.find(r => r.value === rate) || RATE_OPTIONS[0]
-
 const ROLE_OPTIONS: { value: string, label: string }[] = [
   { value: "user", label: "Пользователь" },
   { value: "admin", label: "Администратор" },
   { value: "root", label: "Root" },
 ]
+
+const getRateInfo = (rate: number) => RATE_OPTIONS.find(r => r.value === rate) || RATE_OPTIONS[0]
 
 const generateCode = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
@@ -36,6 +37,12 @@ const generateCode = () => {
 
 const getReferralUrl = (code: string) => `https://admin.postfarm.ru/signup/${code}`
 
+const formatDateForInput = (date: string | null): string => {
+  if (!date) return ""
+  const d = new Date(date)
+  return d.toISOString().slice(0, 16)
+}
+
 export default function ReferralLinksPage() {
   const navigate = useNavigate()
   const { success, error } = useNotifications()
@@ -45,6 +52,7 @@ export default function ReferralLinksPage() {
   const [isCreating, setIsCreating] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [roleOpen, setRoleOpen] = useState(false)
+  const [expirationRoleOpen, setExpirationRoleOpen] = useState(false)
   
   const [form, setForm] = useState({
     code: "",
@@ -52,6 +60,9 @@ export default function ReferralLinksPage() {
     source: "",
     rate: 3,
     role: "user" as string,
+    expirationDate: "",
+    expirationRate: 3,
+    expirationRole: "user" as string,
   })
 
   const loadLinks = useCallback(async () => {
@@ -68,10 +79,29 @@ export default function ReferralLinksPage() {
   useEffect(() => { loadLinks() }, [])
 
   const resetForm = () => {
-    setForm({ code: "", creationLimit: 1, source: "", rate: 3, role: "user" })
+    setForm({ 
+      code: "", creationLimit: 1, source: "", rate: 3, role: "user",
+      expirationDate: "", expirationRate: 3, expirationRole: "user"
+    })
     setIsCreating(false)
     setEditingId(null)
     setRoleOpen(false)
+    setExpirationRoleOpen(false)
+  }
+
+  const buildLinkExpirationDate = () => {
+    if (!form.expirationDate) {
+      return {
+        date: null,
+        role: null,
+        rate: null,
+      }
+    }
+    return {
+      date: new Date(form.expirationDate).toISOString(),
+      role: form.expirationRole,
+      rate: form.expirationRate,
+    }
   }
 
   const handleCreate = async () => {
@@ -82,6 +112,7 @@ export default function ReferralLinksPage() {
         source: form.source,
         rate: form.rate,
         role: form.role,
+        linkExpirationDate: buildLinkExpirationDate(),
       })
       await loadLinks()
       resetForm()
@@ -93,7 +124,14 @@ export default function ReferralLinksPage() {
 
   const handleUpdate = async (id: string) => {
     try {
-      await apiReferralLinkService.update(id, form)
+      await apiReferralLinkService.update(id, {
+        code: form.code,
+        creationLimit: form.creationLimit,
+        source: form.source,
+        rate: form.rate,
+        role: form.role,
+        linkExpirationDate: buildLinkExpirationDate(),
+      })
       await loadLinks()
       resetForm()
       success("Ссылка обновлена")
@@ -136,7 +174,16 @@ export default function ReferralLinksPage() {
       source: link.source,
       rate: link.rate,
       role: link.role,
+      expirationDate: link.linkExpirationDate?.date 
+        ? formatDateForInput(link.linkExpirationDate.date) 
+        : "",
+      expirationRate: link.linkExpirationDate?.rate ? Number(link.linkExpirationDate.rate) : 3,
+      expirationRole: link.linkExpirationDate?.role || "user",
     })
+  }
+
+  const hasExpiration = (link: IReferralLink) => {
+    return link.linkExpirationDate?.date !== null
   }
 
   return (
@@ -217,11 +264,14 @@ export default function ReferralLinksPage() {
 
                 <Dropdown
                   icon={<FiShield className="text-[10px]" />}
-                  label="Роль"
+                  label="Роль при регистрации"
                   value={form.role}
                   options={ROLE_OPTIONS}
                   isOpen={roleOpen}
-                  onToggle={() => setRoleOpen(!roleOpen)}
+                  onToggle={() => {
+                    setRoleOpen(!roleOpen)
+                    setExpirationRoleOpen(false)
+                  }}
                   onSelect={(v) => {
                     setForm(prev => ({ ...prev, role: v }))
                     setRoleOpen(false)
@@ -232,7 +282,7 @@ export default function ReferralLinksPage() {
               <div className="mb-4">
                 <label className="flex items-center gap-1.5 text-[10px] text-white/30 uppercase tracking-[0.05em] mb-3">
                   <FaCrown className="text-[10px]" />
-                  Тариф
+                  Тариф при регистрации
                 </label>
                 <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                   {RATE_OPTIONS.map(opt => {
@@ -258,6 +308,77 @@ export default function ReferralLinksPage() {
                     )
                   })}
                 </div>
+              </div>
+
+              <div className="pt-4 border-t border-white/[0.04] mb-4">
+                <label className="flex items-center gap-1.5 text-[10px] text-white/30 uppercase tracking-[0.05em] mb-3">
+                  <FaCalendarTimes className="text-[10px]" />
+                  Условия после истечения срока (опционально)
+                </label>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-[10px] text-white/20 mb-1.5 block">
+                      <FaClock className="inline text-[8px] mr-1" />
+                      Дата смены условий
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={form.expirationDate}
+                      onChange={e => setForm(prev => ({ ...prev, expirationDate: e.target.value }))}
+                      className="w-full px-3 py-2.5 rounded-xl bg-[#1E3A1E] border border-white/[0.08] text-white text-sm focus:outline-none focus:border-[#4CAF50] transition-colors font-light"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-white/20 mb-1.5 block">Роль после истечения</label>
+                    <Dropdown
+                      icon={<FiShield className="text-[10px]" />}
+                      label=""
+                      value={form.expirationRole}
+                      options={ROLE_OPTIONS}
+                      isOpen={expirationRoleOpen}
+                      onToggle={() => {
+                        setExpirationRoleOpen(!expirationRoleOpen)
+                        setRoleOpen(false)
+                      }}
+                      onSelect={(v) => {
+                        setForm(prev => ({ ...prev, expirationRole: v }))
+                        setExpirationRoleOpen(false)
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[10px] text-white/20 mb-1.5 block">Тариф после истечения</label>
+                    <div className="grid grid-cols-3 gap-1">
+                      {RATE_OPTIONS.filter(o => o.value !== 0).map(opt => {
+                        const OptIcon = opt.icon
+                        const isActive = form.expirationRate === opt.value
+                        return (
+                          <button
+                            key={opt.value}
+                            type="button"
+                            onClick={() => setForm(prev => ({ ...prev, expirationRate: opt.value }))}
+                            className={`flex flex-col items-center gap-0.5 p-1.5 rounded-lg border transition-colors text-center ${
+                              isActive 
+                                ? 'bg-white/[0.06] border-white/[0.15]' 
+                                : 'bg-transparent border-white/[0.04] hover:border-white/[0.08]'
+                            }`}
+                          >
+                            <OptIcon className="text-[10px]" style={{ color: opt.color }} />
+                            <span className={`text-[8px] font-medium ${isActive ? 'text-white' : 'text-white/40'}`}>
+                              {opt.label}
+                            </span>
+                          </button>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-[9px] text-white/15 mt-2 font-light">
+                  После наступления указанной даты, роль и тариф пользователя изменятся автоматически. Оставьте дату пустой если не нужно.
+                </p>
               </div>
 
               <div className="flex items-center gap-3 pt-4 border-t border-white/[0.04]">
@@ -294,6 +415,11 @@ export default function ReferralLinksPage() {
                 ? Math.min(100, (link.createdByLink / link.creationLimit) * 100) 
                 : 0
               const referralUrl = getReferralUrl(link.code)
+              const linkHasExpiration = hasExpiration(link)
+              const expRateInfo = linkHasExpiration && link.linkExpirationDate.rate 
+                ? getRateInfo(Number(link.linkExpirationDate.rate)) 
+                : null
+              const ExpRateIcon = expRateInfo?.icon
 
               return (
                 <div 
@@ -321,6 +447,12 @@ export default function ReferralLinksPage() {
                           }`}>
                             {link.active ? 'Активна' : 'Отключена'}
                           </span>
+                          {linkHasExpiration && (
+                            <span className="text-[10px] px-1.5 py-0.5 rounded-md border border-[#FFA726]/20 bg-[#FFA726]/10 text-[#FFA726] flex-shrink-0">
+                              <FaClock className="inline text-[8px] mr-0.5" />
+                              Истекает
+                            </span>
+                          )}
                         </div>
                         <p className="text-[11px] text-white/25 font-light truncate">{link.source}</p>
                       </div>
@@ -382,6 +514,23 @@ export default function ReferralLinksPage() {
                             </a>
                           </div>
                         </div>
+
+                        {linkHasExpiration && (
+                          <div className="flex items-center gap-3 p-3 rounded-xl bg-[#FFA726]/[0.03] border border-[#FFA726]/[0.08]">
+                            <FaCalendarTimes className="text-sm text-[#FFA726] flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs text-white/50 font-light">
+                                После {new Date(link.linkExpirationDate.date!).toLocaleDateString("ru")}:
+                              </p>
+                              <p className="text-xs text-white/30 font-light flex items-center gap-2">
+                                Роль: <span className="text-white/50">{link.linkExpirationDate.role || "—"}</span>
+                                {ExpRateIcon && (
+                                  <><ExpRateIcon className="text-[10px]" style={{ color: expRateInfo?.color }} /> {expRateInfo?.label}</>
+                                )}
+                              </p>
+                            </div>
+                          </div>
+                        )}
 
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
                           <div className="flex items-center gap-2 text-white/25">
@@ -489,10 +638,12 @@ const Dropdown = ({ icon, label, value, options, isOpen, onToggle, onSelect }: {
 
   return (
     <div className="relative">
-      <label className="flex items-center gap-1.5 text-[10px] text-white/30 uppercase tracking-[0.05em] mb-2">
-        {icon}
-        {label}
-      </label>
+      {label && (
+        <label className="flex items-center gap-1.5 text-[10px] text-white/30 uppercase tracking-[0.05em] mb-2">
+          {icon}
+          {label}
+        </label>
+      )}
       <button
         type="button"
         onClick={onToggle}

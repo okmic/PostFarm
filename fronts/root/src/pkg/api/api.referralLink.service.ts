@@ -14,6 +14,11 @@ export interface IReferralLink {
   source: string
   rate: number
   role: string
+  linkExpirationDate: {
+    date: string | null
+    role: string | null
+    rate: number | null
+  }
 }
 
 class ApiReferralLinkService {
@@ -53,13 +58,7 @@ class ApiReferralLinkService {
       .catch(e => handlerError(e))
   }
 
-  public async create(data: {
-    code: string
-    creationLimit: number
-    source: string
-    rate: number
-    role: string
-  }) {
+  public async create(data: Partial<IReferralLink>) {
     return await this.axiosInstance.post(
       `/api/root/referral-links`,
       data,

@@ -11,6 +11,11 @@ export interface IReferralLink {
   source: string
   rate: IUser["rate"]
   role: IUser["role"]
+  linkExpirationDate: {
+    date: Date | null
+    role: IUser["role"] | null
+    rate: IUser["rate"] | null
+  }
 }
 
 export type IReferralLinkType = IReferralLink & Document
@@ -24,6 +29,11 @@ const ReferralLinkSchema = new Schema<IReferralLinkType>({
   source: { type: String, required: true },
   role: { type: String, enum: ["root", "admin", "user"], required: true },
   rate: { type: Number, required: true},
+  linkExpirationDate: {
+    date: { type: Date, required: false, default: null },
+    role: { type: String, enum: ["root", "admin", "user"], required: false },
+    rate: { type: Number, required: false},
+  }
 })
 
 interface IReferralLinkModel extends Model<IReferralLinkType> {
