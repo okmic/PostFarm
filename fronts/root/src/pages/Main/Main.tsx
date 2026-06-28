@@ -36,17 +36,13 @@ export default function MainPage() {
                     <a
                         className="group inline-flex items-center gap-2 text-sm md:text-base font-medium transition-all duration-300"
                         target="_blank"
-                        href="https://miconext.github.io/MicoMax/"
+                        href="https://miconext.github.io/Mico/"
                     >
                         <span className="text-white font-semibold tracking-wide">сделано в</span>
                         <span className="text-[#fff] font-bold tracking-tight bg-white/5 px-2 py-0.5 rounded-md group-hover:bg-white/10 transition-all">
-                            Mico<span className="text-[#8b5cf6]">Max</span>
+                            Mi<span className="text-[#8b5cf6]">co</span>
                         </span>
                     </a>
-
-                    <p className="text-[10px] md:text-xs text-white/25 mt-2 tracking-wide">
-                        команда разработчиков сервисов для автоматического выращивания контента
-                    </p>
 
                     <div className="mt-5 w-full max-w-md mx-auto mb-6">
                         <div className="h-px bg-gradient-to-r from-transparent via-[#4CAF50]/40 to-transparent" />
