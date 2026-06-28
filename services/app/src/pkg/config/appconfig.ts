@@ -1,6 +1,8 @@
 import dotenv from "dotenv"
-import { text } from "stream/consumers"
-dotenv.config()
+
+if(process.env.MOD !== "docker") {
+    dotenv.config()
+}
 
 const value = (value: any): string  => {
     if(!value) throw new Error('Invalid env property: ' + value)
@@ -8,6 +10,7 @@ const value = (value: any): string  => {
 }
 
 export default {
+    PORT: value(process.env.PORT),
     ROOT_SECRET: value(process.env.ROOT_SECRET),
     JWT_SECRET: value(process.env.JWT_SECRET),
     MONGODB_URI: value(process.env.MONGODB_URI),

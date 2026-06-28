@@ -1,7 +1,6 @@
 import fastify from "fastify"
 import formBody from "@fastify/formbody"
 import cors from '@fastify/cors'
-import fastifyStatic from "@fastify/static"
 import fastifyJwt from '@fastify/jwt'
 import cookie from "@fastify/cookie"
 import appconfig from "./pkg/config/appconfig"
@@ -10,7 +9,6 @@ import { setupGlobalErrorHandlers } from "./pkg/errors/error-handler"
 import { initializeDatabase } from "./pkg/db/db.init"
 import TenantServer from "./entrypoints/gateway/server"
 import AIGPTTextServer from "./entrypoints/ai/text/server"
-import { cheackOrCreateInitFoldersAndFiles, getPath } from "./utils/paths.util"
 import appInstance from "./pkg/appInstance/appInstance"
 import ScheduleCore from "./entrypoints/schedule/core"
 
@@ -29,11 +27,6 @@ import ScheduleCore from "./entrypoints/schedule/core"
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true
   })
-  await server.register(fastifyStatic, {
-    root: getPath("static"),
-    prefix: "/api/public",
-    decorateReply: false
-  })
 
   server.register(errorHandlerPlugin)
 
@@ -45,7 +38,6 @@ import ScheduleCore from "./entrypoints/schedule/core"
   new ScheduleCore()
 
   try {
-    await cheackOrCreateInitFoldersAndFiles()
     await initializeDatabase()
     setupGlobalErrorHandlers()
     
