@@ -10,6 +10,9 @@ export default class SignModule {
         server.post('/api/signin', {
             handler: signController.signin
         })
+        server.post('/api/root/signin', {
+            handler: signController.signin
+        })
         server.post('/api/signup', {
             handler: signController.signup
         })

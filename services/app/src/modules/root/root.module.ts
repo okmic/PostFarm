@@ -2,7 +2,6 @@ import { FastifyInstance } from 'fastify';
 import userController from '../user/user.controller';
 import { cheackJwtInHeaderRoot } from '../../utils/auth.util';
 import referralLinkController from '../referralLink/referralLink.controller';
-import signController from '../sign/sign.controller';
 
 export default class RootModule {
     constructor(server: FastifyInstance) {
@@ -10,9 +9,6 @@ export default class RootModule {
     }
 
     private getRoutes(server: FastifyInstance){
-        server.post('/api/root/signin', {
-            handler: signController.signin
-        })
         server.get('/api/root/users', {
             preHandler: cheackJwtInHeaderRoot,
             handler: userController.find,
