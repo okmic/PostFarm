@@ -56,8 +56,6 @@ services:
     image: mongo:7
     container_name: postfarm-mongo
     restart: always
-    ports:
-      - "27017:27017"
     volumes:
       - mongo-data:/data/db
       - mongo-config:/data/configdb
