@@ -27,17 +27,25 @@ class ApiAuthService {
         })
         .catch(e => handlerError(e))
     }
+    
     async signup(payload: { name: string, email: string, psw: string, refCode?: string}) {
         return await this.axiosInstance.post<any>(
             `/api/signup`,
             { ...payload }
+        )
+        .catch(e => handlerError(e))
+    }
+
+    async signupVerify(payload: { code: string }) {
+        return await this.axiosInstance.get<any>(
+            `/api/signup/verify/${payload.code}`,
         ).then(r => {
             store.dispatch(
                 authStatus({ status: "loading", user: r.data.user })
             )
             localStorage.setItem('token', r.data.accessToken)
         })
-            .catch(e => handlerError(e))
+        .catch(e => handlerError(e))
     }
 }
 

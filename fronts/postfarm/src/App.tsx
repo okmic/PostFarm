@@ -19,6 +19,7 @@ import PostChronicleService from "./pages/Services/PostChronicleService"
 import ChannelContentService from "./pages/Services/ChannelContentService"
 import StatsPage from "./pages/Stats"
 import AILimitIsOverPage from "./pages/AILimitIsOver"
+import { SignUpVerify } from "./pages/SignupVerify"
 
 function MainApp() {
   const auth = useSelector((s: RootState) => s.auth)
@@ -94,6 +95,7 @@ function MainApp() {
               <Route path="/signin" element={<SignInPage />} />
               <Route path="/signup" element={<SignUpPage />} />
               <Route path="/signup/:refCode" element={<SignUpPage />} />
+              <Route path="/signup/verify/:code" element={<SignUpVerify />} />
               <Route path="*" element={<Navigate to="/signin" replace />} />
             </>
           )}

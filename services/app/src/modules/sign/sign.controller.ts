@@ -62,8 +62,8 @@ class SignController {
   }
 
   async signupVerify(req: FastifyRequest<{ Params: { code: string } }>, reply: FastifyReply): Promise<void> {
-    try {
       const { code } = req.params
+
       const user = await signService.signupVerifyCode(code)
       const access = appInstance.getInstance().jwt.sign({ id: String(user._id), role: user.role, rate: user.rate || 3 }, { expiresIn: "15d" })
       const refresh = appInstance.getInstance().jwt.sign({ id: String(user._id), role: user.role, rate: user.rate || 3 }, { expiresIn: "30d" })
@@ -86,9 +86,6 @@ class SignController {
           status: 'success',
           auth: true, accessToken: access, refreshToken: refresh, user: { ...user, psw: undefined }
         })
-    } catch (e) {
-      return errorResponse(e, reply, "Пользователь уже существует")
-    }
   }
 
   async rootSignin(req: FastifyRequest<{ Body: { email: string, psw: string } }>, reply: FastifyReply): Promise<void> {

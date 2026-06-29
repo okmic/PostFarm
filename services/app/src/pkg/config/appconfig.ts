@@ -10,7 +10,7 @@ const value = (value: any): string  => {
 }
 
 export default {
-    uri: value(process.env.URI),
+    adminClientURI: value(process.env.ADMIN_CLIENT_URI),
     PORT: value(process.env.PORT),
     ROOT_SECRET: value(process.env.ROOT_SECRET),
     JWT_SECRET: value(process.env.JWT_SECRET),

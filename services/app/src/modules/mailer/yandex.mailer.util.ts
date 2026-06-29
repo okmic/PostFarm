@@ -38,10 +38,8 @@ export const sendYandexEmail = async (options: MailOptions): Promise<boolean> =>
       html: options.html,
     })
 
-    console.log(info)
     return info
   } catch (error) {
-    console.log(error)
     return false
   }
 }

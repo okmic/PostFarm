@@ -1,7 +1,7 @@
 import { IUser, User } from "../../models/User.model"
 import bcrypt from "bcrypt"
 import { v4 } from "uuid"
-import { ErrorBadRequest, ErrorForbidden } from "../../pkg/errors/errors"
+import { ErrorBadRequest } from "../../pkg/errors/errors"
 import { ReferralLink } from "../../models/ReferralLink.model"
 import { SignupCode } from "../../models/SignupCode.model"
 import { sendYandexEmail } from "../mailer/yandex.mailer.util"
@@ -18,10 +18,15 @@ class SignService {
       } else {
         user = findUser
       }
+      const verifyCode = v4()
+      console.log(
+              await SignupCode.create({
+        userId: user._id,
+        code: verifyCode
+      })
+      )
 
-
-      const verifyUrl = `${appconfig.uri}/signup/verify/${v4()}`
-
+      const verifyUrl = `${appconfig.adminClientURI}/signup/verify/${verifyCode}`
       const html = `
 <div style="font-family: 'Inter', sans-serif; max-width: 480px; margin: 0 auto; padding: 32px 24px; background: #1E3A1E; border-radius: 16px; color: #fff;">
   <div style="text-align: center; margin-bottom: 32px;">
@@ -96,21 +101,26 @@ class SignService {
   }
 
   async signupVerifyCode(code: string) {
-    const signupCode = await SignupCode.findOne({ code })
-    if (!signupCode) {
-      throw new ErrorBadRequest("Неверный код регистрации")
+    try {
+      const signupCode = await SignupCode.findOne({ code })
+      if (!signupCode) {
+        throw new ErrorBadRequest("Неверный код регистрации")
+      }
+
+      const user = await User.findById(signupCode.userId)
+      if (!user) {
+        throw new ErrorBadRequest("Пользователь не найден")
+      }
+
+      await User.updateOne({ _id: user._id }, { "$set": { userCheckEnteredMail: false } })
+      await SignupCode.deleteOne({ _id: signupCode._id })
+      await SignupCode.deleteMany({ userId: user._id })
+
+      return user
+    } catch (e) {
+      console.error(e)
+      throw e
     }
-
-    const user = await User.findById(signupCode.userId)
-    if (!user) {
-      throw new ErrorBadRequest("Пользователь не найден")
-    }
-
-    await User.updateOne({ _id: user._id }, { "$set": { userCheckEnteredMail: false } })
-    await SignupCode.deleteOne({ _id: signupCode._id })
-    await SignupCode.deleteMany({ userId: user._id })
-
-    return user
   }
 }
 
