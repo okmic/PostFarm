@@ -36,7 +36,7 @@ function MainApp() {
     }
   }, [error, initialized])
 
-  if (!isCheckingAuth) {
+  if (isCheckingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <LoadingSpinner />
