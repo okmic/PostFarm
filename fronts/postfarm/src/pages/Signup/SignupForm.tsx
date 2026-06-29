@@ -32,7 +32,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
           return 'Неверный формат email'
         }
-        if (!validateEmail(value)) {
+        if (validateEmail(value)) {
           return 'Регистрация с этой почты недоступна'
         }
         break
