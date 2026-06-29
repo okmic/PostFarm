@@ -6,10 +6,15 @@ import { ReferralLink } from "../../models/ReferralLink.model"
 import { SignupCode } from "../../models/SignupCode.model"
 import { sendYandexEmail } from "../mailer/yandex.mailer.util"
 import appconfig from "../../pkg/config/appconfig"
+import { validateEmail } from "../../pkg/utils/mail.validator"
 class SignService {
 
   public async signup({ name, email, psw, refCode }: { name: string, email: string, psw: string, refCode?: string }): Promise<IUser> {
     try {
+      const errorValidateEmail = validateEmail(email)
+      if(errorValidateEmail) {
+        throw new ErrorBadRequest(errorValidateEmail)
+      }
       const findUser = await User.findOne({ email })
       let user
       if (!findUser) {

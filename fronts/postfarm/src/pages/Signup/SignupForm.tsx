@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import type { SignUpFormProps, SignUpFormData, SignUpFormErrors } from './types'
+import { validateEmail, ALLOWED_DOMAINS } from '../../pkg/utils/mail.validator'
+import { FiInfo, FiExternalLink, FiChevronDown, FiChevronUp } from 'react-icons/fi'
 
 export const SignUpForm: React.FC<SignUpFormProps> = ({
   onSubmit,
@@ -17,6 +19,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({
   const [touched, setTouched] = useState<Set<string>>(new Set())
   const [shake, setShake] = useState(false)
   const [focusedField, setFocusedField] = useState<string | null>(null)
+  const [showDomainInfo, setShowDomainInfo] = useState(false)
 
   const validateField = (name: string, value: string): string | undefined => {
     switch (name) {
@@ -28,6 +31,9 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({
         if (!value) return 'Email обязателен'
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
           return 'Неверный формат email'
+        }
+        if (!validateEmail(value)) {
+          return 'Регистрация с этой почты недоступна'
         }
         break
       case 'psw':
@@ -238,9 +244,45 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({
           </div>
         </div>
         {errors.email && (
-          <p className="text-sm text-[#E57373] mt-2 px-6 animate-fadeIn">
-            {errors.email}
-          </p>
+          <div className="mt-2 px-6">
+            <p className="text-sm text-[#E57373] animate-fadeIn">
+              {errors.email}
+            </p>
+            <button
+              type="button"
+              onClick={() => setShowDomainInfo(!showDomainInfo)}
+              className="flex items-center gap-1.5 mt-2 text-xs text-white/30 hover:text-white/50 transition-colors"
+            >
+              <FiInfo className="text-[10px]" />
+              <span>{showDomainInfo ? 'Скрыть' : 'Какие почты можно использовать?'}</span>
+              {showDomainInfo ? <FiChevronUp className="text-[10px]" /> : <FiChevronDown className="text-[10px]" />}
+            </button>
+            {showDomainInfo && (
+              <div className="mt-2 p-3 sm:p-4 rounded-xl bg-white/[0.03] border border-white/[0.06] animate-fadeIn">
+                <p className="text-xs text-white/40 leading-relaxed mb-3">
+                  По закону РФ регистрация с иностранных почтовых сервисов ограничена.
+                </p>
+                <p className="text-[11px] text-white/50 font-medium mb-2">Доступные почтовые сервисы:</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mb-3">
+                  {ALLOWED_DOMAINS.map(domain => (
+                    <div key={domain} className="flex items-center gap-2 px-2 py-1 rounded-lg">
+                      <div className="w-1 h-1 rounded-full bg-[#4CAF50]/60 flex-shrink-0" />
+                      <span className="text-xs text-[#4CAF50] font-light">@{domain}</span>
+                    </div>
+                  ))}
+                </div>
+                <a
+                  href="https://www.consultant.ru/document/cons_doc_LAW_537878/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-[10px] text-white/25 hover:text-white/40 transition-colors underline underline-offset-2"
+                >
+                  <FiExternalLink className="text-[9px]" />
+                  Почитать об этом
+                </a>
+              </div>
+            )}
+          </div>
         )}
       </div>
 
