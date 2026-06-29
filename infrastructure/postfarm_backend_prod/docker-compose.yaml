@@ -13,6 +13,7 @@ services:
       - "${AI_TEXT_GPT_PORT}:${AI_TEXT_GPT_PORT}"
     environment:
       - NODE_ENV=production
+      - ADMIN_CLIENT_URI=${ADMIN_CLIENT_URI}
       - MOD=docker
       - PORT=${PORT}
       - ROOT_SECRET=${ROOT_SECRET}
@@ -29,6 +30,8 @@ services:
       - ROOT_USER_ID=${ROOT_USER_ID}
       - ROOT_USER_EMAIL=${ROOT_USER_EMAIL}
       - ROOT_USER_PSW=${ROOT_USER_PSW}
+      - MAIL_USER=${MAIL_USER}
+      - MAIL_PASS=${MAIL_PASS}
     env_file:
       - .env
     depends_on:
