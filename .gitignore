@@ -16,5 +16,5 @@ node_modules
 data
 start.sh
 **/.next
-fronts/admin/src/appconfig.ts
 fronts/root/src/appconfig.ts
+fronts/postfarm/src/appconfig.ts
