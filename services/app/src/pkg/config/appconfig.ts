@@ -10,11 +10,16 @@ const value = (value: any): string  => {
 }
 
 export default {
+    uri: value(process.env.URI),
     PORT: value(process.env.PORT),
     ROOT_SECRET: value(process.env.ROOT_SECRET),
     JWT_SECRET: value(process.env.JWT_SECRET),
     MONGODB_URI: value(process.env.MONGODB_URI),
     MONGODB_NAME: value(process.env.MONGODB_NAME),
+    mail: {
+        user: value(process.env.MAIL_USER),
+        pass: value(process.env.MAIL_PASS),
+    },
     rootUser: {
         id: value(process.env.ROOT_USER_ID),
         email: value(process.env.ROOT_USER_EMAIL),

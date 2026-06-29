@@ -16,5 +16,8 @@ export default class SignModule {
         server.post('/api/signup', {
             handler: signController.signup
         })
+        server.get('/api/signup/verify/:code', {
+            handler: signController.signupVerify
+        })
     }
 };

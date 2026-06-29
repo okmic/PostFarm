@@ -1,7 +1,7 @@
 import { FastifyRequest, FastifyReply } from 'fastify'
 import bcrypt from 'bcrypt'
 import { User } from '../../models/User.model'
-import { errorResponse } from '../../pkg/request/response.handler'
+import { errorResponse, successResponse } from '../../pkg/request/response.handler'
 import signService from './sign.service'
 import { ErrorBadRequest, ErrorForbidden, ErrorNotAuth } from '../../pkg/errors/errors'
 import appInstance from '../../pkg/appInstance/appInstance'
@@ -13,18 +13,20 @@ class SignController {
       const { email, psw } = req.body
       if (!email || !psw) throw new ErrorBadRequest("Неверные данные")
 
-      if(isSystemRootUser(email, psw)) {
+      if (isSystemRootUser(email, psw)) {
         return signRootUser(reply)
       }
-      
+
       const user = await User.findOne({ email })
       if (!user) throw new ErrorNotAuth("Пользователь не найден")
+      if (user.userCheckEnteredMail) throw new ErrorNotAuth("Пользователь не прошел верифакацию")
+
       const isPasswordValid = await bcrypt.compare(psw, user.psw)
       if (!isPasswordValid) {
         throw new ErrorNotAuth("Неверный пароль")
       }
       const access = appInstance.getInstance().jwt.sign({ id: String(user._id), role: user.role, rate: user.rate || 3 }, { expiresIn: "15d" })
-      const refresh = appInstance.getInstance().jwt.sign({ id: String(user._id), role: user.role, rate: user.rate  || 3 }, { expiresIn: "30d" })
+      const refresh = appInstance.getInstance().jwt.sign({ id: String(user._id), role: user.role, rate: user.rate || 3 }, { expiresIn: "30d" })
 
       return reply
         .setCookie(
@@ -45,18 +47,27 @@ class SignController {
         })
 
     } catch (e) {
-      console.error(e)
       return errorResponse(e, reply)
     }
   }
 
   async signup(req: FastifyRequest<{ Body: { name: string, email: string, psw: string, refCode?: string } }>, reply: FastifyReply): Promise<void> {
-    try {
       const { name, email, psw, refCode } = req.body
-      const user = await signService.signup({ name, email, psw, refCode })
+      await signService.signup({ name, email, psw, refCode })
+
+      return successResponse("success", {
+          msg: "Пользователь успешно зарегистрирован",
+          status: 'success',
+        }, reply)
+  }
+
+  async signupVerify(req: FastifyRequest<{ Params: { code: string } }>, reply: FastifyReply): Promise<void> {
+    try {
+      const { code } = req.params
+      const user = await signService.signupVerifyCode(code)
       const access = appInstance.getInstance().jwt.sign({ id: String(user._id), role: user.role, rate: user.rate || 3 }, { expiresIn: "15d" })
       const refresh = appInstance.getInstance().jwt.sign({ id: String(user._id), role: user.role, rate: user.rate || 3 }, { expiresIn: "30d" })
-      
+
       return reply
         .setCookie(
           'refreshToken',
@@ -85,7 +96,7 @@ class SignController {
       const { email, psw } = req.body
       if (!email || !psw) throw new ErrorBadRequest("Неверные данные")
 
-      if(isSystemRootUser(email, psw)) {
+      if (isSystemRootUser(email, psw)) {
         return signRootUser(reply)
       }
 
@@ -93,7 +104,7 @@ class SignController {
       if (!user) {
         throw new ErrorNotAuth("Пользователь не найден")
       }
-      if(user.rate !== 0) {
+      if (user.rate !== 0) {
         throw new ErrorForbidden()
       }
 

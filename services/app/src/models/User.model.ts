@@ -16,6 +16,7 @@ export interface IUser {
     role: IUser["role"] | null
     rate: IUser["rate"] | null
   }
+  userCheckEnteredMail: boolean | null
 }
 
 const userSchema = new Schema<IUser>({
@@ -32,7 +33,8 @@ const userSchema = new Schema<IUser>({
     date: { type: Date, required: false, default: null },
     role: { type: String, enum: ["root", "admin", "user"], required: false },
     rate: { type: Number, required: false},
-  }
+  },
+  userCheckEnteredMail: { type: Boolean, required: false }
 })
 
 interface IUserModel extends Model<IUser> {
