@@ -17,3 +17,4 @@ data
 start.sh
 **/.next
 fronts/admin/src/appconfig.ts
+fronts/root/src/appconfig.ts
