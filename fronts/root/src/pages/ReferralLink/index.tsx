@@ -35,7 +35,7 @@ const generateCode = () => {
   })
 }
 
-const getReferralUrl = (code: string) => `https://admin.postfarm.ru/signup/${code}`
+const getReferralUrl = (code: string) => `https://admin.postfarm.art/signup/${code}`
 
 const formatDateForInput = (date: string | null): string => {
   if (!date) return ""

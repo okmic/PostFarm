@@ -36,8 +36,9 @@ export default {
                 PORT: Number(value(process.env.AI_TEXT_GPT_PORT)),
                 JWT_SECRET: value(process.env.AI_TEXT_GPT_JWT_SECRET),
                 yandex: {
-                    OAuthToken: value(process.env.AI_TEXT_GPT_YANDEX_OAUTH_TOKEN),
-                    XFolderId: value(process.env.AI_TEXT_GPT_YANDEX_XFOLDER_ID)
+                    openAIApiKey: value(process.env.YANDEX_AI_API_KEY),
+                    openAIProjectId: value(process.env.YANDEX_AI_YANDEX_PROJECT_ID),
+                    openAIPromptId: value(process.env.YANDEX_AI_YANDEX_PROMPT_ID),
                 }
             }
         },

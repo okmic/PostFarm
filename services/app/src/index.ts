@@ -11,7 +11,7 @@ import TenantServer from "./entrypoints/gateway/server"
 import AIGPTTextServer from "./entrypoints/ai/text/server"
 import appInstance from "./pkg/appInstance/appInstance"
 import ScheduleCore from "./entrypoints/schedule/core"
-
+import OpenAI from "openai"
 (async () => {
   const server = fastify({ logger: true })
 
@@ -40,7 +40,7 @@ import ScheduleCore from "./entrypoints/schedule/core"
   try {
     await initializeDatabase()
     setupGlobalErrorHandlers()
-    
+  
     await server.listen({
       port: appconfig.services.gateway.PORT,
       host: '0.0.0.0'
