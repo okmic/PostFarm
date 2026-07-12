@@ -57,12 +57,6 @@ export default function MainPage() {
                         </span>
                     </div>
                 </div>
-
-                <div className="mt-12 sm:mt-16 flex items-center justify-center gap-3">
-                    <div className="w-10 sm:w-16 h-[1px] bg-gradient-to-r from-transparent to-white/10" />
-                    <span className="text-[9px] sm:text-[10px] text-white/10 uppercase tracking-[0.2em] font-light whitespace-nowrap">AI-Powered</span>
-                    <div className="w-10 sm:w-16 h-[1px] bg-gradient-to-l from-transparent to-white/10" />
-                </div>
             </div>
 
             <div className="relative z-10 w-full pb-6 sm:pb-8 mt-10 sm:mt-[50px]">
