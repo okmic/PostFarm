@@ -19,7 +19,7 @@ export default function MainPage() {
 
                 <p className="mt-6 sm:mt-8 text-sm text-white/20 font-light max-w-md mx-auto leading-relaxed px-2">
                     AI-инструменты для создания постов, заголовков и идей.
-                    Генерируйте контент для Telegram-каналов за секунды.
+                    Генерируйте контент для каналов за несколько генераций.
                 </p>
 
                 <div className="mt-8 sm:mt-12 flex flex-col items-center gap-4">
