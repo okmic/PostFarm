@@ -58,6 +58,7 @@ class YandexGptTextService {
       },
       input: msg
     }).catch((e) => {
+      console.error(e)
       logger.log('Yandex GPT error', e.response?.data);
       throw new ErrorForbidden(`HTTP error! status: ${e.response?.status}`);
     })

@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { FiZap, FiCopy, FiRefreshCw, FiThumbsUp, FiBookOpen, FiLayers, FiCloudLightning, FiCheckCircle, FiInfo, FiStar, FiArrowRight, FiClock, FiSend, FiUsers, FiTarget, FiPenTool } from 'react-icons/fi'
+import { useState, type JSX } from 'react'
+import { FiBookOpen, FiCloudLightning, FiStar, FiLayers, FiUsers, FiTarget, FiZap, FiCopy, FiRefreshCw, FiThumbsUp, FiArrowLeft, FiInfo } from 'react-icons/fi'
 import type { EducationContentEnum, EducationLevelEnum } from '../../../../../../pkg/types/ai.text.types'
 import apiAiService from '../../../pkg/api/api.ai.service'
 import { SimpleLogoLoading } from '../../../components/Logo/LogoLoading'
@@ -7,90 +7,158 @@ import { useSelector } from 'react-redux'
 import type { RootState } from '../../../store/store'
 import { useGetData } from '../../../hooks/useGetData'
 
+type Tab = {
+  id: EducationContentEnum
+  label: string
+  icon: JSX.Element
+  description: string
+}
+
+type Audience = {
+  id: EducationLevelEnum
+  label: string
+  icon: JSX.Element
+  description: string
+}
+
+type GeneratedContent = {
+  title: string
+  content: string
+  toneNote: string
+  structureNote: string
+}
+
+type Mode = 'new' | 'refine'
+
+const SYSTEM_PROMPT = `Ты — опытный педагог и создатель образовательного контента. Твоя задача — объяснять сложные вещи просто, понятно и увлекательно.
+
+Правила:
+1. Начинай с вовлекающего вопроса или факта
+2. Структурируй информацию логично
+3. Используй понятные аналогии и примеры
+4. Добавляй практические советы
+5. Заканчивай выводом или заданием
+6. Учитывай уровень подготовки аудитории
+7. Пиши живым, человеческим языком
+8. Избегай воды и общих фраз
+9. Каждый пост должен давать пользу
+10. Вдохновляй и мотивируй учиться дальше`
+
 const EducationPostsService = () => {
-  const [topic, setTopic] = useState('')
-  const [audience, setAudience] = useState<EducationLevelEnum>('BEGINNER')
-  const [generatedContent, setGeneratedContent] = useState<string | null>(null)
+  const [prompt, setPrompt] = useState('')
+  const userId = useSelector((s: RootState) => s.auth.user!._id!)
+  const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [activeTab, setActiveTab] = useState<EducationContentEnum>('GUIDE')
-  const [currentStep, setCurrentStep] = useState(1)
+  const [audience, setAudience] = useState<EducationLevelEnum>('BEGINNER')
   const [error, setError] = useState<string | null>(null)
-  const userId = useSelector((s: RootState) => s.auth.user!._id!)
+  const [mode, setMode] = useState<Mode>('new')
   const { refreshAll } = useGetData()
 
-  const tabs = [
-    { 
-      id: 'GUIDE' as EducationContentEnum, 
-      label: 'Мини-гайд', 
-      icon: <FiBookOpen className="text-sm" />,
-      description: 'Пошаговая инструкция',
-      example: 'Как настроить AI-бота → 5 шагов'
-    },
-    { 
-      id: 'EXPLAIN' as EducationContentEnum, 
-      label: 'Объяснение', 
-      icon: <FiCloudLightning className="text-sm" />,
-      description: 'Сложное простыми словами',
-      example: 'Что такое нейросети → на примере пиццы'
-    },
-    { 
-      id: 'FACTS' as EducationContentEnum, 
-      label: 'Факты', 
-      icon: <FiStar className="text-sm" />,
-      description: 'Познавательные заметки',
-      example: '5 фактов об AI, которые удивят'
-    },
-    { 
-      id: 'COURSE' as EducationContentEnum, 
-      label: 'Серия уроков', 
-      icon: <FiLayers className="text-sm" />,
-      description: 'Курс из связанных постов',
-      example: 'AI для новичков → 5 уроков'
-    },
+  const tabs: Tab[] = [
+    { id: 'GUIDE', label: 'Гайд', icon: <FiBookOpen className="text-sm" />, description: 'Пошаговая инструкция' },
+    { id: 'EXPLAIN', label: 'Объяснение', icon: <FiCloudLightning className="text-sm" />, description: 'Сложное простыми словами' },
+    { id: 'FACTS', label: 'Факты', icon: <FiStar className="text-sm" />, description: 'Познавательные заметки' },
+    { id: 'COURSE', label: 'Курс', icon: <FiLayers className="text-sm" />, description: 'Серия связанных уроков' },
   ]
 
-  const audiences = [
-    { id: 'BEGINNER' as EducationLevelEnum, label: 'Новичкам', icon: <FiUsers className="text-sm" />, description: 'Объясняю с нуля, без терминов' },
-    { id: 'ADVANCED' as EducationLevelEnum, label: 'Продвинутым', icon: <FiTarget className="text-sm" />, description: 'Детали, нюансы, лучшие практики' },
-    { id: 'EXPERT' as EducationLevelEnum, label: 'Экспертам', icon: <FiZap className="text-sm" />, description: 'Глубокий анализ, инсайты' },
+  const audiences: Audience[] = [
+    { id: 'BEGINNER', label: 'Новичкам', icon: <FiUsers className="text-sm" />, description: 'Объясняю с нуля' },
+    { id: 'ADVANCED', label: 'Продвинутым', icon: <FiTarget className="text-sm" />, description: 'Детали и нюансы' },
+    { id: 'EXPERT', label: 'Экспертам', icon: <FiZap className="text-sm" />, description: 'Глубокий анализ' },
   ]
 
-  const steps = [
-    { number: 1, label: 'Тема', icon: <FiBookOpen className="text-sm" /> },
-    { number: 2, label: 'Генерация', icon: <FiZap className="text-sm" /> },
-    { number: 3, label: 'Результат', icon: <FiSend className="text-sm" /> },
-  ]
+  const resetAll = () => {
+    setGeneratedContent(null)
+    setPrompt('')
+    setMode('new')
+    setError(null)
+  }
+
+  const goBack = () => {
+    if (mode === 'refine' && generatedContent) {
+      setMode('new')
+      setPrompt('')
+      setError(null)
+      return
+    }
+    if (generatedContent) {
+      resetAll()
+      return
+    }
+    if (prompt.trim()) {
+      setPrompt('')
+      return
+    }
+  }
+
+  const getPlaceholder = () => {
+    if (mode === 'refine') {
+      return 'Напишите, что улучшить...'
+    }
+    switch (activeTab) {
+      case 'GUIDE': return 'Тема гайда (например: как настроить контекст)'
+      case 'EXPLAIN': return 'Что объяснить (например: что такое RAG)'
+      case 'FACTS': return 'Тема фактов (например: история AI)'
+      case 'COURSE': return 'Тема курса (например: основы промптинга)'
+      default: return 'Введите тему'
+    }
+  }
+
+  const getTitleByTab = (tabId: EducationContentEnum): string => {
+    switch (tabId) {
+      case 'GUIDE': return 'Пошаговый гайд'
+      case 'EXPLAIN': return 'Простое объяснение'
+      case 'FACTS': return 'Познавательные факты'
+      case 'COURSE': return 'Курс уроков'
+      default: return 'Образовательный пост'
+    }
+  }
 
   const handleGenerate = async () => {
-    if (!topic.trim()) {
-      setError('Пожалуйста, введите тему')
+    if (!prompt.trim()) {
+      setError(mode === 'refine' ? 'Укажите, что улучшить' : 'Введите тему')
       return
     }
 
     setIsGenerating(true)
     setError(null)
-    setCurrentStep(2)
-    setGeneratedContent(null)
 
     try {
-      const response = await apiAiService.educationPost({ 
-        topic: topic.trim(), 
-        type: activeTab, 
+      let systemPrompt = SYSTEM_PROMPT
+
+      if (mode === 'refine' && generatedContent) {
+        systemPrompt = `${systemPrompt}\n\nИнструкция по улучшению: ${prompt.trim()}`
+      }
+
+      const userPrompt = mode === 'refine' && generatedContent
+        ? `Улучши этот контент:\n\n${generatedContent.content}`
+        : prompt.trim()
+
+      const response = await apiAiService.educationPost({
+        topic: userPrompt,
+        type: activeTab,
         level: audience,
         userId,
+        prompt: systemPrompt,
       })
 
-      if (response?.trim()) {
-        setGeneratedContent(response)
-        setCurrentStep(3)
+      if (response && typeof response === 'string' && response.trim()) {
+        setGeneratedContent({
+          title: getTitleByTab(activeTab),
+          content: response,
+          toneNote: `Уровень: ${audiences.find(a => a.id === audience)?.label || 'Новичкам'}`,
+          structureNote: 'Структура: вступление → основная часть → вывод'
+        })
+        setMode('refine')
+        setPrompt('')
         refreshAll()
       } else {
-        throw new Error('Не удалось получить результат')
+        throw new Error('Не удалось получить ответ')
       }
     } catch (err) {
       console.error('API Error:', err)
-      setError(err instanceof Error ? err.message : 'Ошибка при генерации. Попробуйте позже.')
-      setCurrentStep(1)
+      setError(err instanceof Error ? err.message : 'Ошибка при генерации')
     } finally {
       setIsGenerating(false)
     }
@@ -98,330 +166,273 @@ const EducationPostsService = () => {
 
   const handleCopy = () => {
     if (!generatedContent) return
-    navigator.clipboard.writeText(generatedContent)
-  }
-
-  const handleRegenerate = () => {
-    setGeneratedContent(null)
-    setCurrentStep(1)
-    handleGenerate()
+    navigator.clipboard.writeText(`${generatedContent.title}\n\n${generatedContent.content}`)
   }
 
   return (
-    <div className="min-h-screen bg-[#1E3A1E] text-white font-['Inter']">
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        
-        <div className="mb-6 sm:mb-8">
-          <span className="inline-block px-3 py-1 bg-[#8B5CF6]/20 text-[#8B5CF6] text-xs font-medium rounded-full uppercase tracking-[0.05em] mb-3">
-            Обучение
-          </span>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-[-0.02em] mb-2">
-            Обучающие посты
-          </h1>
-        </div>
+    <div className="min-h-screen text-white font-['Inter']">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <Header onBack={goBack} canGoBack={!!prompt.trim() || !!generatedContent || mode === 'refine'} />
+        {error && <ErrorMessage error={error} />}
 
-        <div className="flex items-center gap-2 sm:gap-4 mb-6 sm:mb-8">
-          {steps.map((step, index) => (
-            <div key={step.number} className="flex items-center gap-2 sm:gap-4">
-              <div className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl transition-all duration-300 ${
-                currentStep >= step.number 
-                  ? 'bg-[#8B5CF6]/20 border border-[#8B5CF6]/30' 
-                  : 'bg-white/5 border border-white/10'
-              }`}>
-                <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                  currentStep >= step.number 
-                    ? 'bg-[#8B5CF6] text-white' 
-                    : 'bg-white/10 text-white/40'
-                }`}>
-                  {step.number}
-                </span>
-                <span className={`text-sm font-medium hidden sm:block ${
-                  currentStep >= step.number ? 'text-white' : 'text-white/40'
-                }`}>
-                  {step.label}
-                </span>
-                <span className={`sm:hidden ${
-                  currentStep >= step.number ? 'text-[#8B5CF6]' : 'text-white/40'
-                }`}>
-                  {step.icon}
-                </span>
-              </div>
-              {index < steps.length - 1 && (
-                <FiArrowRight className={`text-sm flex-shrink-0 ${
-                  currentStep > step.number ? 'text-[#8B5CF6]' : 'text-white/20'
-                }`} />
-              )}
-            </div>
-          ))}
-        </div>
-
-        {error && (
-          <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-xl text-red-200 text-sm flex items-center gap-2">
-            <FiInfo className="text-red-400" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6 sm:mb-8">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id)
-                setGeneratedContent(null)
-                setCurrentStep(1)
-                setError(null)
-              }}
-              className={`text-left p-4 rounded-xl transition-all duration-150 cursor-pointer ${
-                activeTab === tab.id
-                  ? 'bg-[#8B5CF6]/20 border border-[#8B5CF6]/30 shadow-[0_0_12px_rgba(139,92,246,0.15)]'
-                  : 'bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/8'
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-2">
-                <span className={activeTab === tab.id ? 'text-[#8B5CF6]' : 'text-white/60'}>
-                  {tab.icon}
-                </span>
-                <span className={`text-sm font-semibold ${
-                  activeTab === tab.id ? 'text-white' : 'text-white/80'
-                }`}>
-                  {tab.label}
-                </span>
-              </div>
-              <p className="text-xs text-white/40 leading-relaxed mb-1">
-                {tab.description}
-              </p>
-              <p className="text-xs text-white/20 italic">
-                {tab.example}
-              </p>
-            </button>
-          ))}
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
-          <div className="lg:col-span-2 space-y-5">
-            <div className="bg-white/5 border border-white/10 rounded-xl p-4 sm:p-5 backdrop-blur-sm">
-              <div className="flex items-start gap-3">
-                <div className="w-8 h-8 rounded-lg bg-[#8B5CF6]/20 flex items-center justify-center flex-shrink-0">
-                  <FiInfo className="text-[#8B5CF6] text-sm" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-[#8B5CF6] mb-1">
-                    Как это работает
-                  </h3>
-                  <p className="text-white/50 text-xs leading-relaxed">
-                    {activeTab === 'GUIDE' && 'Введите тему, и AI создаст пошаговую инструкцию с чёткими этапами. Каждый шаг объяснён простым языком. Идеально для обучения подписчиков новым навыкам.'}
-                    {activeTab === 'EXPLAIN' && 'Назовите сложную тему, и AI объяснит её на простых аналогиях. Без терминов, с примерами из жизни. Ваши читатели скажут «А, вот оно что!»'}
-                    {activeTab === 'FACTS' && 'Укажите тему, и AI соберёт удивительные факты с цифрами и статистикой. Познавательный контент, которым хочется поделиться.'}
-                    {activeTab === 'COURSE' && 'Задайте тему курса, и AI создаст урок с домашним заданием. С прогрессией сложности и удержанием внимания.'}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-white/60 mb-3 tracking-[0.05em] uppercase">
-                Для кого объясняем
-              </label>
-              <div className="grid grid-cols-1 gap-2">
-                {audiences.map((aud) => (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mt-4">
+          <div className="lg:col-span-4 space-y-5">
+            <div className="space-y-3">
+              <label className="text-xs font-medium text-white/40 tracking-wider">Формат</label>
+              <div className="grid grid-cols-2 gap-2">
+                {tabs.map((tab) => (
                   <button
-                    key={aud.id}
-                    onClick={() => setAudience(aud.id)}
-                    className={`flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-150 cursor-pointer ${
-                      audience === aud.id
-                        ? 'bg-[#8B5CF6]/20 border border-[#8B5CF6]/30'
-                        : 'bg-white/5 border border-white/10 hover:border-white/20'
+                    key={tab.id}
+                    onClick={() => { setActiveTab(tab.id); resetAll() }}
+                    className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border transition-all duration-200 cursor-pointer ${
+                      activeTab === tab.id
+                        ? 'border-[#8B5CF6] bg-[#8B5CF6]/10 text-white'
+                        : 'border-white/10 text-white/50 hover:border-white/20 hover:text-white/80'
                     }`}
                   >
-                    <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                      audience === aud.id ? 'bg-[#8B5CF6]/30' : 'bg-white/5'
-                    }`}>
-                      <span className={audience === aud.id ? 'text-[#8B5CF6]' : 'text-white/40'}>
-                        {aud.icon}
-                      </span>
-                    </div>
-                    <div>
-                      <p className={`text-sm font-medium ${
-                        audience === aud.id ? 'text-white' : 'text-white/60'
-                      }`}>
-                        {aud.label}
-                      </p>
-                      <p className="text-xs text-white/30">{aud.description}</p>
-                    </div>
-                    {audience === aud.id && (
-                      <FiCheckCircle className="text-[#8B5CF6] text-sm ml-auto flex-shrink-0" />
-                    )}
+                    <span className={activeTab === tab.id ? 'text-[#8B5CF6]' : 'text-white/40'}>
+                      {tab.icon}
+                    </span>
+                    <span className="text-xs font-medium">{tab.label}</span>
                   </button>
                 ))}
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-white/60 mb-2 tracking-[0.05em] uppercase">
-                О чём рассказать
-              </label>
+              <label className="text-xs font-medium text-white/40 tracking-wider block mb-2">Уровень аудитории</label>
+              <div className="grid grid-cols-1 gap-2">
+                {audiences.map((a) => (
+                  <button
+                    key={a.id}
+                    onClick={() => setAudience(a.id)}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all duration-200 cursor-pointer ${
+                      audience === a.id
+                        ? 'border-[#8B5CF6] bg-[#8B5CF6]/10 text-white'
+                        : 'border-white/10 text-white/40 hover:border-white/20 hover:text-white/70'
+                    }`}
+                  >
+                    <span className={audience === a.id ? 'text-[#8B5CF6]' : 'text-white/30'}>
+                      {a.icon}
+                    </span>
+                    <div className="flex-1">
+                      <span className="text-xs font-medium">{a.label}</span>
+                      <p className="text-[10px] text-white/30">{a.description}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-medium text-white/40 tracking-wider">
+                  {mode === 'refine' ? 'Инструкция для улучшения' : 'О чём рассказать'}
+                </label>
+                {mode === 'refine' && (
+                  <span className="text-[10px] text-[#8B5CF6] bg-[#8B5CF6]/20 px-2 py-0.5 rounded-full">
+                    Улучшение
+                  </span>
+                )}
+              </div>
               <textarea
-                value={topic}
-                onChange={(e) => setTopic(e.target.value)}
-                placeholder={
-                  activeTab === 'GUIDE' ? 'Например: Как настроить автопостинг в Telegram за 5 шагов' :
-                  activeTab === 'EXPLAIN' ? 'Например: Что такое блокчейн и как он работает' :
-                  activeTab === 'FACTS' ? 'Например: Интересные факты об истории Telegram' :
-                  'Например: Основы контент-маркетинга для новичков'
-                }
-                className="w-full h-36 bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 resize-none focus:outline-none focus:border-[#8B5CF6] focus:shadow-[0_0_12px_rgba(139,92,246,0.15)] transition-all duration-150"
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                    handleGenerate()
+                  }
+                }}
+                placeholder={getPlaceholder()}
+                className="w-full h-32 bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white placeholder-white/20 resize-none focus:outline-none focus:border-[#8B5CF6]/50 transition-all"
                 disabled={isGenerating}
               />
+              <div className="flex justify-end mt-1.5 text-[10px] text-white/20">
+                ⌘ + Enter
+              </div>
             </div>
 
             <button
               onClick={handleGenerate}
-              disabled={!topic.trim() || isGenerating}
-              className="w-full bg-gradient-to-r from-[#8B5CF6] to-[#4CAF50] text-white rounded-xl px-6 py-4 font-bold hover:translate-y-[-2px] hover:shadow-[0_0_20px_rgba(139,92,246,0.4)] transition-all duration-150 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none flex items-center justify-center gap-2 cursor-pointer"
+              disabled={isGenerating || !prompt.trim()}
+              className="w-full bg-gradient-to-r from-[#8B5CF6] to-[#4CAF50] hover:opacity-90 text-white rounded-xl px-4 py-3.5 font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
             >
               {isGenerating ? (
-                <>
-                  <span className="flex gap-1.5">
-                    <span className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                    <span className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                    <span className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                  </span>
-                  <span className="text-sm">Создаю обучающий контент...</span>
-                </>
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  <span className="text-sm">{mode === 'refine' ? 'Улучшаем...' : 'Генерируем...'}</span>
+                </span>
               ) : (
                 <>
-                  <FiBookOpen className="text-lg group-hover:scale-110 transition-transform" />
-                  <span>Сгенерировать пост</span>
-                  <FiArrowRight className="text-sm opacity-60" />
+                  <FiZap className="text-base" />
+                  <span className="text-sm">{mode === 'refine' ? 'Улучшить' : 'Сгенерировать'}</span>
                 </>
               )}
             </button>
+
+            {generatedContent && (
+              <button
+                onClick={resetAll}
+                className="w-full text-white/30 hover:text-white/60 text-xs transition-colors duration-200 cursor-pointer py-2"
+              >
+                Начать сначала
+              </button>
+            )}
           </div>
 
-          <div className="lg:col-span-3">
-            <div className="flex items-center justify-between mb-3">
-              <label className="text-sm font-medium text-white/60 tracking-[0.05em] uppercase flex items-center gap-2">
-                <FiSend className="text-sm" />
-                Результат генерации
-              </label>
-              {generatedContent && (
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleCopy}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 border border-white/10 transition-all duration-150 cursor-pointer"
-                  >
-                    <FiCopy className="text-sm" />
-                    <span className="hidden sm:inline">Копировать</span>
-                  </button>
-                  <button
-                    onClick={handleRegenerate}
-                    disabled={isGenerating}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 border border-white/10 transition-all duration-150 cursor-pointer"
-                  >
-                    <FiRefreshCw className={`text-sm ${isGenerating ? 'animate-spin' : ''}`} />
-                    <span className="hidden sm:inline">Перегенерировать</span>
-                  </button>
-                </div>
+          <div className="lg:col-span-8">
+            <div className="bg-white/5 rounded-2xl border border-white/10 min-h-[500px] p-5 sm:p-6 relative">
+              {isGenerating ? (
+                <LoadingState />
+              ) : generatedContent ? (
+                <ResultContent
+                  content={generatedContent}
+                  onCopy={handleCopy}
+                  onRegenerate={handleGenerate}
+                  onReset={resetAll}
+                  onImprove={() => {
+                    setMode('refine')
+                    setPrompt('Сделай контент более структурированным, добавь практические советы')
+                  }}
+                  isGenerating={isGenerating}
+                />
+              ) : (
+                <EmptyState activeTab={activeTab} />
               )}
             </div>
-
-            {isGenerating ? (
-              <div className="bg-white/5 border border-white/10 rounded-xl p-8 sm:p-12 backdrop-blur-sm flex flex-col items-center justify-center text-center min-h-[500px]">
-                <SimpleLogoLoading />
-                <div className="mt-8 flex items-center gap-4 text-white/15 text-xs">
-                  <div className="flex items-center gap-1.5">
-                    <FiPenTool className="text-sm" />
-                    <span>Анализ темы</span>
-                  </div>
-                  <div className="w-1 h-1 bg-white/20 rounded-full" />
-                  <div className="flex items-center gap-1.5">
-                    <FiBookOpen className="text-sm" />
-                    <span>Подбор структуры</span>
-                  </div>
-                  <div className="w-1 h-1 bg-white/20 rounded-full" />
-                  <div className="flex items-center gap-1.5">
-                    <FiSend className="text-sm" />
-                    <span>Генерация поста</span>
-                  </div>
-                </div>
-              </div>
-            ) : generatedContent ? (
-              <div className="space-y-4">
-                <div className="bg-white/5 border border-white/10 rounded-xl p-6 sm:p-8 backdrop-blur-sm">
-                  <div className="flex items-start gap-4">
-                    <div className="w-10 h-10 rounded-xl bg-[#8B5CF6]/20 flex items-center justify-center flex-shrink-0">
-                      <FiSend className="text-[#8B5CF6] text-lg" />
-                    </div>
-                    <div className="text-white/80 text-sm leading-relaxed whitespace-pre-wrap">
-                      {generatedContent}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="bg-gradient-to-r from-[#8B5CF6]/10 to-[#4CAF50]/10 border border-[#8B5CF6]/20 rounded-xl p-4 sm:p-5 backdrop-blur-sm">
-                  <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#8B5CF6] to-[#4CAF50] flex items-center justify-center flex-shrink-0">
-                      <FiCloudLightning className="text-white text-sm" />
-                    </div>
-                    <div>
-                      <h3 className="text-[#8B5CF6] font-semibold mb-2 text-sm">
-                        Совет по использованию
-                      </h3>
-                      <p className="text-white/70 text-xs leading-relaxed">
-                        Добавьте личный пример из практики — это повысит доверие. Один реальный кейс стоит десяти общих советов.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-2">
-                  <div className="flex items-center gap-3">
-                    <span className="text-xs text-white/40">Оценить:</span>
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white/60 hover:text-[#8B5CF6] hover:bg-[#8B5CF6]/10 transition-all duration-150 cursor-pointer">
-                      <FiThumbsUp className="text-sm" />
-                      Полезно
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-xs text-white/20">
-                    <FiClock className="text-sm" />
-                    <span>Сгенерировано только что</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-white/5 border border-white/10 rounded-xl p-8 sm:p-12 backdrop-blur-sm flex flex-col items-center justify-center text-center min-h-[500px]">
-                <div className="w-16 h-16 rounded-2xl bg-[#8B5CF6]/10 flex items-center justify-center mb-5">
-                  {activeTab === 'GUIDE' && <FiBookOpen className="text-[#8B5CF6] text-2xl" />}
-                  {activeTab === 'EXPLAIN' && <FiCloudLightning className="text-[#8B5CF6] text-2xl" />}
-                  {activeTab === 'FACTS' && <FiStar className="text-[#8B5CF6] text-2xl" />}
-                  {activeTab === 'COURSE' && <FiLayers className="text-[#8B5CF6] text-2xl" />}
-                </div>
-                <h3 className="text-white/80 font-semibold mb-2">
-                  Готово к созданию
-                </h3>
-                <p className="text-white/30 text-sm max-w-sm mb-6">
-                  Введите тему, и AI создаст пост с учётом выбранного формата и уровня аудитории.
-                </p>
-                <div className="flex items-center gap-4 text-white/15 text-xs">
-                  <div className="flex items-center gap-1.5">
-                    <FiClock className="text-sm" />
-                    <span>~10 секунд</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <FiUsers className="text-sm" />
-                    <span>Адаптивный уровень</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <FiSend className="text-sm" />
-                    <span>Готово к посту</span>
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+const Header = ({ onBack, canGoBack }: { onBack: () => void; canGoBack: boolean }) => (
+  <div className="flex items-center gap-3">
+    {canGoBack && (
+      <button
+        onClick={onBack}
+        className="p-2 rounded-xl hover:bg-white/5 transition-colors duration-200 text-white/40 hover:text-white/80 cursor-pointer"
+      >
+        <FiArrowLeft className="text-xl" />
+      </button>
+    )}
+    <div>
+      <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">Образовательные посты</h1>
+      <p className="text-white/30 text-sm mt-0.5 hidden sm:block">Создайте обучающий контент с помощью AI</p>
+    </div>
+  </div>
+)
+
+const ErrorMessage = ({ error }: { error: string }) => (
+  <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-300 text-sm flex items-center gap-2">
+    <FiInfo className="text-red-400 flex-shrink-0" />
+    <span>{error}</span>
+  </div>
+)
+
+const LoadingState = () => (
+  <div className="flex flex-col items-center justify-center h-[400px] text-center">
+    <SimpleLogoLoading />
+    <h3 className="text-white/60 font-medium mt-6">Генерация контента</h3>
+    <p className="text-white/20 text-sm max-w-xs mt-2">Обычно занимает 10–15 секунд</p>
+  </div>
+)
+
+const ResultContent = ({
+  content,
+  onCopy,
+  onRegenerate,
+  onReset,
+  onImprove,
+  isGenerating,
+}: {
+  content: GeneratedContent
+  onCopy: () => void
+  onRegenerate: () => void
+  onReset: () => void
+  onImprove: () => void
+  isGenerating: boolean
+}) => (
+  <div className="flex flex-col h-full">
+    <div className="flex items-center justify-between gap-3 pb-4 border-b border-white/10 flex-wrap">
+      <h3 className="text-base font-semibold text-white/80">{content.title}</h3>
+      <div className="flex items-center gap-1.5">
+        <button
+          onClick={onCopy}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/50 hover:text-white hover:bg-white/5 transition-colors duration-200 cursor-pointer"
+        >
+          <FiCopy className="text-sm" />
+          <span className="hidden sm:inline">Копировать</span>
+        </button>
+        <button
+          onClick={onRegenerate}
+          disabled={isGenerating}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/50 hover:text-white hover:bg-white/5 transition-colors duration-200 cursor-pointer disabled:opacity-40"
+        >
+          <FiRefreshCw className={`text-sm ${isGenerating ? 'animate-spin' : ''}`} />
+          <span className="hidden sm:inline">Обновить</span>
+        </button>
+        <button
+          onClick={onReset}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/30 hover:text-white/60 hover:bg-white/5 transition-colors duration-200 cursor-pointer"
+        >
+          <FiRefreshCw className="text-sm" />
+          <span className="hidden sm:inline">Сброс</span>
+        </button>
+      </div>
+    </div>
+
+    <div className="flex-1 py-4 sm:py-5 text-sm sm:text-base text-white/70 leading-relaxed whitespace-pre-wrap break-words overflow-y-auto max-h-[500px] sm:max-h-[600px]">
+      {content.content}
+    </div>
+
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-4 border-t border-white/10">
+      <button
+        onClick={onImprove}
+        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#8B5CF6]/10 border border-[#8B5CF6]/20 text-[#8B5CF6] hover:bg-[#8B5CF6]/20 transition-all duration-200 cursor-pointer text-sm font-medium"
+      >
+        <FiThumbsUp className="text-sm" />
+        <span>Улучшить</span>
+        <span className="text-[10px] opacity-60 hidden sm:inline">(структура и практика)</span>
+      </button>
+      <div className="flex flex-wrap items-center gap-3 text-xs text-white/30">
+        <span>{content.toneNote}</span>
+        <span className="w-1 h-1 rounded-full bg-white/20" />
+        <span>{content.structureNote}</span>
+      </div>
+    </div>
+  </div>
+)
+
+const EmptyState = ({ activeTab }: { activeTab: EducationContentEnum }) => {
+  const getIcon = () => {
+    switch (activeTab) {
+      case 'GUIDE': return <FiBookOpen className="text-[#8B5CF6] text-2xl" />
+      case 'EXPLAIN': return <FiCloudLightning className="text-[#8B5CF6] text-2xl" />
+      case 'FACTS': return <FiStar className="text-[#8B5CF6] text-2xl" />
+      case 'COURSE': return <FiLayers className="text-[#8B5CF6] text-2xl" />
+      default: return <FiBookOpen className="text-[#8B5CF6] text-2xl" />
+    }
+  }
+
+  const getMessage = () => {
+    switch (activeTab) {
+      case 'GUIDE': return 'Введите тему, и AI создаст пошаговый гайд'
+      case 'EXPLAIN': return 'Введите тему, и AI объяснит сложное простыми словами'
+      case 'FACTS': return 'Введите тему, и AI соберёт интересные факты'
+      case 'COURSE': return 'Введите тему, и AI разработает курс уроков'
+      default: return 'Введите тему для генерации'
+    }
+  }
+
+  return (
+    <div className="flex flex-col items-center justify-center h-[400px] text-center">
+      <div className="w-16 h-16 rounded-2xl bg-[#8B5CF6]/10 flex items-center justify-center mb-4">
+        {getIcon()}
+      </div>
+      <h3 className="text-white/40 font-medium text-sm mb-1">Готово к генерации</h3>
+      <p className="text-white/15 text-sm max-w-xs">{getMessage()}</p>
     </div>
   )
 }

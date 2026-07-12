@@ -33,40 +33,40 @@ class ApiAiService {
       }
     )
   }
-  public async postChronicle(payload: { type: PostChronicleTypeEnum, text: string, userId: string }): Promise<string> {
+  public async postChronicle(payload: { type: PostChronicleTypeEnum, text: string, userId: string, prompt?: string}): Promise<string> {
     return await this.axiosInstance.post(
       `/api/ai/text/post-chronicle`,
-      { type: payload.type, text: payload.text, userId: payload.userId },
+      { type: payload.type, text: payload.text, userId: payload.userId, prompt: payload.prompt },
       { headers: getAuthHeader() },
     )
       .then(r => r.data.text)
       .catch(e => handlerError(e))
   }
 
-  public async chanelContent(payload: { text: string, type: PostChannelContentTypeEnum, tone: PostChannelContentToneEnum, userId: string }): Promise<string> {
+  public async chanelContent(payload: { text: string, type: PostChannelContentTypeEnum, tone: PostChannelContentToneEnum, userId: string, prompt: string }): Promise<string> {
     return await this.axiosInstance.post(
       `/api/ai/text/channel-content`,
-      { text: payload.text, type: payload.type, tone: payload.tone, userId: payload.userId },
+      { text: payload.text, type: payload.type, tone: payload.tone, userId: payload.userId, prompt: payload.prompt },
       { headers: getAuthHeader() },
     )
       .then(r => r.data.text)
       .catch(e => handlerError(e))
   }
 
-  public async viralHeadlines(payload: { topic: string, type: HeadlineContentEnum, style: HeadlineStyleEnum, userId: string }): Promise<string> {
+  public async viralHeadlines(payload: { topic: string, type: HeadlineContentEnum, style: HeadlineStyleEnum, userId: string, prompt?: string }): Promise<string> {
     return await this.axiosInstance.post(
       `/api/ai/text/viral-headlines`,
-      { topic: payload.topic, type: payload.type, style: payload.style, userId: payload.userId },
+      { topic: payload.topic, type: payload.type, style: payload.style, userId: payload.userId, prompt: payload.prompt },
       { headers: getAuthHeader() },
     )
       .then(r => r.data.text)
       .catch(e => handlerError(e))
   }
 
-  public async educationPost(payload: { topic: string, type: EducationContentEnum, level: EducationLevelEnum, userId: string }): Promise<string> {
+  public async educationPost(payload: { topic: string, type: EducationContentEnum, level: EducationLevelEnum, userId: string, prompt?: string }): Promise<string> {
     return await this.axiosInstance.post(
       `/api/ai/text/education-post`,
-      { topic: payload.topic, type: payload.type, level: payload.level, userId: payload.userId },
+      { topic: payload.topic, type: payload.type, level: payload.level, userId: payload.userId, prompt: payload.prompt },
       { headers: getAuthHeader() },
     )
       .then(r => r.data.text)

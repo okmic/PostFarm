@@ -1,5 +1,5 @@
 import { useState, type JSX } from 'react'
-import { FiZap, FiCopy, FiRefreshCw, FiThumbsUp, FiInfo, FiArrowRight, FiClock, FiSend, FiPlus, FiFileText, FiPenTool } from 'react-icons/fi'
+import { FiCopy, FiRefreshCw, FiThumbsUp, FiInfo, FiArrowRight, FiPlus, FiFileText, FiArrowLeft } from 'react-icons/fi'
 import { FaHistory } from 'react-icons/fa'
 import apiAiService from '../../../pkg/api/api.ai.service'
 import type { PostChronicleTypeEnum } from '../../../../../../pkg/types/ai.text.types'
@@ -14,24 +14,39 @@ type Tab = {
   label: string
   icon: JSX.Element
   description: string
-  example: string
-  apiType: string
+  apiType: PostChronicleTypeEnum
 }
 
-type Step = {
-  number: number
-  label: string
-  icon: JSX.Element
+type GeneratedContent = {
+  title: string
+  content: string
+  styleNote: string
 }
+
+type Mode = 'new' | 'refine'
+
+const SYSTEM_PROMPT = `Ты — профессиональный писатель и контент-стратег, который умеет продолжать истории в любом стиле. Твоя задача — анализировать стиль автора и создавать логичное продолжение, которое звучит так, будто написано тем же человеком.
+
+Правила:
+1. Тщательно анализируй стиль, тон и лексику автора
+2. Сохраняй уникальный голос автора
+3. Развивай сюжет логично и увлекательно
+4. Добавляй новые детали, но не ломай стиль
+5. Создавай законченный текст, готовый к публикации
+6. Если автор использует эмодзи — сохраняй их стиль
+7. Учитывай длину и структуру оригинальных постов
+8. Делай продолжение естественным и органичным
+9. Добавляй ценность, а не просто воду
+10. Пиши так, будто автор сам продолжает свою мысль`
 
 const PostChronicleService = () => {
-  const [historyPosts, setHistoryPosts] = useState('')
-  const [generatedContent, setGeneratedContent] = useState<string | null>(null)
+  const [prompt, setPrompt] = useState('')
+  const userId = useSelector((s: RootState) => s.auth!.user!._id!)
+  const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [activeTab, setActiveTab] = useState('continue')
-  const [currentStep, setCurrentStep] = useState(1)
   const [error, setError] = useState<string | null>(null)
-  const userId = useSelector((s: RootState) => s.auth!.user!._id!)
+  const [mode, setMode] = useState<Mode>('new')
   const { refreshAll } = useGetData()
 
   const tabs: Tab[] = [
@@ -40,73 +55,127 @@ const PostChronicleService = () => {
       label: 'Продолжение',
       icon: <FiArrowRight className="text-sm" />,
       description: 'Логичное продолжение истории',
-      example: 'Часть 3 → Часть 4 в том же стиле',
       apiType: 'CONTINUATION'
     },
     {
       id: 'new-chapter',
-      label: 'Новая глава',
+      label: 'Новый поворот',
       icon: <FiPlus className="text-sm" />,
-      description: 'Новый поворот сюжета',
-      example: 'Текущая линия → неожиданный поворот',
+      description: 'Неожиданное развитие сюжета',
       apiType: 'NEW_CHAPTER'
     },
     {
       id: 'spin-off',
       label: 'Спин-офф',
       icon: <FiFileText className="text-sm" />,
-      description: 'Ответвление от темы',
-      example: 'Основная тема → смежная история',
-      apiType: 'SPINOFF'
+      description: 'Ответвление от основной темы',
+      apiType: 'SPIN_OFF'
     },
     {
       id: 'the-end',
       label: 'Финал',
       icon: <MdStopScreenShare className="text-sm" />,
-      description: 'Конец истории',
-      example: 'Закончить серию постов. Придумать концовку',
+      description: 'Завершение истории',
       apiType: 'THE_END'
     }
   ]
 
-  const steps: Step[] = [
-    { number: 1, label: 'История', icon: <FaHistory className="text-sm" /> },
-    { number: 2, label: 'Анализ', icon: <FiZap className="text-sm" /> },
-    { number: 3, label: 'Результат', icon: <FiSend className="text-sm" /> },
-  ]
+  const resetAll = () => {
+    setGeneratedContent(null)
+    setPrompt('')
+    setMode('new')
+    setError(null)
+  }
+
+  const goBack = () => {
+    if (mode === 'refine' && generatedContent) {
+      setMode('new')
+      setPrompt('')
+      setError(null)
+      return
+    }
+    if (generatedContent) {
+      resetAll()
+      return
+    }
+    if (prompt.trim()) {
+      setPrompt('')
+      return
+    }
+  }
+
+  const getPlaceholder = () => {
+    if (mode === 'refine') {
+      return 'Напишите, что улучшить в продолжении...'
+    }
+    return `Скопируйте 2-5 ваших предыдущих постов для анализа стиля...
+
+Пример:
+Пост 1:
+Привет! Сегодня хочу поделиться мыслями о...
+
+Пост 2:
+Продолжая тему прошлого поста, я заметил...
+
+Пост 3:
+Многие спрашивали меня про...`
+  }
+
+  const getTitleByTab = (tabId: string): string => {
+    switch (tabId) {
+      case 'continue': return 'Продолжение истории'
+      case 'new-chapter': return 'Новый поворот'
+      case 'spin-off': return 'Спин-офф'
+      case 'the-end': return 'Финал'
+      default: return 'Хроника постов'
+    }
+  }
 
   const handleGenerate = async () => {
-    if (!historyPosts.trim()) {
-      setError('Пожалуйста, введите текст предыдущих постов')
+    if (!prompt.trim()) {
+      setError(mode === 'refine' ? 'Укажите, что улучшить' : 'Введите текст предыдущих постов')
       return
     }
 
     setIsGenerating(true)
     setError(null)
-    setCurrentStep(2)
-    setGeneratedContent(null)
 
     try {
       const currentTab = tabs.find(tab => tab.id === activeTab)
       const apiType = currentTab?.apiType || 'CONTINUATION'
 
+      let systemPrompt = SYSTEM_PROMPT
+
+      if (mode === 'refine' && generatedContent) {
+        systemPrompt = `${systemPrompt}\n\nИнструкция по улучшению: ${prompt.trim()}`
+      }
+
+      const userPrompt = mode === 'refine' && generatedContent
+        ? `Улучши это продолжение:\n\n${generatedContent.content}`
+        : prompt.trim()
+
       const response = await apiAiService.postChronicle({
-        type: apiType as PostChronicleTypeEnum,
-        text: historyPosts.trim(),
+        type: apiType,
+        text: userPrompt,
         userId,
+        prompt: systemPrompt,
       })
 
       if (response && typeof response === 'string' && response.trim()) {
-        setGeneratedContent(response)
-        setCurrentStep(3)
+        setGeneratedContent({
+          title: getTitleByTab(activeTab),
+          content: response,
+          styleNote: 'Стиль: сохранён. Продолжение органично вписывается.'
+        })
+        setMode('refine')
+        setPrompt('')
         refreshAll()
       } else {
-        throw new Error('Не удалось получить ответ от сервера')
+        throw new Error('Не удалось получить ответ')
       }
     } catch (err) {
       console.error('API Error:', err)
-      setError(err instanceof Error ? err.message : 'Ошибка при генерации контента. Попробуйте позже.')
-      setCurrentStep(1)
+      setError(err instanceof Error ? err.message : 'Ошибка при генерации')
     } finally {
       setIsGenerating(false)
     }
@@ -114,427 +183,237 @@ const PostChronicleService = () => {
 
   const handleCopy = () => {
     if (!generatedContent) return
-    navigator.clipboard.writeText(generatedContent)
-  }
-
-  const handleRegenerate = () => {
-    handleGenerate()
+    navigator.clipboard.writeText(generatedContent.content)
   }
 
   return (
-    <div className="min-h-screen bg-[#1E3A1E] text-white font-['Inter']">
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        <Header />
-        <StepsIndicator steps={steps} currentStep={currentStep} />
-        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={(id) => {
-          setActiveTab(id)
-          setGeneratedContent(null)
-          setCurrentStep(1)
-          setError(null)
-        }} />
-
+    <div className="min-h-screen text-white font-['Inter']">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <Header onBack={goBack} canGoBack={!!prompt.trim() || !!generatedContent || mode === 'refine'} />
         {error && <ErrorMessage error={error} />}
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
-          <div className="lg:col-span-2 space-y-5">
-            <HowItWorks activeTab={activeTab} />
-            <HistoryInput
-              value={historyPosts}
-              onChange={setHistoryPosts}
-              isGenerating={isGenerating}
-            />
-            <GenerateButton
-              isGenerating={isGenerating}
-              disabled={!historyPosts.trim()}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mt-4">
+          <div className="lg:col-span-4 space-y-5">
+            <div className="space-y-3">
+              <label className="text-xs font-medium text-white/40 tracking-wider">Режим</label>
+              <div className="grid grid-cols-2 gap-2">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => { setActiveTab(tab.id); resetAll() }}
+                    className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border transition-all duration-200 cursor-pointer ${
+                      activeTab === tab.id
+                        ? 'border-[#FFA726] bg-[#FFA726]/10 text-white'
+                        : 'border-white/10 text-white/50 hover:border-white/20 hover:text-white/80'
+                    }`}
+                  >
+                    <span className={activeTab === tab.id ? 'text-[#FFA726]' : 'text-white/40'}>
+                      {tab.icon}
+                    </span>
+                    <span className="text-xs font-medium">{tab.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-medium text-white/40 tracking-wider">
+                  {mode === 'refine' ? 'Инструкция для улучшения' : 'Ваши предыдущие посты'}
+                </label>
+                {mode === 'refine' && (
+                  <span className="text-[10px] text-[#FFA726] bg-[#FFA726]/20 px-2 py-0.5 rounded-full">
+                    Улучшение
+                  </span>
+                )}
+              </div>
+              <textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                    handleGenerate()
+                  }
+                }}
+                placeholder={getPlaceholder()}
+                className="w-full h-64 bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white placeholder-white/20 resize-none focus:outline-none focus:border-[#FFA726]/50 transition-all"
+                disabled={isGenerating}
+              />
+              <div className="flex justify-between mt-1.5 text-[10px] text-white/20">
+                <span>Минимум 2 поста для анализа</span>
+                <span>⌘ + Enter</span>
+              </div>
+            </div>
+
+            <button
               onClick={handleGenerate}
-            />
-          </div>
-
-          <div className="lg:col-span-3">
-            <ResultSection
-              isGenerating={isGenerating}
-              generatedContent={generatedContent}
-              activeTab={activeTab}
-              onCopy={handleCopy}
-              onRegenerate={handleRegenerate}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const Header = () => {
-  return (
-    <div className="mb-6 sm:mb-8">
-      <h1 className="text-3xl sm:text-4xl font-bold tracking-[-0.02em] mb-2">
-        Хроника постов
-      </h1>
-    </div>
-  )
-}
-
-const StepsIndicator = ({ steps, currentStep }: { steps: Step[], currentStep: number }) => {
-  return (
-    <div className="flex items-center gap-2 sm:gap-4 mb-6 sm:mb-8">
-      {steps.map((step, index) => (
-        <div key={step.number} className="flex items-center gap-2 sm:gap-4">
-          <div className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl transition-all duration-300 ${currentStep >= step.number
-              ? 'bg-[#FFA726]/20 border border-[#FFA726]/30'
-              : 'bg-white/5 border border-white/10'
-            }`}>
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${currentStep >= step.number
-                ? 'bg-[#FFA726] text-[#1E3A1E]'
-                : 'bg-white/10 text-white/40'
-              }`}>
-              {step.number}
-            </span>
-            <span className={`text-sm font-medium hidden sm:block ${currentStep >= step.number ? 'text-white' : 'text-white/40'
-              }`}>
-              {step.label}
-            </span>
-            <span className={`sm:hidden ${currentStep >= step.number ? 'text-[#FFA726]' : 'text-white/40'
-              }`}>
-              {step.icon}
-            </span>
-          </div>
-          {index < steps.length - 1 && (
-            <FiArrowRight className={`text-sm flex-shrink-0 ${currentStep > step.number ? 'text-[#FFA726]' : 'text-white/20'
-              }`} />
-          )}
-        </div>
-      ))}
-    </div>
-  )
-}
-
-const Tabs = ({ tabs, activeTab, onTabChange }: {
-  tabs: Tab[],
-  activeTab: string,
-  onTabChange: (id: string) => void
-}) => {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-6 sm:mb-8">
-      {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          onClick={() => onTabChange(tab.id)}
-          className={`text-left p-4 rounded-xl transition-all duration-150 group ${activeTab === tab.id
-              ? 'bg-[#FFA726]/20 border border-[#FFA726]/30 shadow-[0_0_12px_rgba(255,167,38,0.15)]'
-              : 'bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/8'
-            }`}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <span className={activeTab === tab.id ? 'text-[#FFA726]' : 'text-white/60'}>
-              {tab.icon}
-            </span>
-            <span className={`text-sm font-semibold ${activeTab === tab.id ? 'text-white' : 'text-white/80'
-              }`}>
-              {tab.label}
-            </span>
-          </div>
-          <p className="text-xs text-white/40 leading-relaxed mb-1">
-            {tab.description}
-          </p>
-          <p className="text-xs text-white/20 italic">
-            {tab.example}
-          </p>
-        </button>
-      ))}
-    </div>
-  )
-}
-
-const ErrorMessage = ({ error }: { error: string }) => {
-  return (
-    <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-xl text-red-200 text-sm">
-      <div className="flex items-center gap-2">
-        <FiInfo className="text-red-400" />
-        <span>{error}</span>
-      </div>
-    </div>
-  )
-}
-
-const HowItWorks = ({ activeTab }: { activeTab: string }) => {
-  const getDescription = () => {
-    switch (activeTab) {
-      case 'continue':
-        return 'Скопируйте 2-5 своих предыдущих постов. AI проанализирует стиль, тон и логику повествования, затем создаст естественное продолжение.'
-      case 'new-chapter':
-        return 'Загрузите историю постов, и AI придумает неожиданный поворот. Сохранит ваш стиль, но добавит новый конфликт или развитие темы.'
-      case 'spin-off':
-        return 'AI возьмёт тему из ваших постов и создаст ответвление — смежную историю, которая расширит контент и привлечёт новую аудиторию.'
-      case 'the-end':
-        return 'Придумать конец серии постов, завершить этап, придумать концовку.'
-      default:
-        return 'Скопируйте 2-5 своих предыдущих постов для анализа стиля и генерации продолжения.'
-    }
-  }
-
-  return (
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 sm:p-5 backdrop-blur-sm">
-      <div className="flex items-start gap-3">
-        <div className="w-8 h-8 rounded-lg bg-[#FFA726]/20 flex items-center justify-center flex-shrink-0">
-          <FiInfo className="text-[#FFA726] text-sm" />
-        </div>
-        <div>
-          <h3 className="text-sm font-semibold text-[#FFA726] mb-1">
-            Как это работает
-          </h3>
-          <p className="text-white/50 text-xs leading-relaxed">
-            {getDescription()}
-          </p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const HistoryInput = ({
-  value,
-  onChange,
-  isGenerating
-}: {
-  value: string,
-  onChange: (value: string) => void,
-  isGenerating: boolean
-}) => {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-white/60 mb-2 tracking-[0.05em] uppercase">
-        Ваши предыдущие посты
-      </label>
-      <textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder="Скопируйте сюда 2-5 ваших последних постов...&#10;&#10;Пост 1:&#10;Привет, друзья! Сегодня расскажу о...&#10;&#10;Пост 2:&#10;Продолжаю тему. В прошлый раз мы...&#10;&#10;Пост 3:&#10;Получил много вопросов после..."
-        className="w-full h-64 bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 resize-none focus:outline-none focus:border-[#FFA726] focus:shadow-[0_0_12px_rgba(255,167,38,0.15)] transition-all duration-150"
-        disabled={isGenerating}
-      />
-      <div className="flex items-center gap-2 mt-2 text-white/20 text-xs">
-        <FiInfo className="text-sm" />
-        <span>Минимум 2 поста для анализа. Чем больше примеров — тем точнее стиль.</span>
-      </div>
-    </div>
-  )
-}
-
-const GenerateButton = ({
-  isGenerating,
-  disabled,
-  onClick
-}: {
-  isGenerating: boolean,
-  disabled: boolean,
-  onClick: () => void
-}) => {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled || isGenerating}
-      className="w-full bg-gradient-to-r from-[#FFA726] to-[#4CAF50] text-[#1E3A1E] rounded-xl px-6 py-4 font-bold hover:translate-y-[-2px] hover:shadow-[0_0_20px_rgba(255,167,38,0.4)] transition-all duration-150 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none flex items-center justify-center gap-2 group"
-    >
-      {isGenerating ? (
-        <>
-          <span className="flex gap-1.5">
-            <span className="w-2 h-2 bg-[#1E3A1E] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-            <span className="w-2 h-2 bg-[#1E3A1E] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-            <span className="w-2 h-2 bg-[#1E3A1E] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-          </span>
-          <span className="text-sm">Анализирую стиль и создаю продолжение...</span>
-        </>
-      ) : (
-        <>
-          <FaHistory className="text-lg group-hover:scale-110 transition-transform" />
-          <span>Создать продолжение</span>
-          <FiArrowRight className="text-sm opacity-60" />
-        </>
-      )}
-    </button>
-  )
-}
-
-const ResultSection = ({
-  isGenerating,
-  generatedContent,
-  activeTab,
-  onCopy,
-  onRegenerate
-}: {
-  isGenerating: boolean,
-  generatedContent: string | null,
-  activeTab: string,
-  onCopy: () => void,
-  onRegenerate: () => void
-}) => {
-  return (
-    <>
-      <div className="flex items-center justify-between mb-3">
-        <label className="text-sm font-medium text-white/60 tracking-[0.05em] uppercase flex items-center gap-2">
-          <FiSend className="text-sm" />
-          Результат генерации
-        </label>
-        {generatedContent && (
-          <div className="flex gap-2">
-            <button
-              onClick={onCopy}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 border border-white/10 transition-all duration-150"
+              disabled={isGenerating || !prompt.trim()}
+              className="w-full bg-gradient-to-r from-[#FFA726] to-[#4CAF50] hover:opacity-90 text-[#1E3A1E] rounded-xl px-4 py-3.5 font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
             >
-              <FiCopy className="text-sm" />
-              <span className="hidden sm:inline">Копировать</span>
+              {isGenerating ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-[#1E3A1E]/30 border-t-[#1E3A1E] rounded-full animate-spin" />
+                  <span className="text-sm">{mode === 'refine' ? 'Улучшаем...' : 'Анализируем стиль...'}</span>
+                </span>
+              ) : (
+                <>
+                  <FaHistory className="text-base" />
+                  <span className="text-sm">{mode === 'refine' ? 'Улучшить продолжение' : 'Создать продолжение'}</span>
+                </>
+              )}
             </button>
-            <button
-              onClick={onRegenerate}
-              disabled={isGenerating}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 border border-white/10 transition-all duration-150"
-            >
-              <FiRefreshCw className={`text-sm ${isGenerating ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Перегенерировать</span>
-            </button>
+
+            {generatedContent && (
+              <button
+                onClick={resetAll}
+                className="w-full text-white/30 hover:text-white/60 text-xs transition-colors duration-200 cursor-pointer py-2"
+              >
+                Начать сначала
+              </button>
+            )}
           </div>
-        )}
-      </div>
 
-      {isGenerating ? (
-        <LoadingState />
-      ) : generatedContent ? (
-        <GeneratedResult content={generatedContent} activeTab={activeTab} />
-      ) : (
-        <EmptyState activeTab={activeTab} />
-      )}
-    </>
-  )
-}
-
-
-
-const LoadingState = () => {
-  return (
-    <div className="bg-white/5 border border-white/10 rounded-xl p-8 sm:p-12 backdrop-blur-sm flex flex-col items-center justify-center text-center min-h-[500px]">
-      <SimpleLogoLoading />
-      <div className="mt-8 flex items-center gap-4 text-white/15 text-xs">
-        <div className="flex items-center gap-1.5">
-          <FiPenTool className="text-sm" />
-          <span>Анализ стиля</span>
-        </div>
-        <div className="w-1 h-1 bg-white/20 rounded-full" />
-        <div className="flex items-center gap-1.5">
-          <FaHistory className="text-sm" />
-          <span>Понимание контекста</span>
-        </div>
-        <div className="w-1 h-1 bg-white/20 rounded-full" />
-        <div className="flex items-center gap-1.5">
-          <FiSend className="text-sm" />
-          <span>Генерация текста</span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const GeneratedResult = ({ content, activeTab }: { content: string, activeTab: string }) => {
-  const getAdvice = () => {
-    switch (activeTab) {
-      case 'continue':
-        return 'Не публикуйте AI-продолжение как есть. Добавьте актуальные детали из вашей ниши и личный комментарий. AI сохраняет стиль, но только вы знаете, что происходит прямо сейчас.'
-      case 'new-chapter':
-        return 'Новый поворот должен удивлять, но не отрываться от реальности. Используйте этот пост как основу и добавьте конкретные примеры из своего опыта.'
-      case 'spin-off':
-        return 'Спин-офф — отличный способ протестировать новую тему. Если аудитория отреагирует хорошо — развивайте направление дальше.'
-      default:
-        return 'Добавьте личный комментарий и актуальные детали перед публикацией.'
-    }
-  }
-
-  return (
-    <div className="space-y-4">
-      <div className="bg-white/5 border border-white/10 rounded-xl p-5 sm:p-6 backdrop-blur-sm">
-        <div className="flex items-start gap-4">
-          <div className="w-10 h-10 rounded-xl bg-[#FFA726]/20 flex items-center justify-center flex-shrink-0">
-            <FiSend className="text-[#FFA726] text-lg" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-white/70 text-sm leading-relaxed whitespace-pre-wrap">
-              {content}
+          <div className="lg:col-span-8">
+            <div className="bg-white/5 rounded-2xl border border-white/10 min-h-[500px] p-5 sm:p-6 relative">
+              {isGenerating ? (
+                <LoadingState />
+              ) : generatedContent ? (
+                <ResultContent
+                  content={generatedContent}
+                  onCopy={handleCopy}
+                  onRegenerate={handleGenerate}
+                  onReset={resetAll}
+                  onImprove={() => {
+                    setMode('refine')
+                    setPrompt('Сделай продолжение более живым, добавь яркие детали, усиль эмоциональную связь')
+                  }}
+                  isGenerating={isGenerating}
+                />
+              ) : (
+                <EmptyState activeTab={activeTab} />
+              )}
             </div>
           </div>
         </div>
       </div>
-
-      <div className="bg-gradient-to-r from-[#FFA726]/10 to-[#4CAF50]/10 border border-[#FFA726]/20 rounded-xl p-4 sm:p-5 backdrop-blur-sm">
-        <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FFA726] to-[#4CAF50] flex items-center justify-center flex-shrink-0">
-            <FiZap className="text-white text-sm" />
-          </div>
-          <div>
-            <h3 className="text-[#FFA726] font-semibold mb-2 text-sm">
-              Совет по использованию
-            </h3>
-            <p className="text-white/70 text-xs leading-relaxed">
-              {getAdvice()}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between pt-2">
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-white/40">Оценить:</span>
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white/60 hover:text-[#FFA726] hover:bg-[#FFA726]/10 transition-all duration-150">
-            <FiThumbsUp className="text-sm" />
-            Полезно
-          </button>
-        </div>
-        <div className="flex items-center gap-1.5 text-xs text-white/20">
-          <FiClock className="text-sm" />
-          <span>Сгенерировано только что</span>
-        </div>
-      </div>
     </div>
   )
 }
 
+const Header = ({ onBack, canGoBack }: { onBack: () => void; canGoBack: boolean }) => (
+  <div className="flex items-center gap-3">
+    {canGoBack && (
+      <button
+        onClick={onBack}
+        className="p-2 rounded-xl hover:bg-white/5 transition-colors duration-200 text-white/40 hover:text-white/80 cursor-pointer"
+      >
+        <FiArrowLeft className="text-xl" />
+      </button>
+    )}
+    <div>
+      <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">Хроника постов</h1>
+      <p className="text-white/30 text-sm mt-0.5 hidden sm:block">Продолжайте истории в своём стиле с помощью AI</p>
+    </div>
+  </div>
+)
+
+const ErrorMessage = ({ error }: { error: string }) => (
+  <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-300 text-sm flex items-center gap-2">
+    <FiInfo className="text-red-400 flex-shrink-0" />
+    <span>{error}</span>
+  </div>
+)
+
+const LoadingState = () => (
+  <div className="flex flex-col items-center justify-center h-[400px] text-center">
+    <SimpleLogoLoading />
+    <h3 className="text-white/60 font-medium mt-6">Анализируем стиль</h3>
+    <p className="text-white/20 text-sm max-w-xs mt-2">Обычно занимает 15–20 секунд</p>
+  </div>
+)
+
+const ResultContent = ({
+  content,
+  onCopy,
+  onRegenerate,
+  onReset,
+  onImprove,
+  isGenerating,
+}: {
+  content: GeneratedContent
+  onCopy: () => void
+  onRegenerate: () => void
+  onReset: () => void
+  onImprove: () => void
+  isGenerating: boolean
+}) => (
+  <div className="flex flex-col h-full">
+    <div className="flex items-center justify-between gap-3 pb-4 border-b border-white/10 flex-wrap">
+      <h3 className="text-base font-semibold text-white/80">{content.title}</h3>
+      <div className="flex items-center gap-1.5">
+        <button
+          onClick={onCopy}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/50 hover:text-white hover:bg-white/5 transition-colors duration-200 cursor-pointer"
+        >
+          <FiCopy className="text-sm" />
+          <span className="hidden sm:inline">Копировать</span>
+        </button>
+        <button
+          onClick={onRegenerate}
+          disabled={isGenerating}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/50 hover:text-white hover:bg-white/5 transition-colors duration-200 cursor-pointer disabled:opacity-40"
+        >
+          <FiRefreshCw className={`text-sm ${isGenerating ? 'animate-spin' : ''}`} />
+          <span className="hidden sm:inline">Обновить</span>
+        </button>
+        <button
+          onClick={onReset}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/30 hover:text-white/60 hover:bg-white/5 transition-colors duration-200 cursor-pointer"
+        >
+          <FiRefreshCw className="text-sm" />
+          <span className="hidden sm:inline">Сброс</span>
+        </button>
+      </div>
+    </div>
+
+    <div className="flex-1 py-4 sm:py-5 text-sm sm:text-base text-white/70 leading-relaxed whitespace-pre-wrap break-words overflow-y-auto max-h-[500px] sm:max-h-[600px]">
+      {content.content}
+    </div>
+
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-4 border-t border-white/10">
+      <button
+        onClick={onImprove}
+        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#FFA726]/10 border border-[#FFA726]/20 text-[#FFA726] hover:bg-[#FFA726]/20 transition-all duration-200 cursor-pointer text-sm font-medium"
+      >
+        <FiThumbsUp className="text-sm" />
+        <span>Улучшить</span>
+        <span className="text-[10px] opacity-60 hidden sm:inline">(добавит ярких деталей)</span>
+      </button>
+      <div className="flex flex-wrap items-center gap-3 text-xs text-white/30">
+        <span>{content.styleNote}</span>
+      </div>
+    </div>
+  </div>
+)
+
 const EmptyState = ({ activeTab }: { activeTab: string }) => {
   const getMessage = () => {
     switch (activeTab) {
-      case 'continue':
-        return 'Вставьте 2-5 своих прошлых постов, и AI напишет логичное продолжение. Сохранит ваш стиль и тон.'
-      case 'new-chapter':
-        return 'Загрузите историю постов, и AI придумает неожиданный поворот. Новый конфликт или развитие темы.'
-      case 'spin-off':
-        return 'Дайте AI вашу серию постов, и он создаст ответвление — смежную историю для расширения контента.'
-      default:
-        return 'Вставьте предыдущие посты для генерации продолжения.'
+      case 'continue': return 'Вставьте предыдущие посты, и AI напишет логичное продолжение'
+      case 'new-chapter': return 'Загрузите историю, и AI придумает неожиданный поворот'
+      case 'spin-off': return 'Дайте AI посты, и он создаст ответвление темы'
+      case 'the-end': return 'Придумайте завершение вашей истории'
+      default: return 'Вставьте предыдущие посты'
     }
   }
 
   return (
-    <div className="bg-white/5 border border-white/10 rounded-xl p-8 sm:p-12 backdrop-blur-sm flex flex-col items-center justify-center text-center min-h-[500px]">
-      <div className="w-16 h-16 rounded-2xl bg-[#FFA726]/10 flex items-center justify-center mb-5">
+    <div className="flex flex-col items-center justify-center h-[400px] text-center">
+      <div className="w-16 h-16 rounded-2xl bg-[#FFA726]/10 flex items-center justify-center mb-4">
         <FaHistory className="text-[#FFA726] text-2xl" />
       </div>
-      <h3 className="text-white/80 font-semibold mb-2">
-        Готово к созданию
-      </h3>
-      <p className="text-white/30 text-sm max-w-sm mb-6">
-        {getMessage()}
-      </p>
-      <div className="flex items-center gap-4 text-white/15 text-xs">
-        <div className="flex items-center gap-1.5">
-          <FiClock className="text-sm" />
-          <span>~15-30 секунд</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <FiPenTool className="text-sm" />
-          <span>Анализ стиля</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <FiSend className="text-sm" />
-          <span>Готово к посту</span>
-        </div>
-      </div>
+      <h3 className="text-white/40 font-medium text-sm mb-1">Готово к созданию</h3>
+      <p className="text-white/15 text-sm max-w-xs">{getMessage()}</p>
     </div>
   )
 }

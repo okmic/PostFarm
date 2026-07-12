@@ -10,10 +10,18 @@ import { Types } from "mongoose";
 
 class AITextController {
 
-    async postChronicle(req: FastifyRequest<{ Body: { type: PostChronicleTypeEnum, text: string, userId: Types.ObjectId | string, service: ServicesTypeEnum } }>, reply: FastifyReply) {
+    async postChronicle(req: FastifyRequest<{ Body: { type: PostChronicleTypeEnum, text: string, userId: Types.ObjectId | string, service: ServicesTypeEnum, prompt?: string } }>, reply: FastifyReply) {
+        let msg = generatePostChroniclePrompt(req.body.type, req.body.text)
+        if(req.body.prompt) msg = msg + `
+        
+        ДОБАВЬ ПОПРАВКИ ОТ ПОЛЬЗОВАТЕЛЯ КАК ПРЕОРИТЕТ ЕСЛИ ЭТО НЕ ПРОТИВОРЕЧИТ ЗАКОНАМ УКАЗАННЫХ В ИНСТРУКЦИИ:
+        ДОП ИНСТРКЦИЯ ОТ ПОЛЬЗОВАТЕЛЯ: 
+        ${req.body.prompt}
+        `
+        
         const result = await yandexGptTextService.YGpt({
             prompt: null,
-            msg: generatePostChroniclePrompt(req.body.type, req.body.text),
+            msg: msg,
             userId: req.body.userId,
             service: "service.chronicle",
         })
@@ -28,11 +36,21 @@ class AITextController {
             tone: PostChannelContentToneEnum,
             userId: Types.ObjectId | string,
             service: ServicesTypeEnum,
+            prompt?: string
         }
     }>, reply: FastifyReply) {
+
+        let msg = generateChannelContentPrompt(req.body.type, req.body.tone, req.body.text)
+        if(req.body.prompt) msg = msg + `
+        
+        ДОБАВЬ ПОПРАВКИ ОТ ПОЛЬЗОВАТЕЛЯ КАК ПРЕОРИТЕТ ЕСЛИ ЭТО НЕ ПРОТИВОРЕЧИТ ЗАКОНАМ УКАЗАННЫХ В ИНСТРУКЦИИ:
+        ДОП ИНСТРКЦИЯ ОТ ПОЛЬЗОВАТЕЛЯ: 
+        ${req.body.prompt}
+        `
+
         const result = await yandexGptTextService.YGpt({
             prompt: null,
-            msg: generateChannelContentPrompt(req.body.type, req.body.tone, req.body.text),
+            msg,
             userId: req.body.userId,
             service: "service.post_channel_content",
         })
@@ -47,17 +65,23 @@ class AITextController {
                 type: HeadlineContentEnum
                 style: HeadlineStyleEnum,
                 userId: Types.ObjectId | string
+                prompt?: string
             }
         }>,
         reply: FastifyReply
     ) {
         const { topic, type, style } = req.body
-
-        const prompt = generateHeadlinePrompt(topic, type, style)
+        let msg = generateHeadlinePrompt(topic, type, style)
+        if(req.body.prompt) msg = msg + `
+        
+        ДОБАВЬ ПОПРАВКИ ОТ ПОЛЬЗОВАТЕЛЯ КАК ПРЕОРИТЕТ ЕСЛИ ЭТО НЕ ПРОТИВОРЕЧИТ ЗАКОНАМ УКАЗАННЫХ В ИНСТРУКЦИИ:
+        ДОП ИНСТРКЦИЯ ОТ ПОЛЬЗОВАТЕЛЯ: 
+        ${req.body.prompt}
+        `
 
         const result = await yandexGptTextService.YGpt({
             prompt: null,
-            msg: prompt,
+            msg,
             userId: req.body.userId,
             service: "service.headline"
         })
@@ -72,21 +96,27 @@ class AITextController {
                 type: string
                 level: string
                 userId: Types.ObjectId,
+                prompt?: string
             }
         }>,
         reply: FastifyReply
     ) {
         const { topic, type, level } = req.body
-
-        const prompt = generateEducationPrompt(
+        let msg = generateEducationPrompt(
             topic.trim(),
             type.toUpperCase() as EducationContentEnum,
             level.toUpperCase() as EducationLevelEnum
         )
+        if(req.body.prompt) msg = msg + `
+        
+        ДОБАВЬ ПОПРАВКИ ОТ ПОЛЬЗОВАТЕЛЯ КАК ПРЕОРИТЕТ ЕСЛИ ЭТО НЕ ПРОТИВОРЕЧИТ ЗАКОНАМ УКАЗАННЫХ В ИНСТРУКЦИИ:
+        ДОП ИНСТРКЦИЯ ОТ ПОЛЬЗОВАТЕЛЯ: 
+        ${req.body.prompt}
+        `
 
         const result = await yandexGptTextService.YGpt({
             prompt: null,
-            msg: prompt,
+            msg,
             userId: req.body.userId,
             service: "service.education"
         })

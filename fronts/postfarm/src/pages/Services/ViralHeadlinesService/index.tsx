@@ -1,5 +1,5 @@
 import { useState, type JSX } from 'react'
-import { FiZap, FiCopy, FiRefreshCw, FiThumbsUp, FiTarget, FiTrendingUp, FiVolume2, FiInfo, FiStar, FiArrowRight, FiClock, FiSend, FiPenTool } from 'react-icons/fi'
+import { FiZap, FiCopy, FiRefreshCw, FiThumbsUp, FiTarget, FiTrendingUp, FiVolume2, FiInfo, FiPenTool, FiArrowLeft } from 'react-icons/fi'
 import type { HeadlineStyleEnum, HeadlineContentEnum } from '../../../../../../pkg/types/ai.text.types'
 import apiAiService from '../../../pkg/api/api.ai.service'
 import { SimpleLogoLoading } from '../../../components/Logo/LogoLoading'
@@ -12,60 +12,48 @@ type Tab = {
   label: string
   icon: JSX.Element
   description: string
-  example: string
   apiType: HeadlineContentEnum
 }
 
-type Step = {
-  number: number
-  label: string
-  icon: JSX.Element
+type GeneratedContent = {
+  title: string
+  content: string
+  styleNote: string
+  advice: string
 }
 
+type Mode = 'new' | 'refine'
+
+const SYSTEM_PROMPT = `Ты — профессиональный копирайтер, специалист по созданию цепляющих заголовков и вирусного контента. Твоя задача — создавать заголовки, которые невозможно пропустить.
+
+Правила:
+1. Заголовок должен вызывать эмоцию: удивление, интерес, любопытство
+2. Используй конкретные цифры и факты
+3. Добавляй интригу, но не кликбейт
+4. Учитывай выбранный стиль: вирусный, эмоциональный, провокационный или обучающий
+5. Делай заголовок понятным и ёмким
+6. Адаптируй под формат: пост, хук, CTA или вирусная механика
+7. Проверяй, чтобы заголовок работал без контекста
+8. Создавай варианты с разными триггерами
+9. Каждый заголовок должен давать понятную пользу
+10. Пиши так, чтобы хотелось нажать и прочитать`
+
 const ViralHeadlinesService = () => {
-  const [topic, setTopic] = useState('')
-  const [generatedContent, setGeneratedContent] = useState<string | null>(null)
+  const [prompt, setPrompt] = useState('')
+  const userId = useSelector((s: RootState) => s.auth!.user!._id!)
+  const [generatedContent, setGeneratedContent] = useState<GeneratedContent | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [activeTab, setActiveTab] = useState('headlines')
   const [style, setStyle] = useState<HeadlineStyleEnum>('VIRAL')
-  const [currentStep, setCurrentStep] = useState(1)
   const [error, setError] = useState<string | null>(null)
-  const userId = useSelector((s: RootState) => s.auth!.user!._id!)
+  const [mode, setMode] = useState<Mode>('new')
   const { refreshAll } = useGetData()
 
   const tabs: Tab[] = [
-    { 
-      id: 'headlines', 
-      label: 'Заголовки', 
-      icon: <FiTrendingUp className="text-sm" />,
-      description: 'Названия, которые заставляют нажать',
-      example: 'Тема → 3 варианта с разной механикой',
-      apiType: 'HEADLINES'
-    },
-    { 
-      id: 'hooks', 
-      label: 'Hooks', 
-      icon: <FiZap className="text-sm" />,
-      description: 'Первые цепляющие строки поста',
-      example: 'Ниша → 3 хука с разными эмоциями',
-      apiType: 'HOOKS'
-    },
-    { 
-      id: 'cta', 
-      label: 'CTA', 
-      icon: <FiTarget className="text-sm" />,
-      description: 'Призывы к действию с конверсией',
-      example: 'Тип поста → 3 CTA с разной целью',
-      apiType: 'CTA'
-    },
-    { 
-      id: 'viral', 
-      label: 'Вирусные', 
-      icon: <FiVolume2 className="text-sm" />,
-      description: 'Идеи под максимальные охваты',
-      example: 'Тема → 3 вирусные механики',
-      apiType: 'VIRAL'
-    },
+    { id: 'headlines', label: 'Заголовки', icon: <FiTrendingUp className="text-sm" />, description: 'Цепляющие названия', apiType: 'HEADLINES' },
+    { id: 'hooks', label: 'Хуки', icon: <FiZap className="text-sm" />, description: 'Первые строки поста', apiType: 'HOOKS' },
+    { id: 'cta', label: 'CTA', icon: <FiTarget className="text-sm" />, description: 'Призывы к действию', apiType: 'CTA' },
+    { id: 'viral', label: 'Вирусные', icon: <FiVolume2 className="text-sm" />, description: 'Идеи для охватов', apiType: 'VIRAL' },
   ]
 
   const styles = [
@@ -75,41 +63,117 @@ const ViralHeadlinesService = () => {
     { id: 'EDUCATIONAL' as HeadlineStyleEnum, label: 'Обучающий', icon: <FiPenTool className="text-sm" />, desc: 'Польза, цифры, факты' },
   ]
 
-  const steps: Step[] = [
-    { number: 1, label: 'Тема', icon: <FiPenTool className="text-sm" /> },
-    { number: 2, label: 'Стиль', icon: <FiZap className="text-sm" /> },
-    { number: 3, label: 'Результат', icon: <FiTrendingUp className="text-sm" /> },
-  ]
+  const resetAll = () => {
+    setGeneratedContent(null)
+    setPrompt('')
+    setMode('new')
+    setError(null)
+  }
+
+  const goBack = () => {
+    if (mode === 'refine' && generatedContent) {
+      setMode('new')
+      setPrompt('')
+      setError(null)
+      return
+    }
+    if (generatedContent) {
+      resetAll()
+      return
+    }
+    if (prompt.trim()) {
+      setPrompt('')
+      return
+    }
+  }
+
+  const getPlaceholder = () => {
+    if (mode === 'refine') {
+      return 'Напишите, что улучшить в заголовке...'
+    }
+    switch (activeTab) {
+      case 'headlines': return 'Тема поста (например: как продвигать Telegram-канал)'
+      case 'hooks': return 'Тема поста (например: ошибки новичков в маркетинге)'
+      case 'cta': return 'Что нужно сделать читателю (например: подписаться)'
+      case 'viral': return 'Тема для вируса (например: сравнение Telegram и WhatsApp)'
+      default: return 'Введите тему'
+    }
+  }
+
+  const getTitleByTab = (tabId: string): string => {
+    switch (tabId) {
+      case 'headlines': return 'Цепляющий заголовок'
+      case 'hooks': return 'Хук для поста'
+      case 'cta': return 'Призыв к действию'
+      case 'viral': return 'Вирусная идея'
+      default: return 'Результат'
+    }
+  }
+
+  const getAdviceByTab = (tabId: string): string => {
+    switch (tabId) {
+      case 'headlines': return 'Сильные заголовки строятся на конкретике, интриге и обещании пользы. Тестируйте 2-3 варианта.'
+      case 'hooks': return 'Хороший хук удерживает внимание в первые 3 секунды. Используйте личные истории или неожиданные факты.'
+      case 'cta': return 'Без CTA даже вирусный пост не приносит результат. Одно конкретное действие работает лучше трёх.'
+      case 'viral': return 'Вирусность — это формула: эмоция + простота репоста + актуальность. Спорные темы работают лучше всего.'
+      default: return 'Используйте результат как основу и добавляйте свои детали.'
+    }
+  }
+
+  const getStyleLabel = (styleId: HeadlineStyleEnum): string => {
+    const labels: Record<HeadlineStyleEnum, string> = {
+      VIRAL: 'Вирусный',
+      EMOTIONAL: 'Эмоциональный',
+      PROVOCATIVE: 'Провокационный',
+      EDUCATIONAL: 'Обучающий'
+    }
+    return labels[styleId] || 'Вирусный'
+  }
 
   const handleGenerate = async () => {
-    if (!topic.trim()) {
-      setError('Пожалуйста, введите тему')
+    if (!prompt.trim()) {
+      setError(mode === 'refine' ? 'Укажите, что улучшить' : 'Введите тему')
       return
     }
 
     setIsGenerating(true)
     setError(null)
-    setCurrentStep(2)
-    setGeneratedContent(null)
 
     try {
-      const response = await apiAiService.viralHeadlines({ 
-        topic: topic.trim(), 
-        type: activeTab as HeadlineContentEnum, 
+      let systemPrompt = SYSTEM_PROMPT
+
+      if (mode === 'refine' && generatedContent) {
+        systemPrompt = `${systemPrompt}\n\nИнструкция по улучшению: ${prompt.trim()}`
+      }
+
+      const userPrompt = mode === 'refine' && generatedContent
+        ? `Улучши этот заголовок:\n\n${generatedContent.content}`
+        : prompt.trim()
+
+      const response = await apiAiService.viralHeadlines({
+        topic: userPrompt,
+        type: activeTab as HeadlineContentEnum,
         style: style,
         userId,
+        prompt: systemPrompt,
       })
 
-      if (response && response && response.trim()) {
-        setGeneratedContent(response)
-        setCurrentStep(3)
+      if (response && typeof response === 'string' && response.trim()) {
+        setGeneratedContent({
+          title: getTitleByTab(activeTab),
+          content: response,
+          styleNote: `Стиль: ${getStyleLabel(style)}`,
+          advice: getAdviceByTab(activeTab)
+        })
+        setMode('refine')
+        setPrompt('')
         refreshAll()
       } else {
-        throw new Error('Не удалось получить результат')
+        throw new Error('Не удалось получить ответ')
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Ошибка при генерации. Попробуйте позже.')
-      setCurrentStep(1)
+      console.error('API Error:', err)
+      setError(err instanceof Error ? err.message : 'Ошибка при генерации')
     } finally {
       setIsGenerating(false)
     }
@@ -117,618 +181,277 @@ const ViralHeadlinesService = () => {
 
   const handleCopy = () => {
     if (!generatedContent) return
-    navigator.clipboard.writeText(generatedContent)
+    navigator.clipboard.writeText(generatedContent.content)
   }
-
-  const handleRegenerate = () => {
-    handleGenerate()
-  }
-
-  const getStyleColor = (styleId: HeadlineStyleEnum) => {
-    const colors: Record<HeadlineStyleEnum, string> = {
-      VIRAL: '#FFA726',
-      EMOTIONAL: '#E57373',
-      PROVOCATIVE: '#FF7043',
-      EDUCATIONAL: '#4CAF50'
-    }
-    return colors[styleId] || '#FFA726'
-  }
-
-  const currentStyleColor = getStyleColor(style)
 
   return (
-    <div className="min-h-screen bg-[#1E3A1E] text-white font-['Inter']">
-      <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8 sm:py-12">
-
-        <Header />
-        <StepsIndicator steps={steps} currentStep={currentStep} />
-        <Tabs tabs={tabs} activeTab={activeTab} onTabChange={(id) => {
-          setActiveTab(id)
-          setGeneratedContent(null)
-          setCurrentStep(1)
-          setError(null)
-        }} />
-        
+    <div className="min-h-screen text-white font-['Inter']">
+      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <Header onBack={goBack} canGoBack={!!prompt.trim() || !!generatedContent || mode === 'refine'} />
         {error && <ErrorMessage error={error} />}
-        
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
-          <div className="lg:col-span-2 space-y-5">
-            <HowItWorks activeTab={activeTab} />
-            <StyleSelector 
-              styles={styles} 
-              activeStyle={style} 
-              onStyleChange={(s) => setStyle(s as HeadlineStyleEnum)} 
-            />
-            <TopicInput 
-              value={topic} 
-              onChange={setTopic} 
-              activeTab={activeTab}
-              isGenerating={isGenerating} 
-            />
-            <GenerateButton 
-              isGenerating={isGenerating} 
-              disabled={!topic.trim()} 
-              onClick={handleGenerate} 
-            />
-          </div>
-          
-          <div className="lg:col-span-3">
-            <ResultSection 
-              isGenerating={isGenerating}
-              generatedContent={generatedContent}
-              activeTab={activeTab}
-              style={style}
-              currentStyleColor={currentStyleColor}
-              onCopy={handleCopy}
-              onRegenerate={handleRegenerate}
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// КОМПОНЕНТЫ
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-const Header = () => {
-  return (
-    <div className="mb-6 sm:mb-8">
-      <span className="inline-block px-3 py-1 bg-[#FFA726]/20 text-[#FFA726] text-xs font-medium rounded-full uppercase tracking-[0.05em] mb-3">
-        Вовлечение
-      </span>
-      <h1 className="text-3xl sm:text-4xl font-bold tracking-[-0.02em] mb-2">
-        Цепляющие заголовки
-      </h1>
-    </div>
-  )
-}
-
-const StepsIndicator = ({ steps, currentStep }: { steps: Step[], currentStep: number }) => {
-  return (
-    <div className="flex items-center gap-2 sm:gap-4 mb-6 sm:mb-8">
-      {steps.map((step, index) => (
-        <div key={step.number} className="flex items-center gap-2 sm:gap-4">
-          <div className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl transition-all duration-300 ${
-            currentStep >= step.number 
-              ? 'bg-[#FFA726]/20 border border-[#FFA726]/30' 
-              : 'bg-white/5 border border-white/10'
-          }`}>
-            <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-              currentStep >= step.number 
-                ? 'bg-[#FFA726] text-[#1E3A1E]' 
-                : 'bg-white/10 text-white/40'
-            }`}>
-              {step.number}
-            </span>
-            <span className={`text-sm font-medium hidden sm:block ${
-              currentStep >= step.number ? 'text-white' : 'text-white/40'
-            }`}>
-              {step.label}
-            </span>
-            <span className={`sm:hidden ${
-              currentStep >= step.number ? 'text-[#FFA726]' : 'text-white/40'
-            }`}>
-              {step.icon}
-            </span>
-          </div>
-          {index < steps.length - 1 && (
-            <FiArrowRight className={`text-sm flex-shrink-0 ${
-              currentStep > step.number ? 'text-[#FFA726]' : 'text-white/20'
-            }`} />
-          )}
-        </div>
-      ))}
-    </div>
-  )
-}
-
-const Tabs = ({ tabs, activeTab, onTabChange }: { 
-  tabs: Tab[], 
-  activeTab: string, 
-  onTabChange: (id: string) => void 
-}) => {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-6 sm:mb-8">
-      {tabs.map((tab) => (
-        <button
-          key={tab.id}
-          onClick={() => onTabChange(tab.id)}
-          className={`text-left p-4 rounded-xl transition-all duration-150 group ${
-            activeTab === tab.id
-              ? 'bg-[#FFA726]/20 border border-[#FFA726]/30 shadow-[0_0_12px_rgba(255,167,38,0.15)]'
-              : 'bg-white/5 border border-white/10 hover:border-white/20 hover:bg-white/8'
-          }`}
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <span className={activeTab === tab.id ? 'text-[#FFA726]' : 'text-white/60'}>
-              {tab.icon}
-            </span>
-            <span className={`text-sm font-semibold ${
-              activeTab === tab.id ? 'text-white' : 'text-white/80'
-            }`}>
-              {tab.label}
-            </span>
-          </div>
-          <p className="text-xs text-white/40 leading-relaxed mb-1">
-            {tab.description}
-          </p>
-          <p className="text-xs text-white/20 italic">
-            {tab.example}
-          </p>
-        </button>
-      ))}
-    </div>
-  )
-}
-
-const ErrorMessage = ({ error }: { error: string }) => {
-  return (
-    <div className="mb-6 p-4 bg-red-500/20 border border-red-500/30 rounded-xl text-red-200 text-sm">
-      <div className="flex items-center gap-2">
-        <FiInfo className="text-red-400" />
-        <span>{error}</span>
-      </div>
-    </div>
-  )
-}
-
-const HowItWorks = ({ activeTab }: { activeTab: string }) => {
-  const getDescription = () => {
-    switch(activeTab) {
-      case 'headlines':
-        return 'Введите тему, и AI создаст мощный заголовок. Он проанализирует лучшие примеры, оценит свои варианты по 3 критериям и выдаст только победителя.'
-      case 'hooks':
-        return 'Укажите тему поста, и AI напишет цепляющий хук. Короткий, резкий, с эмоциональным триггером — такой, который остановит скролл за 0.5 секунды.'
-      case 'cta':
-        return 'Опишите контекст, и AI предложит призыв к действию. С конкретной выгодой для читателя и лёгким FOMO.'
-      case 'viral':
-        return 'Назовите нишу, и AI придумает вирусную механику. С описанием, почему это сработает и на какую эмоцию давит.'
-      default:
-        return 'Введите тему, и AI создаст цепляющий заголовок с максимальным CTR.'
-    }
-  }
-
-  return (
-    <div className="bg-white/5 border border-white/10 rounded-xl p-4 sm:p-5 backdrop-blur-sm">
-      <div className="flex items-start gap-3">
-        <div className="w-8 h-8 rounded-lg bg-[#FFA726]/20 flex items-center justify-center flex-shrink-0">
-          <FiInfo className="text-[#FFA726] text-sm" />
-        </div>
-        <div>
-          <h3 className="text-sm font-semibold text-[#FFA726] mb-1">
-            Как это работает
-          </h3>
-          <p className="text-white/50 text-xs leading-relaxed">
-            {getDescription()}
-          </p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const StyleSelector = ({ 
-  styles, 
-  activeStyle, 
-  onStyleChange 
-}: { 
-  styles: Array<{ id: HeadlineStyleEnum, label: string, icon: JSX.Element, desc: string }>, 
-  activeStyle: HeadlineStyleEnum, 
-  onStyleChange: (style: string) => void 
-}) => {
-  const getStyleColor = (styleId: HeadlineStyleEnum) => {
-    const colors: Record<HeadlineStyleEnum, string> = {
-      VIRAL: '#FFA726',
-      EMOTIONAL: '#E57373',
-      PROVOCATIVE: '#FF7043',
-      EDUCATIONAL: '#4CAF50'
-    }
-    return colors[styleId] || '#FFA726'
-  }
-
-  return (
-    <div>
-      <label className="block text-sm font-medium text-white/60 mb-3 tracking-[0.05em] uppercase">
-        Стиль
-      </label>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-        {styles.map((s) => {
-          const color = getStyleColor(s.id)
-          const isActive = activeStyle === s.id
-          
-          return (
-            <button
-              key={s.id}
-              onClick={() => onStyleChange(s.id)}
-              className={`flex items-center gap-3 p-3 rounded-xl text-left transition-all duration-150 ${
-                isActive
-                  ? 'bg-white/5 border shadow-lg'
-                  : 'bg-white/5 border border-white/10 hover:border-white/20'
-              }`}
-              style={isActive ? { borderColor: `${color}40`, boxShadow: `0 0 12px ${color}20` } : {}}
-            >
-              <div 
-                className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 transition-all duration-150"
-                style={{ backgroundColor: isActive ? `${color}30` : 'rgba(255,255,255,0.05)' }}
-              >
-                <span style={{ color: isActive ? color : 'rgba(255,255,255,0.4)' }}>
-                  {s.icon}
-                </span>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mt-4">
+          <div className="lg:col-span-4 space-y-5">
+            <div className="space-y-3">
+              <label className="text-xs font-medium text-white/40 tracking-wider">Формат</label>
+              <div className="grid grid-cols-2 gap-2">
+                {tabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => { setActiveTab(tab.id); resetAll() }}
+                    className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border transition-all duration-200 cursor-pointer ${
+                      activeTab === tab.id
+                        ? 'border-[#FFA726] bg-[#FFA726]/10 text-white'
+                        : 'border-white/10 text-white/50 hover:border-white/20 hover:text-white/80'
+                    }`}
+                  >
+                    <span className={activeTab === tab.id ? 'text-[#FFA726]' : 'text-white/40'}>
+                      {tab.icon}
+                    </span>
+                    <span className="text-xs font-medium">{tab.label}</span>
+                  </button>
+                ))}
               </div>
-              <div className="flex-1 min-w-0">
-                <p 
-                  className="text-sm font-medium transition-colors duration-150"
-                  style={{ color: isActive ? 'white' : 'rgba(255,255,255,0.6)' }}
-                >
-                  {s.label}
-                </p>
-                <p className="text-xs text-white/30 truncate">{s.desc}</p>
-              </div>
-            </button>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
-const TopicInput = ({ 
-  value, 
-  onChange, 
-  activeTab,
-  isGenerating 
-}: { 
-  value: string, 
-  onChange: (value: string) => void,
-  activeTab: string,
-  isGenerating: boolean 
-}) => {
-  const getPlaceholder = () => {
-    switch(activeTab) {
-      case 'headlines': return 'Например: как продвигать Telegram-канал бесплатно'
-      case 'hooks': return 'Например: пост про ошибки новичков в маркетинге'
-      case 'cta': return 'Например: обучающий пост про AI-инструменты'
-      case 'viral': return 'Например: сравнение Telegram и WhatsApp для бизнеса'
-      default: return 'Введите тему для генерации...'
-    }
-  }
-
-  return (
-    <div>
-      <label className="block text-sm font-medium text-white/60 mb-2 tracking-[0.05em] uppercase">
-        Тема или ниша
-      </label>
-      <textarea
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={getPlaceholder()}
-        className="w-full h-32 bg-white/5 border border-white/10 rounded-xl p-4 text-white placeholder-white/20 resize-none focus:outline-none focus:border-[#FFA726] focus:shadow-[0_0_12px_rgba(255,167,38,0.15)] transition-all duration-150 text-sm"
-        disabled={isGenerating}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' && !e.shiftKey && value.trim() && !isGenerating) {
-            e.preventDefault()
-            const btn = document.getElementById('generate-btn')
-            btn?.click()
-          }
-        }}
-      />
-    </div>
-  )
-}
-
-const GenerateButton = ({ 
-  isGenerating, 
-  disabled, 
-  onClick 
-}: { 
-  isGenerating: boolean, 
-  disabled: boolean, 
-  onClick: () => void 
-}) => {
-  return (
-    <button
-      id="generate-btn"
-      onClick={onClick}
-      disabled={disabled || isGenerating}
-      className="w-full bg-gradient-to-r from-[#FFA726] to-[#4CAF50] text-[#1E3A1E] rounded-xl px-6 py-4 font-bold hover:translate-y-[-2px] hover:shadow-[0_0_20px_rgba(255,167,38,0.4)] transition-all duration-150 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:hover:shadow-none flex items-center justify-center gap-2 group"
-    >
-      {isGenerating ? (
-        <>
-          <span className="flex gap-1.5">
-            <span className="w-2 h-2 bg-[#1E3A1E] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-            <span className="w-2 h-2 bg-[#1E3A1E] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-            <span className="w-2 h-2 bg-[#1E3A1E] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-          </span>
-          <span className="text-sm">Генерируем заголовок...</span>
-        </>
-      ) : (
-        <>
-          <FiZap className="text-lg group-hover:scale-110 transition-transform" />
-          <span>Сгенерировать</span>
-          <FiArrowRight className="text-sm opacity-60" />
-        </>
-      )}
-    </button>
-  )
-}
-
-const ResultSection = ({ 
-  isGenerating, 
-  generatedContent, 
-  activeTab, 
-  style,
-  currentStyleColor,
-  onCopy, 
-  onRegenerate 
-}: { 
-  isGenerating: boolean, 
-  generatedContent: string | null, 
-  activeTab: string,
-  style: HeadlineStyleEnum,
-  currentStyleColor: string,
-  onCopy: () => void, 
-  onRegenerate: () => void 
-}) => {
-  const getLabel = () => {
-    switch(activeTab) {
-      case 'headlines': return 'Заголовок'
-      case 'hooks': return 'Хук'
-      case 'cta': return 'CTA'
-      case 'viral': return 'Вирусная идея'
-      default: return 'Результат'
-    }
-  }
-
-  return (
-    <>
-      <div className="flex items-center justify-between mb-3">
-        <label className="text-sm font-medium text-white/60 tracking-[0.05em] uppercase flex items-center gap-2">
-          <FiTrendingUp className="text-sm" />
-          Результат генерации
-        </label>
-        {generatedContent && (
-          <div className="flex gap-2">
-            <button
-              onClick={onCopy}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 border border-white/10 transition-all duration-150"
-            >
-              <FiCopy className="text-sm" />
-              <span className="hidden sm:inline">Копировать</span>
-            </button>
-            <button
-              onClick={onRegenerate}
-              disabled={isGenerating}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white/60 hover:text-white hover:bg-white/5 border border-white/10 transition-all duration-150"
-            >
-              <FiRefreshCw className={`text-sm ${isGenerating ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">Обновить</span>
-            </button>
-          </div>
-        )}
-      </div>
-
-      {isGenerating ? (
-        <LoadingState />
-      ) : generatedContent ? (
-        <GeneratedResult 
-          content={generatedContent} 
-          label={getLabel()}
-          activeTab={activeTab}
-          currentStyleColor={currentStyleColor}
-          style={style}
-        />
-      ) : (
-        <EmptyState activeTab={activeTab} />
-      )}
-    </>
-  )
-}
-
-const LoadingState = () => {
-  return (
-    <div className="bg-white/5 border border-white/10 rounded-xl p-8 sm:p-12 backdrop-blur-sm flex flex-col items-center justify-center text-center min-h-[500px]">
-      <SimpleLogoLoading />
-      <div className="mt-8 flex items-center gap-4 text-white/15 text-xs">
-        <div className="flex items-center gap-1.5">
-          <FiPenTool className="text-sm" />
-          <span>Анализ темы</span>
-        </div>
-        <div className="w-1 h-1 bg-white/20 rounded-full" />
-        <div className="flex items-center gap-1.5">
-          <FiStar className="text-sm" />
-          <span>Оценка вариантов</span>
-        </div>
-        <div className="w-1 h-1 bg-white/20 rounded-full" />
-        <div className="flex items-center gap-1.5">
-          <FiSend className="text-sm" />
-          <span>Выбор лучшего</span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-const GeneratedResult = ({ 
-  content, 
-  label,
-  activeTab,
-  currentStyleColor,
-  style
-}: { 
-  content: string
-  label: string
-  activeTab: string
-  currentStyleColor: string
-  style: HeadlineStyleEnum
-}) => {
-  const getStyleLabel = () => {
-    const labels: Record<HeadlineStyleEnum, string> = {
-      VIRAL: 'Вирусный стиль',
-      EMOTIONAL: 'Эмоциональный стиль',
-      PROVOCATIVE: 'Провокационный стиль',
-      EDUCATIONAL: 'Обучающий стиль'
-    }
-    return labels[style] || ''
-  }
-
-  const getAdvice = () => {
-    switch(activeTab) {
-      case 'headlines':
-        return 'Сильные заголовки строятся на трёх китах: конкретика, интрига, обещание. Чем точнее вы попадаете в боль аудитории — тем выше отклик. Тестируйте 2-3 варианта на один пост и анализируйте статистику.'
-      case 'hooks':
-        return 'Хороший хук удерживает внимание в первые 3 секунды. Используйте личные истории, неожиданные факты или вопросы. Главное правило: пообещали интригу — раскройте её в тексте.'
-      case 'cta':
-        return 'Без CTA даже вирусный пост не приносит подписчиков. Одно конкретное действие работает лучше, чем три. Чем проще действие — тем выше конверсия в отклик.'
-      case 'viral':
-        return 'Вирусность — это формула: сильная эмоция + простота репоста + актуальность. Спорные темы работают лучше всего, но сохраняйте уважение к аудитории.'
-      default:
-        return 'Используйте этот результат как основу и добавляйте свои детали.'
-    }
-  }
-
-  return (
-    <div className="space-y-4">
-      {/* Главный результат */}
-      <div 
-        className="relative rounded-xl p-6 sm:p-8 backdrop-blur-sm overflow-hidden"
-        style={{ 
-          background: `linear-gradient(135deg, ${currentStyleColor}10 0%, ${currentStyleColor}05 100%)`,
-          border: `1px solid ${currentStyleColor}30`
-        }}
-      >
-        {/* Glow effect */}
-        <div 
-          className="absolute -top-20 -right-20 w-40 h-40 rounded-full blur-3xl opacity-20"
-          style={{ background: currentStyleColor }}
-        />
-        
-        <div className="relative">
-          <div className="flex items-center gap-3 mb-4">
-            <div 
-              className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
-              style={{ backgroundColor: `${currentStyleColor}20` }}
-            >
-              <FiStar style={{ color: currentStyleColor }} className="text-lg" />
             </div>
+
             <div>
-              <span 
-                className="text-xs font-medium uppercase tracking-wider"
-                style={{ color: currentStyleColor }}
+              <label className="text-xs font-medium text-white/40 tracking-wider block mb-2">Стиль</label>
+              <div className="grid grid-cols-2 gap-2">
+                {styles.map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() => setStyle(s.id)}
+                    className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border transition-all duration-200 cursor-pointer ${
+                      style === s.id
+                        ? 'border-[#FFA726] bg-[#FFA726]/10 text-white'
+                        : 'border-white/10 text-white/40 hover:border-white/20 hover:text-white/70'
+                    }`}
+                  >
+                    <span className={style === s.id ? 'text-[#FFA726]' : 'text-white/30'}>
+                      {s.icon}
+                    </span>
+                    <div className="flex-1">
+                      <span className="text-xs font-medium">{s.label}</span>
+                      <p className="text-[10px] text-white/30">{s.desc}</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-xs font-medium text-white/40 tracking-wider">
+                  {mode === 'refine' ? 'Инструкция для улучшения' : 'О чём написать'}
+                </label>
+                {mode === 'refine' && (
+                  <span className="text-[10px] text-[#FFA726] bg-[#FFA726]/20 px-2 py-0.5 rounded-full">
+                    Улучшение
+                  </span>
+                )}
+              </div>
+              <textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+                    handleGenerate()
+                  }
+                }}
+                placeholder={getPlaceholder()}
+                className="w-full h-32 bg-white/5 border border-white/10 rounded-xl p-4 text-sm text-white placeholder-white/20 resize-none focus:outline-none focus:border-[#FFA726]/50 transition-all"
+                disabled={isGenerating}
+              />
+              <div className="flex justify-end mt-1.5 text-[10px] text-white/20">
+                ⌘ + Enter
+              </div>
+            </div>
+
+            <button
+              onClick={handleGenerate}
+              disabled={isGenerating || !prompt.trim()}
+              className="w-full bg-gradient-to-r from-[#FFA726] to-[#4CAF50] hover:opacity-90 text-[#1E3A1E] rounded-xl px-4 py-3.5 font-medium transition-all duration-200 disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 cursor-pointer"
+            >
+              {isGenerating ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-[#1E3A1E]/30 border-t-[#1E3A1E] rounded-full animate-spin" />
+                  <span className="text-sm">{mode === 'refine' ? 'Улучшаем...' : 'Генерируем...'}</span>
+                </span>
+              ) : (
+                <>
+                  <FiZap className="text-base" />
+                  <span className="text-sm">{mode === 'refine' ? 'Улучшить' : 'Сгенерировать'}</span>
+                </>
+              )}
+            </button>
+
+            {generatedContent && (
+              <button
+                onClick={resetAll}
+                className="w-full text-white/30 hover:text-white/60 text-xs transition-colors duration-200 cursor-pointer py-2"
               >
-                {label}
-              </span>
-              <p className="text-white/30 text-xs">{getStyleLabel()}</p>
+                Начать сначала
+              </button>
+            )}
+          </div>
+
+          <div className="lg:col-span-8">
+            <div className="bg-white/5 rounded-2xl border border-white/10 min-h-[500px] p-5 sm:p-6 relative">
+              {isGenerating ? (
+                <LoadingState />
+              ) : generatedContent ? (
+                <ResultContent
+                  content={generatedContent}
+                  onCopy={handleCopy}
+                  onRegenerate={handleGenerate}
+                  onReset={resetAll}
+                  onImprove={() => {
+                    setMode('refine')
+                    setPrompt('Сделай заголовок более цепляющим, добавь интриги и конкретики')
+                  }}
+                  isGenerating={isGenerating}
+                />
+              ) : (
+                <EmptyState activeTab={activeTab} />
+              )}
             </div>
           </div>
-          
-          <p className="text-white/90 text-lg sm:text-xl font-medium leading-relaxed whitespace-pre-wrap pl-13">
-            {content}
-          </p>
-        </div>
-      </div>
-
-      {/* Совет */}
-      <div className="bg-gradient-to-r from-[#FFA726]/10 to-[#4CAF50]/10 border border-[#FFA726]/20 rounded-xl p-4 sm:p-5 backdrop-blur-sm">
-        <div className="flex items-start gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#FFA726] to-[#4CAF50] flex items-center justify-center flex-shrink-0">
-            <FiZap className="text-white text-sm" />
-          </div>
-          <div>
-            <h3 className="text-[#FFA726] font-semibold mb-2 text-sm">
-              Совет по использованию
-            </h3>
-            <p className="text-white/70 text-xs leading-relaxed">
-              {getAdvice()}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Оценка */}
-      <div className="flex items-center justify-between pt-2">
-        <div className="flex items-center gap-3">
-          <span className="text-xs text-white/40">Оценить:</span>
-          <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white/60 hover:text-[#FFA726] hover:bg-[#FFA726]/10 transition-all duration-150">
-            <FiThumbsUp className="text-sm" />
-            Полезно
-          </button>
-        </div>
-        <div className="flex items-center gap-1.5 text-xs text-white/20">
-          <FiClock className="text-sm" />
-          <span>Сгенерировано только что</span>
         </div>
       </div>
     </div>
   )
 }
+
+const Header = ({ onBack, canGoBack }: { onBack: () => void; canGoBack: boolean }) => (
+  <div className="flex items-center gap-3">
+    {canGoBack && (
+      <button
+        onClick={onBack}
+        className="p-2 rounded-xl hover:bg-white/5 transition-colors duration-200 text-white/40 hover:text-white/80 cursor-pointer"
+      >
+        <FiArrowLeft className="text-xl" />
+      </button>
+    )}
+    <div>
+      <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">Цепляющие заголовки</h1>
+      <p className="text-white/30 text-sm mt-0.5 hidden sm:block">Создайте заголовки, которые невозможно пропустить</p>
+    </div>
+  </div>
+)
+
+const ErrorMessage = ({ error }: { error: string }) => (
+  <div className="mt-4 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-300 text-sm flex items-center gap-2">
+    <FiInfo className="text-red-400 flex-shrink-0" />
+    <span>{error}</span>
+  </div>
+)
+
+const LoadingState = () => (
+  <div className="flex flex-col items-center justify-center h-[400px] text-center">
+    <SimpleLogoLoading />
+    <h3 className="text-white/60 font-medium mt-6">Генерация заголовка</h3>
+    <p className="text-white/20 text-sm max-w-xs mt-2">Обычно занимает 8–10 секунд</p>
+  </div>
+)
+
+const ResultContent = ({
+  content,
+  onCopy,
+  onRegenerate,
+  onReset,
+  onImprove,
+  isGenerating,
+}: {
+  content: GeneratedContent
+  onCopy: () => void
+  onRegenerate: () => void
+  onReset: () => void
+  onImprove: () => void
+  isGenerating: boolean
+}) => (
+  <div className="flex flex-col h-full">
+    <div className="flex items-center justify-between gap-3 pb-4 border-b border-white/10 flex-wrap">
+      <h3 className="text-base font-semibold text-white/80">{content.title}</h3>
+      <div className="flex items-center gap-1.5">
+        <button
+          onClick={onCopy}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/50 hover:text-white hover:bg-white/5 transition-colors duration-200 cursor-pointer"
+        >
+          <FiCopy className="text-sm" />
+          <span className="hidden sm:inline">Копировать</span>
+        </button>
+        <button
+          onClick={onRegenerate}
+          disabled={isGenerating}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/50 hover:text-white hover:bg-white/5 transition-colors duration-200 cursor-pointer disabled:opacity-40"
+        >
+          <FiRefreshCw className={`text-sm ${isGenerating ? 'animate-spin' : ''}`} />
+          <span className="hidden sm:inline">Обновить</span>
+        </button>
+        <button
+          onClick={onReset}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs text-white/30 hover:text-white/60 hover:bg-white/5 transition-colors duration-200 cursor-pointer"
+        >
+          <FiRefreshCw className="text-sm" />
+          <span className="hidden sm:inline">Сброс</span>
+        </button>
+      </div>
+    </div>
+
+    <div className="flex-1 py-4 sm:py-5">
+      <div className="bg-gradient-to-r from-[#FFA726]/10 to-[#4CAF50]/10 rounded-xl p-5 sm:p-6 border border-[#FFA726]/20">
+        <p className="text-lg sm:text-xl text-white font-medium leading-relaxed">
+          {content.content}
+        </p>
+      </div>
+    </div>
+
+    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-4 border-t border-white/10">
+      <button
+        onClick={onImprove}
+        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[#FFA726]/10 border border-[#FFA726]/20 text-[#FFA726] hover:bg-[#FFA726]/20 transition-all duration-200 cursor-pointer text-sm font-medium"
+      >
+        <FiThumbsUp className="text-sm" />
+        <span>Улучшить</span>
+        <span className="text-[10px] opacity-60 hidden sm:inline">(сделает ещё цепляющее)</span>
+      </button>
+      <div className="flex flex-wrap items-center gap-3 text-xs text-white/30">
+        <span>{content.styleNote}</span>
+        <span className="w-1 h-1 rounded-full bg-white/20" />
+        <span className="text-white/20">{content.advice}</span>
+      </div>
+    </div>
+  </div>
+)
 
 const EmptyState = ({ activeTab }: { activeTab: string }) => {
+  const getIcon = () => {
+    switch (activeTab) {
+      case 'headlines': return <FiTrendingUp className="text-[#FFA726] text-2xl" />
+      case 'hooks': return <FiZap className="text-[#FFA726] text-2xl" />
+      case 'cta': return <FiTarget className="text-[#FFA726] text-2xl" />
+      case 'viral': return <FiVolume2 className="text-[#FFA726] text-2xl" />
+      default: return <FiTrendingUp className="text-[#FFA726] text-2xl" />
+    }
+  }
+
   const getMessage = () => {
-    switch(activeTab) {
-      case 'headlines':
-        return 'Введите тему, и AI создаст мощный заголовок. Сам оценит варианты и выдаст только лучший.'
-      case 'hooks':
-        return 'Укажите тему, и AI напишет цепляющий хук. Который остановит скролл за 0.5 секунды.'
-      case 'cta':
-        return 'Опишите контекст, и AI предложит призыв к действию. С конкретной выгодой для читателя.'
-      case 'viral':
-        return 'Назовите нишу, и AI придумает вирусную механику. С описанием, почему это сработает.'
-      default:
-        return 'Введите тему для генерации заголовка.'
+    switch (activeTab) {
+      case 'headlines': return 'Введите тему, и AI создаст цепляющий заголовок'
+      case 'hooks': return 'Введите тему, и AI напишет хук для поста'
+      case 'cta': return 'Опишите контекст, и AI предложит призыв к действию'
+      case 'viral': return 'Назовите тему, и AI придумает вирусную механику'
+      default: return 'Введите тему для генерации'
     }
   }
 
   return (
-    <div className="bg-white/5 border border-white/10 rounded-xl p-8 sm:p-12 backdrop-blur-sm flex flex-col items-center justify-center text-center min-h-[500px]">
-      <div className="w-16 h-16 rounded-2xl bg-[#FFA726]/10 flex items-center justify-center mb-5">
-        {activeTab === 'headlines' && <FiTrendingUp className="text-[#FFA726] text-2xl" />}
-        {activeTab === 'hooks' && <FiZap className="text-[#FFA726] text-2xl" />}
-        {activeTab === 'cta' && <FiTarget className="text-[#FFA726] text-2xl" />}
-        {activeTab === 'viral' && <FiVolume2 className="text-[#FFA726] text-2xl" />}
+    <div className="flex flex-col items-center justify-center h-[400px] text-center">
+      <div className="w-16 h-16 rounded-2xl bg-[#FFA726]/10 flex items-center justify-center mb-4">
+        {getIcon()}
       </div>
-      <h3 className="text-white/80 font-semibold mb-2">
-        Готово к генерации
-      </h3>
-      <p className="text-white/30 text-sm max-w-sm mb-6">
-        {getMessage()}
-      </p>
-      <div className="flex items-center gap-4 text-white/15 text-xs">
-        <div className="flex items-center gap-1.5">
-          <FiClock className="text-sm" />
-          <span>~8 секунд</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <FiTarget className="text-sm" />
-          <span>4 стиля</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <FiSend className="text-sm" />
-          <span>Готово к посту</span>
-        </div>
-      </div>
+      <h3 className="text-white/40 font-medium text-sm mb-1">Готово к генерации</h3>
+      <p className="text-white/15 text-sm max-w-xs">{getMessage()}</p>
     </div>
   )
 }

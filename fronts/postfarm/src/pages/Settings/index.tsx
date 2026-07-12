@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, type JSX } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import { logout, updateStateUser } from "../../store/slices/auth.slice"
 import type { RootState } from "../../store/store"
@@ -7,11 +7,13 @@ import {
   FaStar, FaCrown, FaRocket, 
   FaUserAstronaut, FaGem, FaEdit, FaSignOutAlt,
   FaCheckCircle, FaBell, FaShieldAlt, FaClock,
-  FaArrowLeft, FaLeaf, FaInfinity, FaEnvelope
+  FaArrowLeft, FaLeaf, FaInfinity, FaEnvelope,
+  FaCode
 } from "react-icons/fa"
 import { MdOutlineVerified } from "react-icons/md"
 import { useNavigate, Link } from "react-router-dom"
 import apiUserService from "../../pkg/api/api.user.service"
+import { BsPatchCheck } from "react-icons/bs"
 
 const RATE_CONFIG: Record<number, {
   name: string
@@ -109,6 +111,15 @@ const getRateConfig = (rate: number) => {
   return RATE_CONFIG[5]
 }
 
+type Notification = {
+  id: string
+  icon: JSX.Element
+  title: string
+  description: string
+  time: string
+  isNew: boolean
+}
+
 export default function SettingsPage() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
@@ -130,6 +141,36 @@ export default function SettingsPage() {
   const userRate = typeof user?.rate === 'number' ? user.rate : 3
   const rateConfig = getRateConfig(userRate)
   const RateIcon = rateConfig.icon
+
+  // Уведомления
+  const [notifications] = useState<Notification[]>([
+    {
+      id: "1",
+      icon: <BsPatchCheck className="text-[#FFA726]" />,
+      title: "Обновление версии v1.0.1",
+      description: "Улучшена производительность и исправлены ошибки. Добавлена поддержка новых форматов контента.",
+      time: "Только что",
+      isNew: true
+    },
+    {
+      id: "2",
+      icon: <FaCode className="text-[#4CAF50]" />,
+      title: "Добавлена генерация постов",
+      description: "Теперь вы можете создавать посты для Telegram-каналов и блогов.",
+      time: "2 дня назад",
+      isNew: false
+    },
+    {
+      id: "3",
+      icon: <FaBell className="text-sky-400" />,
+      title: "Настройка уведомлений",
+      description: "Настройте уведомления о синхронизации данных и обновлениях.",
+      time: "5 дней назад",
+      isNew: false
+    }
+  ])
+
+  const unreadCount = notifications.filter(n => n.isNew).length
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value })
@@ -254,6 +295,11 @@ export default function SettingsPage() {
           >
             <FaBell className="text-sm" />
             <span className="hidden sm:inline">Уведомления</span>
+            {unreadCount > 0 && (
+              <span className="ml-1 px-2 py-0.5 rounded-full bg-[#4CAF50]/20 text-[#4CAF50] text-[10px]">
+                {unreadCount}
+              </span>
+            )}
           </button>
         </div>
 
@@ -518,16 +564,59 @@ export default function SettingsPage() {
             )}
 
             {activeTab === "notifications" && (
-              <div className="bg-white/[0.03] backdrop-blur-sm rounded-2xl border border-white/[0.08] p-5 sm:p-8 min-h-[300px] sm:min-h-[400px] flex items-center justify-center">
-                <div className="flex flex-col items-center justify-center text-center">
-                  <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
-                    <FaBell className="text-2xl sm:text-4xl text-white/20" />
-                  </div>
-                  <h3 className="text-sm sm:text-lg font-medium text-white mb-2">
-                    Нет уведомлений
+              <div className="bg-white/[0.03] backdrop-blur-sm rounded-2xl border border-white/[0.08] p-5 sm:p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-base sm:text-lg font-semibold text-white flex items-center gap-2">
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-[#FFA726]/20 flex items-center justify-center">
+                      <FaBell className="text-[#FFA726] text-xs sm:text-sm" />
+                    </div>
+                    Уведомления
                   </h3>
-                  <p className="text-white/40 text-[10px] sm:text-sm max-w-xs">
-                    Здесь будут отображаться уведомления о синхронизации и обновлениях
+                  {unreadCount > 0 && (
+                    <span className="text-[10px] text-white/40">
+                      {unreadCount} новых
+                    </span>
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  {notifications.map((notification) => (
+                    <div
+                      key={notification.id}
+                      className={`flex items-start gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border transition-all duration-200 ${
+                        notification.isNew
+                          ? "bg-[#FFA726]/5 border-[#FFA726]/20"
+                          : "bg-white/[0.02] border-white/5 hover:border-white/10"
+                      }`}
+                    >
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-white/5 flex items-center justify-center flex-shrink-0">
+                        {notification.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-center gap-2 mb-0.5">
+                          <span className="text-sm font-medium text-white">
+                            {notification.title}
+                          </span>
+                          {notification.isNew && (
+                            <span className="px-2 py-0.5 rounded-full bg-[#4CAF50]/20 text-[#4CAF50] text-[9px] font-medium">
+                              Новое
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-xs text-white/50 leading-relaxed">
+                          {notification.description}
+                        </p>
+                        <span className="text-[9px] text-white/20 mt-1 block">
+                          {notification.time}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6 text-center">
+                  <p className="text-[10px] text-white/20">
+                    Уведомления о синхронизации и обновлениях
                   </p>
                 </div>
               </div>
