@@ -84,7 +84,7 @@ const RATE_CONFIG: Record<number, {
     gradient: "from-[#FFA726]/20 via-orange-500/10 to-amber-500/20",
     dailyLimit: 1000,
     level: "До 1000 генераций в день",
-    stars: 4
+    stars: 5
   }
 }
 

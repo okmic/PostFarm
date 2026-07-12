@@ -10,7 +10,6 @@ import LoadingSpinner from "./components/UI/LoadingSpinner"
 import { SignInPage } from "./pages/Signin"
 import { SignUpPage } from "./pages/Signup"
 import UserSettingsPage from "./pages/Settings"
-import NotFound from "./pages/NotFound"
 import ServicePage from "./pages/Services"
 import MainPage from "./pages/Main/Main"
 import ViralHeadlinesService from "./pages/Services/ViralHeadlinesService"
@@ -88,7 +87,7 @@ function MainApp() {
               <Route path="/settings" element={<UserSettingsPage />} />
               <Route path="/stats" element={<StatsPage />} />
               <Route path="/ai-limit" element={<AILimitIsOverPage />} />
-              <Route path="*" element={<NotFound />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Route>
           ) : (
             <>

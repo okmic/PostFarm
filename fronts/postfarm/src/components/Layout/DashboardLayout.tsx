@@ -35,7 +35,7 @@ export const DashboardLayout: React.FC = () => {
           >
             <Outlet />
             <Nav />
-            <div className='mb-[300px]' />
+            <div className='mb-[69px]' />
           </div>
         </main>
       </div>
