@@ -185,7 +185,6 @@ const ChannelContentService = () => {
         {error && <ErrorMessage error={error} />}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 mt-4">
-          {/* Левая панель — настройки */}
           <div className="lg:col-span-4 space-y-5">
             <div className="space-y-3">
               <label className="text-xs font-medium text-white/40 tracking-wider">Тип контента</label>
@@ -287,7 +286,6 @@ const ChannelContentService = () => {
             )}
           </div>
 
-          {/* Правая панель — результат */}
           <div className="lg:col-span-8">
             <div className="bg-white/5 rounded-2xl border border-white/10 min-h-[500px] p-5 sm:p-6 relative">
               {isGenerating ? (
@@ -393,8 +391,10 @@ const ResultContent = ({
       </div>
     </div>
 
-    <div className="flex-1 py-4 sm:py-5 text-sm sm:text-base text-white/70 leading-relaxed whitespace-pre-wrap break-words overflow-y-auto max-h-[500px] sm:max-h-[600px]">
-      {content.content}
+    <div className="flex-1 py-4 sm:py-5 overflow-y-auto max-h-[400px] sm:max-h-[600px]">
+      <div className="text-sm sm:text-base text-white/70 leading-relaxed break-words [word-break:break-word] [overflow-wrap:anywhere] whitespace-pre-wrap">
+        {content.content}
+      </div>
     </div>
 
     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-4 border-t border-white/10">

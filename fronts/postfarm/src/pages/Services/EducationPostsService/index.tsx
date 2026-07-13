@@ -184,11 +184,10 @@ const EducationPostsService = () => {
                   <button
                     key={tab.id}
                     onClick={() => { setActiveTab(tab.id); resetAll() }}
-                    className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border transition-all duration-200 cursor-pointer ${
-                      activeTab === tab.id
+                    className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border transition-all duration-200 cursor-pointer ${activeTab === tab.id
                         ? 'border-[#8B5CF6] bg-[#8B5CF6]/10 text-white'
                         : 'border-white/10 text-white/50 hover:border-white/20 hover:text-white/80'
-                    }`}
+                      }`}
                   >
                     <span className={activeTab === tab.id ? 'text-[#8B5CF6]' : 'text-white/40'}>
                       {tab.icon}
@@ -206,11 +205,10 @@ const EducationPostsService = () => {
                   <button
                     key={a.id}
                     onClick={() => setAudience(a.id)}
-                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all duration-200 cursor-pointer ${
-                      audience === a.id
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl border transition-all duration-200 cursor-pointer ${audience === a.id
                         ? 'border-[#8B5CF6] bg-[#8B5CF6]/10 text-white'
                         : 'border-white/10 text-white/40 hover:border-white/20 hover:text-white/70'
-                    }`}
+                      }`}
                   >
                     <span className={audience === a.id ? 'text-[#8B5CF6]' : 'text-white/30'}>
                       {a.icon}
@@ -383,8 +381,10 @@ const ResultContent = ({
       </div>
     </div>
 
-    <div className="flex-1 py-4 sm:py-5 text-sm sm:text-base text-white/70 leading-relaxed whitespace-pre-wrap break-words overflow-y-auto max-h-[500px] sm:max-h-[600px]">
-      {content.content}
+    <div className="flex-1 py-4 sm:py-5 overflow-y-auto max-h-[400px] sm:max-h-[600px]">
+      <div className="text-sm sm:text-base text-white/70 leading-relaxed whitespace-pre-wrap break-words [word-break:break-word] [overflow-wrap:anywhere]">
+        {content.content}
+      </div>
     </div>
 
     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-4 border-t border-white/10">

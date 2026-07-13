@@ -199,11 +199,10 @@ const ViralHeadlinesService = () => {
                   <button
                     key={tab.id}
                     onClick={() => { setActiveTab(tab.id); resetAll() }}
-                    className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border transition-all duration-200 cursor-pointer ${
-                      activeTab === tab.id
+                    className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border transition-all duration-200 cursor-pointer ${activeTab === tab.id
                         ? 'border-[#FFA726] bg-[#FFA726]/10 text-white'
                         : 'border-white/10 text-white/50 hover:border-white/20 hover:text-white/80'
-                    }`}
+                      }`}
                   >
                     <span className={activeTab === tab.id ? 'text-[#FFA726]' : 'text-white/40'}>
                       {tab.icon}
@@ -221,11 +220,10 @@ const ViralHeadlinesService = () => {
                   <button
                     key={s.id}
                     onClick={() => setStyle(s.id)}
-                    className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border transition-all duration-200 cursor-pointer ${
-                      style === s.id
+                    className={`flex items-center gap-2 px-3 py-2.5 rounded-xl border transition-all duration-200 cursor-pointer ${style === s.id
                         ? 'border-[#FFA726] bg-[#FFA726]/10 text-white'
                         : 'border-white/10 text-white/40 hover:border-white/20 hover:text-white/70'
-                    }`}
+                      }`}
                   >
                     <span className={style === s.id ? 'text-[#FFA726]' : 'text-white/30'}>
                       {s.icon}
@@ -400,7 +398,7 @@ const ResultContent = ({
 
     <div className="flex-1 py-4 sm:py-5">
       <div className="bg-gradient-to-r from-[#FFA726]/10 to-[#4CAF50]/10 rounded-xl p-5 sm:p-6 border border-[#FFA726]/20">
-        <p className="text-lg sm:text-xl text-white font-medium leading-relaxed">
+        <p className="text-lg sm:text-xl text-white font-medium leading-relaxed break-words [word-break:break-word] [overflow-wrap:anywhere]">
           {content.content}
         </p>
       </div>
